@@ -4,12 +4,16 @@ import com.ping.pingpicturebackend.common.BaseResponse;
 import com.ping.pingpicturebackend.common.ResultUtils;
 import com.ping.pingpicturebackend.exception.ErrorCode;
 import com.ping.pingpicturebackend.exception.ThrowUtils;
+import com.ping.pingpicturebackend.model.dto.UserLoginRequest;
 import com.ping.pingpicturebackend.model.dto.UserRegisterRequest;
+import com.ping.pingpicturebackend.model.entity.User;
+import com.ping.pingpicturebackend.model.vo.LoginUserVO;
 import com.ping.pingpicturebackend.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -21,7 +25,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/user")
 public class UserController {
-    
+
     @Resource
     private UserService userService;
 
@@ -40,5 +44,22 @@ public class UserController {
         long result = userService.userRegister(userAccount, userPassword, checkPassword);
         // 4. 返回成功响应
         return ResultUtils.success(result);
+    }
+
+    /**
+     * 用户登录
+     */
+    @PostMapping("/login")
+    public BaseResponse<LoginUserVO> userLogin(@RequestBody UserLoginRequest userLoginRequest
+            , HttpServletRequest request) {
+        // 1. 参数校验
+        ThrowUtils.throwIf(userLoginRequest == null, ErrorCode.PARAMS_ERROR);
+        // 2. 提取参数
+        String userAccount = userLoginRequest.getUserAccount();
+        String userPassword = userLoginRequest.getUserPassword();
+        // 3. 调用业务层处理
+        LoginUserVO loginUserVO = userService.userLogin(userAccount, userPassword, request);
+        // 4. 返回成功响应
+        return ResultUtils.success(loginUserVO);
     }
 }

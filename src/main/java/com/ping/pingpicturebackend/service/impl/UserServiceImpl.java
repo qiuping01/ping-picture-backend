@@ -8,18 +8,26 @@ import com.ping.pingpicturebackend.exception.BusinessException;
 import com.ping.pingpicturebackend.exception.ErrorCode;
 import com.ping.pingpicturebackend.model.entity.User;
 import com.ping.pingpicturebackend.model.enums.UserRoleEnum;
+import com.ping.pingpicturebackend.model.vo.LoginUserVO;
 import com.ping.pingpicturebackend.service.UserService;
 import com.ping.pingpicturebackend.mapper.UserMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
+
+import javax.servlet.http.HttpServletRequest;
+
+import static com.ping.pingpicturebackend.constant.UserConstant.USER_LOGIN_STATE;
 
 /**
 * @author 21877
 * @description 针对表【user(用户)】的数据库操作Service实现
 * @createDate 2025-10-30 22:06:44
 */
+@Slf4j
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     implements UserService{
@@ -74,10 +82,49 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     /**
+     * 用户登录
+     *
+     * @param userAccount  用户账户
+     * @param userPassword 用户密码
+     * @param request      Http请求
+     * @return 脱敏后的用户信息
+     */
+    @Override
+    public LoginUserVO userLogin(String userAccount, String userPassword,
+                                 HttpServletRequest request) {
+        // 1. 校验
+        if (StrUtil.hasBlank(userAccount, userPassword)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
+        }
+        if (userAccount.length() < 4) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号错误");
+        }
+        if (userPassword.length() < 8) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "密码错误");
+        }
+        // 2. 对用户传递的密码进行加密
+        String encryptPassword = getEncryptPassword(userPassword);
+        // 3. 查询数据库中的用户是否存在
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("userAccount", userAccount);
+        queryWrapper.eq("userPassword", encryptPassword);
+        User user = this.baseMapper.selectOne(queryWrapper);
+        // 不存在，抛异常
+        if (user == null) {
+            // 使用英文存储空间更小
+            log.info("user login failed, userAccount cannot match userPassword");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在或密码错误");
+        }
+        // 4. 保存用户的登录态
+        request.getSession().setAttribute(USER_LOGIN_STATE, user);
+        return this.getLoginUserVO(user);
+    }
+
+    /**
      * 获取加密后的密码
      *
      * @param userPassword  用户密码
-     * @return
+     * @return 加密后的用户密码
      */
     @Override
     public String getEncryptPassword(String userPassword) {
@@ -85,6 +132,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         final String SALT = "ping";
         // 2. 使用单向加密
         return DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
+    }
+
+    /**
+     * 获取脱敏类的用户信息
+     *
+     * @param user 用户
+     * @return 脱敏后的用户信息
+     */
+    @Override
+    public LoginUserVO getLoginUserVO(User user) {
+        if (user == null) {
+            return null; // null 不转换，节省资源
+        }
+        LoginUserVO loginUserVO = new LoginUserVO();
+        BeanUtils.copyProperties(user, loginUserVO);
+        return loginUserVO;
     }
 }
 
