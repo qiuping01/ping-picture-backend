@@ -137,7 +137,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     /**
      * 获取当前的登录用户
      *
-     * @param request 会话请求
+     * @param request HTTP请求对象
      * @return 登录用户
      */
     @Override
@@ -171,6 +171,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         LoginUserVO loginUserVO = new LoginUserVO();
         BeanUtils.copyProperties(user, loginUserVO);
         return loginUserVO;
+    }
+
+    @Override
+    public boolean userLogout(HttpServletRequest request) {
+        // 1. 先判断是否已登录
+        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
+        if (userObj == null ) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "未登录");
+        }
+        // 2. 移除登录态
+        request.getSession().removeAttribute(USER_LOGIN_STATE);
+        return true;
     }
 }
 
