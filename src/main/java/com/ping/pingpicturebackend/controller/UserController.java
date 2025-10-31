@@ -62,4 +62,13 @@ public class UserController {
         // 4. 返回成功响应
         return ResultUtils.success(loginUserVO);
     }
+
+    /**
+     * 获取当前登录用户
+     */
+    @GetMapping("/get/login")
+    public BaseResponse<LoginUserVO> getLoginUser(HttpServletRequest request) {
+        User loginUser = userService.getLoginUser(request);
+        return ResultUtils.success(userService.getLoginUserVO(loginUser));
+    }
 }
