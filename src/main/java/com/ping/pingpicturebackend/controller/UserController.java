@@ -1,7 +1,9 @@
 package com.ping.pingpicturebackend.controller;
 
+import com.ping.pingpicturebackend.annotation.AuthCheck;
 import com.ping.pingpicturebackend.common.BaseResponse;
 import com.ping.pingpicturebackend.common.ResultUtils;
+import com.ping.pingpicturebackend.constant.UserConstant;
 import com.ping.pingpicturebackend.exception.ErrorCode;
 import com.ping.pingpicturebackend.exception.ThrowUtils;
 import com.ping.pingpicturebackend.model.dto.UserLoginRequest;
