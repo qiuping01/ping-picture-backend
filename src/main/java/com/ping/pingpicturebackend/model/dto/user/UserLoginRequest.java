@@ -1,4 +1,4 @@
-package com.ping.pingpicturebackend.model.dto;
+package com.ping.pingpicturebackend.model.dto.user;
 
 import lombok.Data;
 

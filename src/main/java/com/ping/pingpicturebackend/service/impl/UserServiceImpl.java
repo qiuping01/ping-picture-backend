@@ -1,14 +1,18 @@
 package com.ping.pingpicturebackend.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ping.pingpicturebackend.common.UserNameGenerator;
 import com.ping.pingpicturebackend.exception.BusinessException;
 import com.ping.pingpicturebackend.exception.ErrorCode;
+import com.ping.pingpicturebackend.model.dto.user.UserQueryRequest;
 import com.ping.pingpicturebackend.model.entity.User;
 import com.ping.pingpicturebackend.model.enums.UserRoleEnum;
 import com.ping.pingpicturebackend.model.vo.LoginUserVO;
+import com.ping.pingpicturebackend.model.vo.UserVO;
 import com.ping.pingpicturebackend.service.UserService;
 import com.ping.pingpicturebackend.mapper.UserMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -18,21 +22,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.ping.pingpicturebackend.constant.UserConstant.USER_LOGIN_STATE;
 
 /**
-* @author 21877
-* @description 针对表【user(用户)】的数据库操作Service实现
-* @createDate 2025-10-30 22:06:44
-*/
+ * @author 21877
+ * @description 针对表【user(用户)】的数据库操作Service实现
+ * @createDate 2025-10-30 22:06:44
+ */
 @Slf4j
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User>
-    implements UserService{
+        implements UserService {
 
-    @Autowired
+    @Resource
     private UserNameGenerator userNameGenerator;
 
     /**
@@ -46,7 +56,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     @Override
     public long userRegister(String userAccount, String userPassword, String checkPassword) {
         // 1. 校验参数
-        if (StrUtil.hasBlank(userAccount, userPassword,checkPassword)) {
+        if (StrUtil.hasBlank(userAccount, userPassword, checkPassword)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
         }
         if (userAccount.length() < 4) {
@@ -121,9 +131,41 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     /**
+     * 获得脱敏后的用户信息
+     *
+     * @param user 用户
+     * @return 脱敏后的用户
+     */
+    @Override
+    public UserVO getUserVo(User user) {
+        if (user == null) {
+            return null;
+        }
+        UserVO userVO = new UserVO();
+        BeanUtils.copyProperties(user, userVO);
+        return userVO;
+    }
+
+    /**
+     * 获得脱敏后的用户信息列表
+     *
+     * @param userList 用户列表
+     * @return 脱敏后的用户列表
+     */
+    @Override
+    public List<UserVO> getUserVoList(List<User> userList) {
+        if (CollUtil.isEmpty(userList)) {
+            return new ArrayList<>();
+        }
+        return userList.stream()
+                .map(this::getUserVo)
+                .collect(Collectors.toList());
+    }
+
+    /**
      * 获取加密后的密码
      *
-     * @param userPassword  用户密码
+     * @param userPassword 用户密码
      * @return 加密后的用户密码
      */
     @Override
@@ -177,12 +219,41 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     public boolean userLogout(HttpServletRequest request) {
         // 1. 先判断是否已登录
         Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
-        if (userObj == null ) {
+        if (userObj == null) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "未登录");
         }
         // 2. 移除登录态
         request.getSession().removeAttribute(USER_LOGIN_STATE);
         return true;
+    }
+
+    /**
+     * 构建用户查询条件包装器
+     * 将前端查询请求转换为MyBatis Plus的查询条件
+     *
+     * @param userQueryRequest 用户查询请求，包含查询条件和分页参数
+     * @return MyBatis Plus查询条件包装器，用于数据库查询
+     */
+    @Override
+    public QueryWrapper<User> getQueryWrapper(UserQueryRequest userQueryRequest) {
+        if (userQueryRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求参数为空");
+        }
+        Long id = userQueryRequest.getId();
+        String userName = userQueryRequest.getUserName();
+        String userAccount = userQueryRequest.getUserAccount();
+        String userProfile = userQueryRequest.getUserProfile();
+        String userRole = userQueryRequest.getUserRole();
+        String sortField = userQueryRequest.getSortField();
+        String sortOrder = userQueryRequest.getSortOrder();
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq(ObjUtil.isNotNull(id), "id", id);
+        queryWrapper.eq(StrUtil.isNotBlank(userRole), "userRole", userRole);
+        queryWrapper.like(StrUtil.isNotBlank(userAccount), "userAccount", userAccount);
+        queryWrapper.like(StrUtil.isNotBlank(userName), "userName", userName);
+        queryWrapper.like(StrUtil.isNotBlank(userProfile), "userProfile", userProfile);
+        queryWrapper.orderBy(StrUtil.isNotBlank(sortField), sortOrder.equals("ascend"), sortField);
+        return queryWrapper;
     }
 }
 
