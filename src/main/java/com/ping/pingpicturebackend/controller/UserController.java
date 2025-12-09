@@ -100,7 +100,7 @@ public class UserController {
         String encryptPassword = userService.getEncryptPassword(DEFAULT_PASSWORD);
         user.setUserPassword(encryptPassword);
         boolean result = userService.save(user);
-        ThrowUtils.throwIf(!result,ErrorCode.OPERATION_ERROR);
+        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         return ResultUtils.success(user.getId());
     }
 
@@ -123,7 +123,7 @@ public class UserController {
     public BaseResponse<UserVO> getUserVOById(long id) {
         BaseResponse<User> response = getUserById(id);
         User user = response.getData();
-        return ResultUtils.success(userService.getUserVo(user));
+        return ResultUtils.success(userService.getUserVO(user));
     }
 
     /**
@@ -150,7 +150,7 @@ public class UserController {
         User user = new User();
         BeanUtils.copyProperties(userUpdateRequest, user);
         boolean result = userService.updateById(user);
-        ThrowUtils.throwIf(!result,ErrorCode.OPERATION_ERROR);
+        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         return ResultUtils.success(true);
     }
 

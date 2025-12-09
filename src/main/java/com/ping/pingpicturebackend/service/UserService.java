@@ -44,7 +44,7 @@ public interface UserService extends IService<User> {
      * @param user 用户
      * @return 脱敏后的用户
      */
-    UserVO getUserVo(User user);
+    UserVO getUserVO(User user);
 
     /**
      * 获得脱敏后的用户信息列表

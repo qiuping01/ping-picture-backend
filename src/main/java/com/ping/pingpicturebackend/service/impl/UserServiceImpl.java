@@ -16,9 +16,7 @@ import com.ping.pingpicturebackend.model.vo.UserVO;
 import com.ping.pingpicturebackend.service.UserService;
 import com.ping.pingpicturebackend.mapper.UserMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
@@ -26,7 +24,6 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -137,7 +134,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      * @return 脱敏后的用户
      */
     @Override
-    public UserVO getUserVo(User user) {
+    public UserVO getUserVO(User user) {
         if (user == null) {
             return null;
         }
@@ -158,7 +155,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             return new ArrayList<>();
         }
         return userList.stream()
-                .map(this::getUserVo)
+                .map(this::getUserVO)
                 .collect(Collectors.toList());
     }
 
