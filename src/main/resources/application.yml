@@ -12,6 +12,11 @@ spring:
     url: jdbc:mysql://localhost:3306/ping_picture?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8
     username: root
     password: 123456
+  # 配置文件大小
+  servlet:
+    multipart:
+      max-file-size: 10MB       # 单个文件的最大大小
+      max-request-size: 15MB    # 整个请求（可能包含多个文件）的最大大小
 
 mybatis-plus:
   configuration:

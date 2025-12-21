@@ -19,16 +19,6 @@ public class ResultUtils {
     }
 
     /**
-     * 只有消息成功 - 使用通配符 <?>
-     *
-     * @param message
-     * @return
-     */
-    public static BaseResponse<?> success(String message) {
-        return new BaseResponse<>(0, null, "success");
-    }
-
-    /**
      * 失败 - 使用 ErrorCode
      *
      * @param errorCode 错误码
