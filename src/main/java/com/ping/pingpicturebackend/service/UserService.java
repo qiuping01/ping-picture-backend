@@ -11,10 +11,10 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
-* @author 21877
-* @description 针对表【user(用户)】的数据库操作Service
-* @createDate 2025-10-30 22:06:44
-*/
+ * @author 21877
+ * @description 针对表【user(用户)】的数据库操作Service
+ * @createDate 2025-10-30 22:06:44
+ */
 public interface UserService extends IService<User> {
 
     /**
@@ -57,7 +57,7 @@ public interface UserService extends IService<User> {
     /**
      * 获取加密后的密码
      *
-     * @param userPassword  用户密码
+     * @param userPassword 用户密码
      * @return 加密后的密码
      */
     String getEncryptPassword(String userPassword);
@@ -94,4 +94,13 @@ public interface UserService extends IService<User> {
      * @return MyBatis Plus查询条件包装器，用于数据库查询
      */
     QueryWrapper<User> getQueryWrapper(UserQueryRequest userQueryRequest);
+
+    /**
+     * 判断当前用户是否为管理员
+     *
+     * @param loginUser 当前登录用户
+     * @return 如果当前用户是管理员，则返回true，否则返回false
+     */
+    boolean isAdmin(User loginUser);
 }
+
