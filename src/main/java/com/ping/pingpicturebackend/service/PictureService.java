@@ -3,6 +3,7 @@ package com.ping.pingpicturebackend.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ping.pingpicturebackend.model.dto.picture.PictureQueryRequest;
+import com.ping.pingpicturebackend.model.dto.picture.PictureReviewRequest;
 import com.ping.pingpicturebackend.model.dto.picture.PictureUploadRequest;
 import com.ping.pingpicturebackend.model.entity.Picture;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -59,4 +60,20 @@ public interface PictureService extends IService<Picture> {
      * @return PictureVO分页
      */
     Page<PictureVO> getPictureVOPage(Page<Picture> picturePage);
+
+    /**
+     * 图片审核
+     *
+     * @param pictureReviewRequest 审核请求
+     * @param loginUser            登录用户
+     */
+    void doPictureReview(PictureReviewRequest pictureReviewRequest, User loginUser);
+
+    /**
+     * 填充审核参数
+     *
+     * @param picture   图片
+     * @param loginUser 登录用户
+     */
+    void fillReviewParams(Picture picture, User loginUser);
 }
