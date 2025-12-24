@@ -1,5 +1,8 @@
 package com.ping.pingpicturebackend.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.ping.pingpicturebackend.model.dto.picture.PictureQueryRequest;
 import com.ping.pingpicturebackend.model.dto.picture.PictureUploadRequest;
 import com.ping.pingpicturebackend.model.entity.Picture;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -15,6 +18,13 @@ import org.springframework.web.multipart.MultipartFile;
 public interface PictureService extends IService<Picture> {
 
     /**
+     * 验证图片
+     *
+     * @param picture 图片
+     */
+    void validPicture(Picture picture);
+
+    /**
      * 上传图片
      *
      * @param file                 上传文件
@@ -25,4 +35,28 @@ public interface PictureService extends IService<Picture> {
     PictureVO uploadPicture(MultipartFile file,
                             PictureUploadRequest pictureUploadRequest,
                             User loginUser);
+
+    /**
+     * 构造查询 QueryWrapper
+     *
+     * @param pictureQueryRequest 查询请求
+     * @return 查询 QueryWrapper
+     */
+    QueryWrapper<Picture> getQueryWrapper(PictureQueryRequest pictureQueryRequest);
+
+    /**
+     * 获取单个图片封装
+     *
+     * @param picture 图片
+     * @return PictureVO
+     */
+    PictureVO getPictureVO(Picture picture);
+
+    /**
+     * 获取分页图片封装
+     *
+     * @param picturePage 图片分页
+     * @return PictureVO分页
+     */
+    Page<PictureVO> getPictureVOPage(Page<Picture> picturePage);
 }
