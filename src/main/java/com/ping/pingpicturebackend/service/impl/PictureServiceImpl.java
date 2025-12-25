@@ -10,6 +10,9 @@ import com.ping.pingpicturebackend.exception.BusinessException;
 import com.ping.pingpicturebackend.exception.ErrorCode;
 import com.ping.pingpicturebackend.exception.ThrowUtils;
 import com.ping.pingpicturebackend.manager.FileManager;
+import com.ping.pingpicturebackend.manager.upload.FilePictureUpload;
+import com.ping.pingpicturebackend.manager.upload.PictureUploadTemplate;
+import com.ping.pingpicturebackend.manager.upload.URLPictureUpload;
 import com.ping.pingpicturebackend.mapper.PictureMapper;
 import com.ping.pingpicturebackend.model.dto.file.UploadPictureResult;
 import com.ping.pingpicturebackend.model.dto.picture.PictureQueryRequest;
@@ -24,7 +27,6 @@ import com.ping.pingpicturebackend.service.PictureService;
 import com.ping.pingpicturebackend.service.UserService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.util.*;
@@ -44,6 +46,12 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private FilePictureUpload filePictureUpload;
+
+    @Resource
+    private URLPictureUpload urlPictureUpload;
 
     /**
      * 验证图片
@@ -71,14 +79,15 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
     /**
      * 上传图片
      *
-     * @param file                 上传文件
+     * @param inputSource          输入源
      * @param pictureUploadRequest pictureId
      * @param loginUser            登录用户
      * @return PictureVO
      */
     @Override
-    public PictureVO uploadPicture(MultipartFile file, PictureUploadRequest pictureUploadRequest, User loginUser) {
+    public PictureVO uploadPicture(Object inputSource, PictureUploadRequest pictureUploadRequest, User loginUser) {
         ThrowUtils.throwIf(loginUser == null, ErrorCode.NO_AUTH_ERROR);
+        ThrowUtils.throwIf(inputSource == null, ErrorCode.PARAMS_ERROR, "上传文件不能为空");
         // 用于判断是新增还是更新图片
         Long pictureId = null;
         if (pictureUploadRequest != null) {
@@ -95,7 +104,12 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         }
         // 上传图片得到信息，并按照用户 id 划分目录（利于私人图库的构建）
         String uploadPathPrefix = String.format("public/%s", loginUser.getId());
-        UploadPictureResult uploadPictureResult = fileManager.uploadPicture(uploadPathPrefix, file);
+        // 根据 inputSource 类型判断上传方式
+        PictureUploadTemplate pictureUploadTemplate = filePictureUpload;
+        if (inputSource instanceof String) {
+            pictureUploadTemplate = urlPictureUpload;
+        }
+        UploadPictureResult uploadPictureResult = pictureUploadTemplate.uploadPicture(uploadPathPrefix, inputSource);
         // 构造图片的入库信息
         Picture picture = new Picture();
         picture.setUrl(uploadPictureResult.getUrl());
