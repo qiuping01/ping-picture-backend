@@ -83,7 +83,7 @@ public interface PictureService extends IService<Picture> {
      *
      * @param pictureUploadByBatchRequest 批量上传请求
      * @param loginUser                   登录用户
-     * @return Integer  成功创建的图片数
+     * @return int  成功创建的图片数
      */
     int uploadPictureByBatch(PictureUploadByBatchRequest pictureUploadByBatchRequest, User loginUser);
 }
