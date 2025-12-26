@@ -5,27 +5,27 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
- * 图片上传请求体
+ * 图片抓取请求体
  *
  * @author ping
  */
 @Data
-public class PictureUploadRequest implements Serializable {
+public class PictureUploadByBatchRequest implements Serializable {
 
     private static final long serialVersionUID = 8390869968441930196L;
 
     /**
-     * 图片 id（用于修改）
+     * 搜索词
      */
-    private Long id;
+    private String searchText;
 
     /**
-     * 文件地址
+     * 抓取数量
      */
-    private String fileUrl;
+    private Integer count;
 
     /**
-     * 图片名
+     * 名称前缀
      */
-    private String picName;
+    private String namePrefix;
 }
