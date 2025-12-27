@@ -17,6 +17,12 @@ spring:
     multipart:
       max-file-size: 10MB       # 单个文件的最大大小
       max-request-size: 15MB    # 整个请求（可能包含多个文件）的最大大小
+  # Redis 配置
+  redis:
+    database: 0
+    host: 127.0.0.1
+    port: 6379
+    timeout: 5000
 
 mybatis-plus:
   configuration:
