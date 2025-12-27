@@ -4,6 +4,8 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.ping.pingpicturebackend.annotation.AuthCheck;
 import com.ping.pingpicturebackend.common.BaseResponse;
 import com.ping.pingpicturebackend.common.DeleteRequest;
@@ -51,6 +53,18 @@ public class PictureController {
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+
+    /**
+     * 本地缓存
+     */
+    private final Cache<String, String> LOCAL_CACHE =
+            // 设置初始容量为1024，优化初始内存分配，避免频繁扩容
+            Caffeine.newBuilder().initialCapacity(1024)
+                    // 设置最大缓存条目数为10000，防止内存溢出
+                    .maximumSize(10000L)
+                    // 缓存 5 分钟移除
+                    .expireAfterWrite(5L, TimeUnit.MINUTES)
+                    .build();
 
     /**
      * 上传图片
@@ -202,10 +216,12 @@ public class PictureController {
         // 构建缓存 key
         String queryCondition = JSONUtil.toJsonStr(pictureQueryRequest);
         String hashKey = DigestUtils.md5DigestAsHex(queryCondition.getBytes());
-        String redisKey = String.format("picture:vo:page:%s", hashKey);
+//        String redisKey = "yupicture:listPictureVOByPage:" + hashKey;
+        String cacheKey = String.format("listPictureVOByPage:%s", hashKey);
         // 查缓存
         ValueOperations<String, String> valueOps = stringRedisTemplate.opsForValue();
-        String cachedValue = valueOps.get(redisKey);
+//        String cachedValue = valueOps.get(redisKey);
+        String cachedValue = LOCAL_CACHE.getIfPresent(cacheKey);
         if (StrUtil.isNotBlank(cachedValue)) {
             // 缓存命中
             Page<PictureVO> cachedPage = JSONUtil.toBean(cachedValue, Page.class);
@@ -218,8 +234,8 @@ public class PictureController {
         // 写缓存
         String cacheValue = JSONUtil.toJsonStr(pictureVOPage);
         // 5 - 10 分钟随机过期，防止雪崩
-        int cacheExpireTime = RandomUtil.randomInt(300, 600);
-        valueOps.set(redisKey, cacheValue, cacheExpireTime, TimeUnit.SECONDS);
+//        int cacheExpireTime = RandomUtil.randomInt(300, 600);
+        LOCAL_CACHE.put(cacheKey, cacheValue);
         return ResultUtils.success(pictureVOPage);
     }
 
