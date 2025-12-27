@@ -216,26 +216,35 @@ public class PictureController {
         // 构建缓存 key
         String queryCondition = JSONUtil.toJsonStr(pictureQueryRequest);
         String hashKey = DigestUtils.md5DigestAsHex(queryCondition.getBytes());
-//        String redisKey = "yupicture:listPictureVOByPage:" + hashKey;
-        String cacheKey = String.format("listPictureVOByPage:%s", hashKey);
-        // 查缓存
-        ValueOperations<String, String> valueOps = stringRedisTemplate.opsForValue();
-//        String cachedValue = valueOps.get(redisKey);
+        String cacheKey = String.format("pingPicture:listPictureVOByPage:%s", hashKey);
+        // 1. 先查本地缓存
         String cachedValue = LOCAL_CACHE.getIfPresent(cacheKey);
         if (StrUtil.isNotBlank(cachedValue)) {
             // 缓存命中
             Page<PictureVO> cachedPage = JSONUtil.toBean(cachedValue, Page.class);
             return ResultUtils.success(cachedPage);
         }
-        // 查数据库
+        // 2. 查分布式缓存 - Redis
+        ValueOperations<String, String> valueOps = stringRedisTemplate.opsForValue();
+        cachedValue = valueOps.get(cacheKey);
+        if (StrUtil.isNotBlank(cachedValue)) {
+            // 如果命中 Redis，存入本地缓存并缓存
+            LOCAL_CACHE.put(cacheKey, cachedValue);
+            Page<PictureVO> cachedPage = JSONUtil.toBean(cachedValue, Page.class);
+            return ResultUtils.success(cachedPage);
+        }
+        // 3. 都未命中，查数据库
         Page<Picture> picturePage = pictureService.page(
                 new Page<>(current, size), pictureService.getQueryWrapper(pictureQueryRequest));
         Page<PictureVO> pictureVOPage = pictureService.getPictureVOPage(picturePage);
-        // 写缓存
+        // 4. 更新缓存
         String cacheValue = JSONUtil.toJsonStr(pictureVOPage);
-        // 5 - 10 分钟随机过期，防止雪崩
-//        int cacheExpireTime = RandomUtil.randomInt(300, 600);
+        // 更新本地缓存
         LOCAL_CACHE.put(cacheKey, cacheValue);
+        // 更新分布式缓存
+        // 5 - 10 分钟随机过期，防止雪崩
+        int cacheExpireTime = RandomUtil.randomInt(300, 600);
+        valueOps.set(cacheKey, cacheValue, cacheExpireTime, TimeUnit.SECONDS);
         return ResultUtils.success(pictureVOPage);
     }
 
