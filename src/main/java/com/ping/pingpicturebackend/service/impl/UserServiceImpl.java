@@ -1,5 +1,6 @@
 package com.ping.pingpicturebackend.service.impl;
 
+import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
@@ -13,6 +14,7 @@ import com.ping.pingpicturebackend.model.entity.User;
 import com.ping.pingpicturebackend.model.enums.UserRoleEnum;
 import com.ping.pingpicturebackend.model.vo.LoginUserVO;
 import com.ping.pingpicturebackend.model.vo.UserVO;
+import com.ping.pingpicturebackend.satoken.DeviceUtils;
 import com.ping.pingpicturebackend.service.UserService;
 import com.ping.pingpicturebackend.mapper.UserMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -124,6 +126,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
         // 4. 保存用户的登录态
         request.getSession().setAttribute(USER_LOGIN_STATE, user);
+        // Sa-token 登录，并指定设备，同端登录互斥
+        StpUtil.login(user.getId(), DeviceUtils.getRequestDevice(request));
+        StpUtil.getSession().set(USER_LOGIN_STATE, user);
         return this.getLoginUserVO(user);
     }
 
@@ -181,15 +186,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      */
     @Override
     public User getLoginUser(HttpServletRequest request) {
+        Object loginUserId = StpUtil.getLoginIdDefaultNull();
         // 1. 先判断是否已经登录
-        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User currentUser = (User) userObj;
-        if (currentUser == null || currentUser.getId() == null) {
+        if (loginUserId == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
         }
         // 2. 从数据库查询（获取最新结果，追求的话性能上一步即可返回）
-        Long userId = currentUser.getId();
-        currentUser = this.getById(userId); // 数据库中的最新用户信息
+        User currentUser = this.getById((String)loginUserId); // 数据库中的最新用户信息
         if (currentUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
         }
@@ -215,12 +218,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     @Override
     public boolean userLogout(HttpServletRequest request) {
         // 1. 先判断是否已登录
-        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
-        if (userObj == null) {
-            throw new BusinessException(ErrorCode.OPERATION_ERROR, "未登录");
-        }
+        StpUtil.checkLogin();
         // 2. 移除登录态
-        request.getSession().removeAttribute(USER_LOGIN_STATE);
+        StpUtil.logout();
         return true;
     }
 
