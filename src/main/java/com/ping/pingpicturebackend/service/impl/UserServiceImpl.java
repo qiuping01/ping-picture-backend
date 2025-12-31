@@ -77,7 +77,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         // 3. 密码一定要加密
         String encryptPassword = getEncryptPassword(userPassword);
         // 4. 插入数据到数据库中
-        String uniqueUserName = userNameGenerator.generateUniqueUserName("无名用户");
+        String uniqueUserName = userNameGenerator.generateUniqueUserName("图友");
         User user = new User();
         user.setUserAccount(userAccount);
         user.setUserPassword(encryptPassword);
