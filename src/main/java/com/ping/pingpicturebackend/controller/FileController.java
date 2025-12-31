@@ -1,5 +1,6 @@
 package com.ping.pingpicturebackend.controller;
 
+import cn.dev33.satoken.annotation.SaCheckRole;
 import com.ping.pingpicturebackend.annotation.AuthCheck;
 import com.ping.pingpicturebackend.common.BaseResponse;
 import com.ping.pingpicturebackend.common.ResultUtils;
@@ -41,7 +42,7 @@ public class FileController {
      * @param multipartFile 文件
      * @return URL
      */
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    @SaCheckRole(UserConstant.ADMIN_ROLE)
     @PostMapping("/test/upload")
     public BaseResponse<String> testUploadFile(@RequestPart("file") MultipartFile multipartFile) {
         // COS 文件目录
@@ -77,7 +78,7 @@ public class FileController {
      * @param filepath 文件路径
      * @param response 响应对象
      */
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    @SaCheckRole(UserConstant.ADMIN_ROLE)
     @GetMapping("/test/download")
     public void testDownloadFile(String filepath, HttpServletResponse response) throws IOException {
         COSObjectInputStream cosObjectInput = null;

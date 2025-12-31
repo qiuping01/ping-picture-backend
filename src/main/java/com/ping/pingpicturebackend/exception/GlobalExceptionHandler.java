@@ -1,5 +1,7 @@
 package com.ping.pingpicturebackend.exception;
 
+import cn.dev33.satoken.exception.NotLoginException;
+import cn.dev33.satoken.exception.NotRoleException;
 import com.ping.pingpicturebackend.common.BaseResponse;
 import com.ping.pingpicturebackend.common.ResultUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -35,5 +37,17 @@ public class GlobalExceptionHandler {
     public BaseResponse<?> exceptionHandler(Exception e) {
         log.error("系统异常 Exception", e);
         return ResultUtils.error(SYSTEM_ERROR, "系统繁忙，请稍后重试");
+    }
+
+    @ExceptionHandler(NotRoleException.class)
+    public BaseResponse<?> notRoleExceptionHandler(RuntimeException e) {
+        log.error("NotRoleException", e);
+        return ResultUtils.error(ErrorCode.NO_AUTH_ERROR, "无权限");
+    }
+
+    @ExceptionHandler(NotLoginException.class)
+    public BaseResponse<?> notLoginExceptionHandler(RuntimeException e) {
+        log.error("NotLoginException", e);
+        return ResultUtils.error(ErrorCode.NOT_LOGIN_ERROR, "未登录");
     }
 }

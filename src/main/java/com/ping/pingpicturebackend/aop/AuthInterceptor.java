@@ -19,8 +19,9 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.sql.BatchUpdateException;
 
-@Aspect
-@Component
+//@Aspect
+//@Component
+@Deprecated // 改为 Sa-Token 框架的注解鉴权
 public class AuthInterceptor {
 
     @Resource
