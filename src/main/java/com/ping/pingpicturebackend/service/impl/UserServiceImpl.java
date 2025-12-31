@@ -125,7 +125,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在或密码错误");
         }
         // 4. 保存用户的登录态
-        request.getSession().setAttribute(USER_LOGIN_STATE, user);
+//        request.getSession().setAttribute(USER_LOGIN_STATE, user);
         // Sa-token 登录，并指定设备，同端登录互斥
         StpUtil.login(user.getId(), DeviceUtils.getRequestDevice(request));
         StpUtil.getSession().set(USER_LOGIN_STATE, user);
