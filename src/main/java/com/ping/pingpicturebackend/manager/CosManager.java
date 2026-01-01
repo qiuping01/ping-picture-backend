@@ -1,5 +1,6 @@
 package com.ping.pingpicturebackend.manager;
 
+import cn.hutool.core.io.FileUtil;
 import com.ping.pingpicturebackend.config.CosClientConfig;
 import com.qcloud.cos.COSClient;
 import com.qcloud.cos.model.COSObject;
@@ -11,6 +12,8 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class CosManager {
@@ -57,7 +60,16 @@ public class CosManager {
         // 对图片进行处理（获取基本信息也被视作为一种处理）
         PicOperations picOperations = new PicOperations();
         picOperations.setIsPicInfo(1); // 1 表示返回原图信息
+        // 图片压缩 - webp
+        List<PicOperations.Rule> rules = new ArrayList<>();
+        String webpKey = FileUtil.mainName(key) + ".webp";
+        PicOperations.Rule webpRule = new PicOperations.Rule();
+        webpRule.setRule("imageMogr2/format/webp");
+        webpRule.setBucket(cosClientConfig.getBucket());
+        webpRule.setFileId(webpKey);
+        rules.add(webpRule);
         // 构造处理参数
+        picOperations.setRules(rules);
         putObjectRequest.setPicOperations(picOperations);
         return cosClient.putObject(putObjectRequest);
     }
