@@ -1,6 +1,7 @@
 package com.ping.pingpicturebackend.manager;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
 import com.ping.pingpicturebackend.config.CosClientConfig;
 import com.qcloud.cos.COSClient;
 import com.qcloud.cos.model.COSObject;
@@ -68,6 +69,20 @@ public class CosManager {
         webpRule.setBucket(cosClientConfig.getBucket());
         webpRule.setFileId(webpKey);
         rules.add(webpRule);
+        // 缩略图处理，仅对 > 20 KB 的图片生成缩略图
+        if(file.length() > 20 * 1024) {
+            String suffix = FileUtil.getSuffix(key);
+            if (StrUtil.isBlank(suffix)) {
+                suffix = "png";
+            }
+            String thumbnailKey = FileUtil.mainName(key) + "_thumbnail." + suffix;
+            PicOperations.Rule thumbnailRule = new PicOperations.Rule();
+            // 缩放规则 /thumbnail/<Width>x<Height>>（如果大于原图宽高，则不处理）
+            thumbnailRule.setRule(String.format("imageMogr2/thumbnail/%sx%s>", 256, 256));
+            thumbnailRule.setBucket(cosClientConfig.getBucket());
+            thumbnailRule.setFileId(thumbnailKey);
+            rules.add(thumbnailRule);
+        }
         // 构造处理参数
         picOperations.setRules(rules);
         putObjectRequest.setPicOperations(picOperations);
