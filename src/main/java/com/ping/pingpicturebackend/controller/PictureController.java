@@ -112,6 +112,7 @@ public class PictureController {
         }
         // 删除图片
         boolean result = pictureService.removeById(picId);
+        pictureService.clearPictureFile(oldPicture);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "删除失败");
         return ResultUtils.success(true);
     }
