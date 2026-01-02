@@ -1,6 +1,7 @@
 package com.ping.pingpicturebackend.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.net.url.UrlBuilder;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -9,6 +10,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ping.pingpicturebackend.exception.BusinessException;
 import com.ping.pingpicturebackend.exception.ErrorCode;
 import com.ping.pingpicturebackend.exception.ThrowUtils;
+import com.ping.pingpicturebackend.manager.CosManager;
 import com.ping.pingpicturebackend.manager.FileManager;
 import com.ping.pingpicturebackend.manager.upload.FilePictureUpload;
 import com.ping.pingpicturebackend.manager.upload.PictureUploadTemplate;
@@ -32,6 +34,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -60,6 +64,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
 
     @Resource
     private URLPictureUpload urlPictureUpload;
+    @Autowired
+    private CosManager cosManager;
 
     /**
      * 验证图片
@@ -109,6 +115,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
             if (!oldPicture.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
                 throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
             }
+            this.clearPictureFile(oldPicture);
         }
         // 上传图片得到信息，并按照用户 id 划分目录（利于私人图库的构建）
         String uploadPathPrefix = String.format("public/%s", loginUser.getId());
@@ -122,6 +129,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         Picture picture = new Picture();
         picture.setUrl(uploadPictureResult.getUrl());
         picture.setThumbnailUrl(uploadPictureResult.getThumbnailUrl());
+        picture.setOriginalUrl(uploadPictureResult.getOriginalUrl());
         String picName = uploadPictureResult.getPicName();
         if (pictureUploadRequest != null && StrUtil.isNotBlank(pictureUploadRequest.getPicName())) {
             picName = pictureUploadRequest.getPicName();
@@ -395,6 +403,50 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
             }
         }
         return uploadCount;
+    }
+
+    /**
+     * 清除图片文件
+     *
+     * @param oldPicture 旧图片
+     */
+    @Async
+    @Override
+    public void clearPictureFile(Picture oldPicture) {
+        // 判断该图片是否被多条记录使用
+        String pictureUrl = oldPicture.getUrl();
+        long count = this.lambdaQuery()
+                .eq(Picture::getUrl, pictureUrl)
+                .count();
+        // 有不止一条记录用到了该图片，不清理
+        if (count > 1) {
+            return;
+        }
+        // 删除图片文件
+        // 解析 key
+        cosManager.deleteObject(this.getKeyFromUrl(pictureUrl));
+        // 清理缩略图
+        String thumbnailUrl = oldPicture.getThumbnailUrl();
+        if (StrUtil.isNotBlank(thumbnailUrl)) {
+            cosManager.deleteObject(this.getKeyFromUrl(thumbnailUrl));
+        }
+    }
+
+    /**
+     * 从 url 中解析 key
+     *
+     * @param url url
+     */
+    @Override
+    public String getKeyFromUrl(String url) {
+        // 解析 key
+        UrlBuilder urlBuilder = UrlBuilder.ofHttp(url);
+        String key = urlBuilder.getPathStr(); // 获取路径部分
+        // 去掉开头的斜杠
+        if (key.startsWith("/")) {
+            key= key.substring(1);
+        }
+        return key;
     }
 }
 
