@@ -158,7 +158,7 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space>
     /**
      * 填充空间级别参数
      *
-     * @param space     空间
+     * @param space 空间
      */
     @Override
     public void fillSpaceBySpaceLevel(Space space) {
