@@ -49,7 +49,7 @@ public interface SpaceService extends IService<Space> {
     /**
      * 填充审核参数
      *
-     * @param space     空间
+     * @param space 空间
      */
     void fillSpaceBySpaceLevel(Space space);
 
