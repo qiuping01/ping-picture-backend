@@ -9,6 +9,7 @@ import com.ping.pingpicturebackend.constant.UserConstant;
 import com.ping.pingpicturebackend.exception.BusinessException;
 import com.ping.pingpicturebackend.exception.ErrorCode;
 import com.ping.pingpicturebackend.exception.ThrowUtils;
+import com.ping.pingpicturebackend.model.dto.space.SpaceAddRequest;
 import com.ping.pingpicturebackend.model.dto.space.SpaceQueryRequest;
 import com.ping.pingpicturebackend.model.dto.space.SpaceUpdateRequest;
 import com.ping.pingpicturebackend.model.entity.Space;
@@ -36,6 +37,17 @@ public class SpaceController {
 
     @Resource
     private UserService userService;
+
+    /**
+     * 创建空间
+     */
+    @PostMapping("/add")
+    public BaseResponse<Long> addSpace(@RequestBody SpaceAddRequest spaceAddRequest, HttpServletRequest request) {
+        ThrowUtils.throwIf(spaceAddRequest == null, ErrorCode.PARAMS_ERROR);
+        User loginUser = userService.getLoginUser(request);
+        long newSpaceId = spaceService.addSpace(spaceAddRequest, loginUser);
+        return ResultUtils.success(newSpaceId);
+    }
 
     /**
      * 删除空间

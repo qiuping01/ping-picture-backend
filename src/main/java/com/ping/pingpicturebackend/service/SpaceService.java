@@ -3,6 +3,7 @@ package com.ping.pingpicturebackend.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.ping.pingpicturebackend.model.dto.space.SpaceAddRequest;
 import com.ping.pingpicturebackend.model.dto.space.SpaceQueryRequest;
 import com.ping.pingpicturebackend.model.entity.Space;
 import com.ping.pingpicturebackend.model.entity.User;
@@ -14,6 +15,15 @@ import com.ping.pingpicturebackend.model.vo.SpaceVO;
  * @createDate 2026-01-03 19:53:40
  */
 public interface SpaceService extends IService<Space> {
+
+    /**
+     * 添加空间
+     *
+     * @param spaceAddRequest 添加请求
+     * @param loginUser       登录用户
+     * @return 空间id
+     */
+    long addSpace(SpaceAddRequest spaceAddRequest, User loginUser);
 
     /**
      * 验证空间
