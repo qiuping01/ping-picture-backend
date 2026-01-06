@@ -11,7 +11,6 @@ import com.ping.pingpicturebackend.exception.BusinessException;
 import com.ping.pingpicturebackend.exception.ErrorCode;
 import com.ping.pingpicturebackend.exception.ThrowUtils;
 import com.ping.pingpicturebackend.manager.CosManager;
-import com.ping.pingpicturebackend.manager.FileManager;
 import com.ping.pingpicturebackend.manager.upload.FilePictureUpload;
 import com.ping.pingpicturebackend.manager.upload.PictureUploadTemplate;
 import com.ping.pingpicturebackend.manager.upload.URLPictureUpload;
@@ -54,9 +53,6 @@ import java.util.stream.Collectors;
 @Service
 public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         implements PictureService {
-
-    @Resource
-    private FileManager fileManager;
 
     @Resource
     private UserService userService;
@@ -482,6 +478,49 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
             key = key.substring(1);
         }
         return key;
+    }
+
+    /**
+     * 校验图片空间权限
+     *
+     * @param loginUser 登录用户
+     * @param picture   图片
+     */
+    @Override
+    public void checkPictureAuth(User loginUser, Picture picture) {
+        Long spaceId = picture.getSpaceId();
+        if (spaceId == null) {
+            // 公共图库仅本人和管理员能操作
+            if (!picture.getUserId().equals(loginUser.getId()) && userService.isAdmin(loginUser)) {
+                throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "没有权限");
+            }
+        } else {
+            // 私有空间仅本人能操作
+            if (!picture.getUserId().equals(loginUser.getId()))
+                throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "没有权限");
+        }
+    }
+
+    /**
+     * 删除图片
+     *
+     * @param picId     图片 id
+     * @param loginUser 登录用户
+     */
+    @Override
+    public void deletePicture(Long picId, User loginUser) {
+        ThrowUtils.throwIf(picId <= 0, ErrorCode.PARAMS_ERROR);
+        ThrowUtils.throwIf(loginUser == null, ErrorCode.NO_AUTH_ERROR);
+        // 判断图片是否存在
+        Picture oldPicture = getById(picId);
+        ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR, "图片不存在");
+        // 校验操作权限
+        this.checkPictureAuth(loginUser, oldPicture);
+        // 操作数据库
+        boolean result = removeById(picId);
+        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "删除失败");
+        // 异步清理文件
+        clearPictureFile(oldPicture);
     }
 }
 

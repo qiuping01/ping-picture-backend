@@ -100,4 +100,20 @@ public interface PictureService extends IService<Picture> {
      * @param url url
      */
     String getKeyFromUrl(String url);
+
+    /**
+     * 校验图片空间权限
+     *
+     * @param loginUser 登录用户
+     * @param picture   图片
+     */
+    void checkPictureAuth(User loginUser, Picture picture);
+
+    /**
+     * 删除图片
+     *
+     * @param picId     图片 id
+     * @param loginUser 登录用户
+     */
+    void deletePicture(Long picId, User loginUser);
 }
