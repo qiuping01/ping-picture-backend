@@ -22,11 +22,13 @@ import com.ping.pingpicturebackend.model.dto.picture.PictureReviewRequest;
 import com.ping.pingpicturebackend.model.dto.picture.PictureUploadByBatchRequest;
 import com.ping.pingpicturebackend.model.dto.picture.PictureUploadRequest;
 import com.ping.pingpicturebackend.model.entity.Picture;
+import com.ping.pingpicturebackend.model.entity.Space;
 import com.ping.pingpicturebackend.model.entity.User;
 import com.ping.pingpicturebackend.model.enums.PictureReviewStatusEnum;
 import com.ping.pingpicturebackend.model.vo.PictureVO;
 import com.ping.pingpicturebackend.model.vo.UserVO;
 import com.ping.pingpicturebackend.service.PictureService;
+import com.ping.pingpicturebackend.service.SpaceService;
 import com.ping.pingpicturebackend.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
@@ -64,8 +66,12 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
 
     @Resource
     private URLPictureUpload urlPictureUpload;
+
     @Autowired
     private CosManager cosManager;
+
+    @Resource
+    private SpaceService spaceService;
 
     /**
      * 验证图片
@@ -104,8 +110,19 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         ThrowUtils.throwIf(inputSource == null, ErrorCode.PARAMS_ERROR, "上传文件不能为空");
         // 用于判断是新增还是更新图片
         Long pictureId = null;
+        Long spaceId = null;
         if (pictureUploadRequest != null) {
             pictureId = pictureUploadRequest.getId();
+            spaceId = pictureUploadRequest.getSpaceId();
+        }
+        // 校验是否指定空间
+        if (spaceId != null) {   // 指定空间id，则为非默认公共空间
+            Space space = spaceService.getById(spaceId);
+            ThrowUtils.throwIf(space == null, ErrorCode.PARAMS_ERROR, "空间不存在");
+            // 仅本人可编辑
+            if (!loginUser.getId().equals(space.getUserId())) {
+                throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "没有空间权限");
+            }
         }
         // 如果是更新图片，需要校验图片是否存在
         if (pictureId != null) {
@@ -116,9 +133,26 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
                 throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
             }
             this.clearPictureFile(oldPicture);
+            // 校验空间，没传 spaceId 则使用旧图片的 spaceId
+            if (spaceId == null) {
+                if (oldPicture.getSpaceId() != null) {
+                    spaceId = oldPicture.getSpaceId();
+                }
+            } else {
+                // 如果传了 spaceId，则校验是否一致
+                if (ObjUtil.equals(spaceId, oldPicture.getSpaceId())) { // 使用 ObjUtil.equals 防止空指针异常
+                    throw new BusinessException(ErrorCode.PARAMS_ERROR, "图片空间不一致");
+                }
+            }
         }
-        // 上传图片得到信息，并按照用户 id 划分目录（利于私人图库的构建）
-        String uploadPathPrefix = String.format("public/%s", loginUser.getId());
+        String uploadPathPrefix;
+        if (spaceId == null) {
+            // 上传图片得到信息，并按照用户 id 划分目录（利于私人图库的构建）
+            uploadPathPrefix = String.format("public/%s", loginUser.getId());
+        } else {
+            // 制定空间就按空间 id 划分目录
+            uploadPathPrefix = String.format("space/%s", spaceId);
+        }
         // 根据 inputSource 类型判断上传方式
         PictureUploadTemplate pictureUploadTemplate = filePictureUpload;
         if (inputSource instanceof String) {
@@ -141,6 +175,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         picture.setPicScale(uploadPictureResult.getPicScale());
         picture.setPicFormat(uploadPictureResult.getPicFormat());
         picture.setUserId(loginUser.getId());
+        picture.setSpaceId(spaceId);
         // 补充审核参数
         fillReviewParams(picture, loginUser);
         // 如果 pictureId 不为空，则更新图片
@@ -352,7 +387,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         // 1. 格式化数量
         String searchText = pictureUploadByBatchRequest.getSearchText();
         String namePrefix = pictureUploadByBatchRequest.getNamePrefix();
-        if (StrUtil.isBlank(namePrefix)){
+        if (StrUtil.isBlank(namePrefix)) {
             namePrefix = searchText;
         }
         int count = pictureUploadByBatchRequest.getCount();
@@ -444,7 +479,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         String key = urlBuilder.getPathStr(); // 获取路径部分
         // 去掉开头的斜杠
         if (key.startsWith("/")) {
-            key= key.substring(1);
+            key = key.substring(1);
         }
         return key;
     }
