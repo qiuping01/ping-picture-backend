@@ -211,6 +211,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         Integer reviewStatus = pictureQueryRequest.getReviewStatus();
         String reviewMessage = pictureQueryRequest.getReviewMessage();
         Long reviewerId = pictureQueryRequest.getReviewerId();
+        Long spaceId = pictureQueryRequest.getSpaceId();
+        Boolean nullSpaceId = pictureQueryRequest.getNullSpaceId();
         String sortField = pictureQueryRequest.getSortField();
         String sortOrder = pictureQueryRequest.getSortOrder();
 
@@ -227,6 +229,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
                 .eq(ObjUtil.isNotEmpty(userId), "userId", userId)
                 .eq(ObjUtil.isNotEmpty(reviewerId), "reviewerId", reviewerId)
                 .eq(ObjUtil.isNotEmpty(reviewStatus), "reviewStatus", reviewStatus)
+                .eq(ObjUtil.isNotEmpty(spaceId), "spaceId", spaceId)
+                .isNull(nullSpaceId, "spaceId")
                 .like(StrUtil.isNotBlank(name), "name", name)
                 .like(StrUtil.isNotBlank(introduction), "introduction", introduction)
                 .like(StrUtil.isNotBlank(picFormat), "picFormat", picFormat)
