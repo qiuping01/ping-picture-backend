@@ -2,10 +2,7 @@ package com.ping.pingpicturebackend.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.ping.pingpicturebackend.model.dto.picture.PictureQueryRequest;
-import com.ping.pingpicturebackend.model.dto.picture.PictureReviewRequest;
-import com.ping.pingpicturebackend.model.dto.picture.PictureUploadByBatchRequest;
-import com.ping.pingpicturebackend.model.dto.picture.PictureUploadRequest;
+import com.ping.pingpicturebackend.model.dto.picture.*;
 import com.ping.pingpicturebackend.model.entity.Picture;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ping.pingpicturebackend.model.entity.User;
@@ -100,4 +97,28 @@ public interface PictureService extends IService<Picture> {
      * @param url url
      */
     String getKeyFromUrl(String url);
+
+    /**
+     * 校验图片空间权限
+     *
+     * @param loginUser 登录用户
+     * @param picture   图片
+     */
+    void checkPictureAuth(User loginUser, Picture picture);
+
+    /**
+     * 删除图片
+     *
+     * @param picId     图片 id
+     * @param loginUser 登录用户
+     */
+    void deletePicture(Long picId, User loginUser);
+
+    /**
+     * 编辑图片
+     *
+     * @param pictureEditRequest 编辑请求
+     * @param loginUser          登录用户
+     */
+    void editPicture(PictureEditRequest pictureEditRequest, User loginUser);
 }
