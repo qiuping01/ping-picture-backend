@@ -245,31 +245,10 @@ public class PictureController {
      */
     @PostMapping("/edit")
     public BaseResponse<Boolean> editPicture(@RequestBody PictureEditRequest pictureEditRequest, HttpServletRequest request) {
-        if (pictureEditRequest == null || pictureEditRequest.getId() <= 0) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        }
-        // 判断图片是否存在
-        Picture oldPicture = pictureService.getById(pictureEditRequest.getId());
-        ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR, "图片不存在");
-        // 将实体类和 DTO 进行转换
-        Picture picture = new Picture();
-        BeanUtils.copyProperties(pictureEditRequest, picture);
-        // tag 类型转换
-        picture.setTags(JSONUtil.toJsonStr(pictureEditRequest.getTags()));
-        // 图片校验
-        pictureService.validPicture(picture);
-        // 设置编辑时间
-        picture.setUpdateTime(new Date());
-        // 更新图片，仅本人或管理员可编辑
+        ThrowUtils.throwIf(pictureEditRequest == null || pictureEditRequest.getId() <= 0,
+                ErrorCode.PARAMS_ERROR);
         User loginUser = userService.getLoginUser(request);
-        if (!oldPicture.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
-            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
-        }
-        // 补充审核参数
-        pictureService.fillReviewParams(picture, loginUser);
-        // 操作数据库
-        boolean result = pictureService.updateById(picture);
-        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "更新失败");
+        pictureService.editPicture(pictureEditRequest, loginUser);
         return ResultUtils.success(true);
     }
 
