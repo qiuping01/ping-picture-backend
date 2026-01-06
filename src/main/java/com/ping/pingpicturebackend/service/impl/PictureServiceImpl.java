@@ -144,7 +144,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
             // 上传图片得到信息，并按照用户 id 划分目录（利于私人图库的构建）
             uploadPathPrefix = String.format("public/%s", loginUser.getId());
         } else {
-            // 制定空间就按空间 id 划分目录
+            // 指定空间就按空间 id 划分目录
             uploadPathPrefix = String.format("space/%s", spaceId);
         }
         // 根据 inputSource 类型判断上传方式
