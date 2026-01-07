@@ -22,7 +22,6 @@ import com.ping.pingpicturebackend.model.entity.Picture;
 import com.ping.pingpicturebackend.model.entity.Space;
 import com.ping.pingpicturebackend.model.entity.User;
 import com.ping.pingpicturebackend.model.enums.PictureReviewStatusEnum;
-import com.ping.pingpicturebackend.model.enums.SpaceLevelEnum;
 import com.ping.pingpicturebackend.model.vo.PictureVO;
 import com.ping.pingpicturebackend.model.vo.UserVO;
 import com.ping.pingpicturebackend.service.PictureService;
@@ -206,7 +205,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
                         .update();
                 ThrowUtils.throwIf(!updateResult, ErrorCode.OPERATION_ERROR, "额度更新失败");
             }
-            return picture;
+            return picture; // 此处返回图片信息，saveOrUpdate 会更新 picture 对象（比如设置 ID）
         });
         return PictureVO.objToVo(picture);
     }
@@ -547,9 +546,22 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR, "图片不存在");
         // 校验操作权限
         this.checkPictureAuth(loginUser, oldPicture);
-        // 操作数据库
-        boolean result = removeById(picId);
-        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "删除失败");
+        // 开启事务 - 更新空间额度
+        transactionTemplate.executeWithoutResult(status -> {
+            // 操作数据库 - 删除图片信息
+            boolean result = removeById(picId);
+            ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "删除失败");
+            // 释放额度
+            Long finalSpaceId = oldPicture.getSpaceId();
+            if (finalSpaceId != null) {
+                boolean updateResult = spaceService.lambdaUpdate()
+                        .eq(Space::getId, finalSpaceId)
+                        .setSql("totalCount = totalCount - 1")
+                        .setSql("totalSize = totalSize - " + oldPicture.getPicSize())
+                        .update();
+                ThrowUtils.throwIf(!updateResult, ErrorCode.OPERATION_ERROR, "额度更新失败");
+            }
+        });
         // 异步清理文件
         this.clearPictureFile(oldPicture);
     }
