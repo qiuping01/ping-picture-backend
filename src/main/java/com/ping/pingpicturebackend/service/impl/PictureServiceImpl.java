@@ -126,6 +126,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
             if (!oldPicture.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
                 throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
             }
+            // 异步清理图片
             this.clearPictureFile(oldPicture);
             // 校验空间，没传 spaceId 则使用旧图片的 spaceId
             if (spaceId == null) {
@@ -522,7 +523,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         boolean result = removeById(picId);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "删除失败");
         // 异步清理文件
-        clearPictureFile(oldPicture);
+        this.clearPictureFile(oldPicture);
     }
 
     /**
