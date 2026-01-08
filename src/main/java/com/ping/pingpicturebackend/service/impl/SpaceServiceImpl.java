@@ -20,7 +20,6 @@ import com.ping.pingpicturebackend.model.entity.User;
 import com.ping.pingpicturebackend.model.enums.SpaceLevelEnum;
 import com.ping.pingpicturebackend.model.vo.SpaceVO;
 import com.ping.pingpicturebackend.model.vo.UserVO;
-import com.ping.pingpicturebackend.service.PictureService;
 import com.ping.pingpicturebackend.service.SpaceService;
 import com.ping.pingpicturebackend.service.UserService;
 import lombok.extern.slf4j.Slf4j;
