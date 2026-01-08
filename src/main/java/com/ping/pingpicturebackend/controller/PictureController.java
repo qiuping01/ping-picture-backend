@@ -203,6 +203,7 @@ public class PictureController {
             pictureQueryRequest.setNullSpaceId(true);
         } else {
             // 查询私有空间
+            pictureQueryRequest.setNullSpaceId(false);
             User loginUser = userService.getLoginUser(request);
             Space space = spaceService.getById(spaceId);
             ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");

@@ -10,10 +10,12 @@ import com.ping.pingpicturebackend.exception.BusinessException;
 import com.ping.pingpicturebackend.exception.ErrorCode;
 import com.ping.pingpicturebackend.exception.ThrowUtils;
 import com.ping.pingpicturebackend.model.dto.space.SpaceAddRequest;
+import com.ping.pingpicturebackend.model.dto.space.SpaceLevel;
 import com.ping.pingpicturebackend.model.dto.space.SpaceQueryRequest;
 import com.ping.pingpicturebackend.model.dto.space.SpaceUpdateRequest;
 import com.ping.pingpicturebackend.model.entity.Space;
 import com.ping.pingpicturebackend.model.entity.User;
+import com.ping.pingpicturebackend.model.enums.SpaceLevelEnum;
 import com.ping.pingpicturebackend.model.vo.SpaceVO;
 import com.ping.pingpicturebackend.service.SpaceService;
 import com.ping.pingpicturebackend.service.UserService;
@@ -23,6 +25,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 空间接口
@@ -151,5 +156,20 @@ public class SpaceController {
                 new Page<>(current, size), spaceService.getQueryWrapper(spaceQueryRequest));
         Page<SpaceVO> spaceVOPage = spaceService.getSpaceVOPage(spacePage);
         return ResultUtils.success(spaceVOPage);
+    }
+
+    /**
+     * 返回给前端所有的空间级别信息
+     */
+    @GetMapping("/list/level")
+    public BaseResponse<List<SpaceLevel>> listSpaceLevel() {
+        List<SpaceLevel> spaceLevelList = Arrays.stream(SpaceLevelEnum.values())
+                .map(spaceLevelEnum -> new SpaceLevel(
+                        spaceLevelEnum.getValue(),
+                        spaceLevelEnum.getText(),
+                        spaceLevelEnum.getMaxCount(),
+                        spaceLevelEnum.getMaxSize()))
+                .collect(Collectors.toList());
+        return ResultUtils.success(spaceLevelList);
     }
 }
