@@ -3,6 +3,7 @@ package com.ping.pingpicturebackend.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.ping.pingpicturebackend.common.DeleteRequest;
 import com.ping.pingpicturebackend.model.dto.space.SpaceAddRequest;
 import com.ping.pingpicturebackend.model.dto.space.SpaceQueryRequest;
 import com.ping.pingpicturebackend.model.entity.Space;
@@ -63,4 +64,11 @@ public interface SpaceService extends IService<Space> {
      */
     void fillSpaceBySpaceLevel(Space space);
 
+    /**
+     * 删除空间
+     *
+     * @param deleteRequest 删除请求
+     * @param loginUser     登录用户
+     */
+    void deleteSpace(DeleteRequest deleteRequest, User loginUser);
 }
