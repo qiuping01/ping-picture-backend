@@ -63,17 +63,7 @@ public class SpaceController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         User loginUser = userService.getLoginUser(request);
-        Long spaceId = deleteRequest.getId();
-        // 判断空间是否存在
-        Space oldSpace = spaceService.getById(spaceId);
-        ThrowUtils.throwIf(oldSpace == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
-        // 仅本人或管理员可删除
-        if (!oldSpace.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
-            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
-        }
-        // 删除空间
-        boolean result = spaceService.removeById(spaceId);
-        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "删除失败");
+        spaceService.deleteSpace(deleteRequest, loginUser);
         return ResultUtils.success(true);
     }
 

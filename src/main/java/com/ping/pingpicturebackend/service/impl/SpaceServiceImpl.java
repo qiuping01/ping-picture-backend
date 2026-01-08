@@ -6,12 +6,15 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ping.pingpicturebackend.common.DeleteRequest;
 import com.ping.pingpicturebackend.exception.BusinessException;
 import com.ping.pingpicturebackend.exception.ErrorCode;
 import com.ping.pingpicturebackend.exception.ThrowUtils;
+import com.ping.pingpicturebackend.mapper.PictureMapper;
 import com.ping.pingpicturebackend.mapper.SpaceMapper;
 import com.ping.pingpicturebackend.model.dto.space.SpaceAddRequest;
 import com.ping.pingpicturebackend.model.dto.space.SpaceQueryRequest;
+import com.ping.pingpicturebackend.model.entity.Picture;
 import com.ping.pingpicturebackend.model.entity.Space;
 import com.ping.pingpicturebackend.model.entity.User;
 import com.ping.pingpicturebackend.model.enums.SpaceLevelEnum;
@@ -19,6 +22,7 @@ import com.ping.pingpicturebackend.model.vo.SpaceVO;
 import com.ping.pingpicturebackend.model.vo.UserVO;
 import com.ping.pingpicturebackend.service.SpaceService;
 import com.ping.pingpicturebackend.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -32,12 +36,16 @@ import java.util.stream.Collectors;
  * @description 针对表【space(空间)】的数据库操作Service实现
  * @createDate 2026-01-03 19:53:40
  */
+@Slf4j
 @Service
 public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space>
         implements SpaceService {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private PictureMapper pictureMapper;
 
     @Resource
     private TransactionTemplate transactionTemplate;
@@ -232,6 +240,38 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space>
             }
         }
     }
+
+    /**
+     * 删除空间
+     *
+     * @param deleteRequest 删除请求
+     * @param loginUser     登录用户
+     */
+    @Override
+    public void deleteSpace(DeleteRequest deleteRequest, User loginUser) {
+        if (deleteRequest == null || deleteRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        Long spaceId = deleteRequest.getId();
+        // 判断空间是否存在
+        Space oldSpace = getById(spaceId);
+        ThrowUtils.throwIf(oldSpace == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
+        // 仅本人或管理员可删除
+        if (!oldSpace.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+        // 删除空间 - 添加事务同时删除空间下的图片
+        transactionTemplate.executeWithoutResult(status -> {
+            boolean result = removeById(spaceId);
+            ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "删除空间失败");
+            // 删除空间下的图片
+            QueryWrapper<Picture> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("spaceId", spaceId);
+            int deletedCount = pictureMapper.delete(queryWrapper);
+            log.info("删除空间时删除了 {} 张图片，spaceId: {}", deletedCount, spaceId);
+        });
+    }
+
 }
 
 
