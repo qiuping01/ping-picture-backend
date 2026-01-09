@@ -240,6 +240,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         Long reviewerId = pictureQueryRequest.getReviewerId();
         Long spaceId = pictureQueryRequest.getSpaceId();
         Boolean nullSpaceId = pictureQueryRequest.getNullSpaceId();
+        Date startEditTime = pictureQueryRequest.getStartEditTime();
+        Date endEditTime = pictureQueryRequest.getEndEditTime();
         String sortField = pictureQueryRequest.getSortField();
         String sortOrder = pictureQueryRequest.getSortOrder();
 
@@ -266,7 +268,11 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
                 .eq(ObjUtil.isNotEmpty(picWidth), "picWidth", picWidth)
                 .eq(ObjUtil.isNotEmpty(picHeight), "picHeight", picHeight)
                 .eq(ObjUtil.isNotEmpty(picSize), "picSize", picSize)
-                .eq(ObjUtil.isNotEmpty(picScale), "picScale", picScale);
+                .eq(ObjUtil.isNotEmpty(picScale), "picScale", picScale)
+                // >= startEditTime
+                .ge(ObjUtil.isNotEmpty(startEditTime), "editTime", startEditTime)
+                // < endEditTime
+                .lt(ObjUtil.isNotEmpty(endEditTime), "editTime", endEditTime);
         // 标签搜索
         if (CollUtil.isNotEmpty(tags)) {
             for (String tag : tags) {
