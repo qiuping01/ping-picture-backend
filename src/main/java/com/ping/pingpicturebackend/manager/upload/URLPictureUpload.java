@@ -20,6 +20,8 @@ import java.util.List;
 @Service
 public class URLPictureUpload extends PictureUploadTemplate {
 
+    String urlSuffix;
+
     @Override
     protected void validPicture(Object inputSource) {
         String fileUrl = (String) inputSource;
@@ -41,6 +43,7 @@ public class URLPictureUpload extends PictureUploadTemplate {
             }
             // 4. 校验文件类型
             String contentType = response.header("Content-Type");
+            urlSuffix = contentType.substring(6);
             if (StrUtil.isNotBlank(contentType)) {
                 // 允许的图片类型
                 final List<String> ALLOW_FORMAT_TYPES = Arrays.asList("image/jpeg",
@@ -65,9 +68,9 @@ public class URLPictureUpload extends PictureUploadTemplate {
 
     @Override
     protected String getOriginalFilename(Object inputSource) {
-        String fileUrl = (String) inputSource;
+        String fileUrl = (String) inputSource + "." + urlSuffix;
         // 从 URL 中获取文件名
-        return FileUtil.mainName(fileUrl);
+        return fileUrl;
     }
 
     @Override
