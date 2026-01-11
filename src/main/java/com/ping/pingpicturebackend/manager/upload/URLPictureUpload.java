@@ -68,9 +68,9 @@ public class URLPictureUpload extends PictureUploadTemplate {
 
     @Override
     protected String getOriginalFilename(Object inputSource) {
-        String fileUrl = (String) inputSource + "." + urlSuffix;
+        String fileUrl = (String) inputSource;
         // 从 URL 中获取文件名
-        return fileUrl;
+        return FileUtil.mainName(fileUrl) + "." + urlSuffix;
     }
 
     @Override
