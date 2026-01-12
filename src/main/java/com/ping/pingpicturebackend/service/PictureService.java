@@ -9,6 +9,8 @@ import com.ping.pingpicturebackend.model.entity.User;
 import com.ping.pingpicturebackend.model.vo.PictureVO;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 /**
  * @author 21877
  * @description 针对表【picture(图片)】的数据库操作Service
@@ -121,4 +123,14 @@ public interface PictureService extends IService<Picture> {
      * @param loginUser          登录用户
      */
     void editPicture(PictureEditRequest pictureEditRequest, User loginUser);
+
+    /**
+     * 根据颜色搜索图片
+     *
+     * @param picColor  颜色
+     * @param spaceId   空间id
+     * @param loginUser 登录用户
+     * @return List<PictureVO>
+     */
+    List<PictureVO> searchPictureByColor(String picColor, Long spaceId, User loginUser);
 }

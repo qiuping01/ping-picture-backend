@@ -18,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.Resource;
 import java.io.File;
-import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
@@ -74,7 +73,8 @@ public abstract class PictureUploadTemplate {
                     thumbnailCiObject = objectList.get(1);
                 }
                 // 封装压缩图返回结果
-                return buildResult(originalFilename, compressedCiObject, thumbnailCiObject, uploadPath);
+                return buildResult(originalFilename, compressedCiObject, thumbnailCiObject,
+                        uploadPath, imageInfo);
             }
             return buildResult(imageInfo, uploadPath, originalFilename, file);
         } catch (Exception e) {
@@ -107,7 +107,8 @@ public abstract class PictureUploadTemplate {
     private UploadPictureResult buildResult(String originalFilename,
                                             CIObject compressedCiObject,
                                             CIObject thumbnailCiObject,
-                                            String uploadPath) {
+                                            String uploadPath,
+                                            ImageInfo imageInfo) {
         UploadPictureResult uploadPictureResult = new UploadPictureResult();
         // 计算宽高
         int picWidth = compressedCiObject.getWidth();
@@ -126,6 +127,8 @@ public abstract class PictureUploadTemplate {
         uploadPictureResult.setThumbnailUrl(cosClientConfig.getHost() + "/" + thumbnailCiObject.getKey());
         // 设置初始原图地址
         uploadPictureResult.setOriginalUrl(cosClientConfig.getHost() + "/" + uploadPath);
+        // 设置图片颜色
+        uploadPictureResult.setPicColor(imageInfo.getAve());
         return uploadPictureResult;
     }
 
@@ -147,6 +150,7 @@ public abstract class PictureUploadTemplate {
         uploadPictureResult.setPicScale(picScale);
         uploadPictureResult.setPicFormat(imageInfo.getFormat());
         uploadPictureResult.setUrl(cosClientConfig.getHost() + "/" + uploadPath);
+        uploadPictureResult.setPicColor(imageInfo.getAve());
         return uploadPictureResult;
     }
 
