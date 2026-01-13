@@ -22,7 +22,6 @@ public class SoImageSearchApiFacade {
 	 * @param start    开始下表
 	 * @return 图片搜索结果列表
 	 */
-
 	public static List<SoImageSearchResult> searchImage(String imageUrl, Integer start) {
 		String soImageUrl = GetSoImageUrlApi.getSoImageUrl(imageUrl);
 		List<SoImageSearchResult> imageList = GetSoImageListApi.getImageList(soImageUrl, start);
