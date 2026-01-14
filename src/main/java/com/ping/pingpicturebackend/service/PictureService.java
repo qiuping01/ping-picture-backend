@@ -2,6 +2,7 @@ package com.ping.pingpicturebackend.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.ping.pingpicturebackend.api.aliyunai.model.CreateOutPaintingTaskResponse;
 import com.ping.pingpicturebackend.model.dto.picture.*;
 import com.ping.pingpicturebackend.model.entity.Picture;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -141,4 +142,14 @@ public interface PictureService extends IService<Picture> {
      * @return List<PictureVO>
      */
     List<PictureVO> searchPictureByColor(String picColor, Long spaceId, User loginUser);
+
+    /**
+     * 扩图
+     *
+     * @param createPictureOutPaintingTaskRequest 扩图请求
+     * @param loginUser                           登录用户
+     * @return 扩图任务响应类
+     */
+    CreateOutPaintingTaskResponse createPictureOutPaintingTask(CreatePictureOutPaintingTaskRequest createPictureOutPaintingTaskRequest,
+                                                               User loginUser);
 }
