@@ -152,7 +152,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
                 }
             } else {
                 // 如果传了 spaceId，则校验是否一致
-                if (ObjUtil.equals(spaceId, oldPicture.getSpaceId())) { // 使用 ObjUtil.equals 防止空指针异常
+                if (!ObjUtil.equals(spaceId, oldPicture.getSpaceId())) { // 使用 ObjUtil.equals 防止空指针异常
                     throw new BusinessException(ErrorCode.PARAMS_ERROR, "图片空间不一致");
                 }
             }
