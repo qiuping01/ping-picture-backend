@@ -9,10 +9,7 @@ import com.ping.pingpicturebackend.constant.UserConstant;
 import com.ping.pingpicturebackend.exception.BusinessException;
 import com.ping.pingpicturebackend.exception.ErrorCode;
 import com.ping.pingpicturebackend.exception.ThrowUtils;
-import com.ping.pingpicturebackend.model.dto.space.SpaceAddRequest;
-import com.ping.pingpicturebackend.model.dto.space.SpaceLevel;
-import com.ping.pingpicturebackend.model.dto.space.SpaceQueryRequest;
-import com.ping.pingpicturebackend.model.dto.space.SpaceUpdateRequest;
+import com.ping.pingpicturebackend.model.dto.space.*;
 import com.ping.pingpicturebackend.model.entity.Space;
 import com.ping.pingpicturebackend.model.entity.User;
 import com.ping.pingpicturebackend.model.enums.SpaceLevelEnum;
@@ -146,6 +143,20 @@ public class SpaceController {
                 new Page<>(current, size), spaceService.getQueryWrapper(spaceQueryRequest));
         Page<SpaceVO> spaceVOPage = spaceService.getSpaceVOPage(spacePage);
         return ResultUtils.success(spaceVOPage);
+    }
+
+    /**
+     * 编辑空间 - 给用户使用
+     */
+    @PostMapping("/edit")
+    public BaseResponse<Boolean> editSpace(@RequestBody SpaceEditRequest spaceEditRequest,
+                                           HttpServletRequest request) {
+        if (spaceEditRequest == null || spaceEditRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        spaceService.editSpace(spaceEditRequest, loginUser);
+        return ResultUtils.success(true);
     }
 
     /**
