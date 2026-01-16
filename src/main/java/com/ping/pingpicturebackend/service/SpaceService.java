@@ -80,4 +80,12 @@ public interface SpaceService extends IService<Space> {
      * @param loginUser     登录用户
      */
     void deleteSpace(DeleteRequest deleteRequest, User loginUser);
+
+    /**
+     * 空间权限校验 - 仅本人或管理员可访问
+     *
+     * @param oldSpace 空间
+     * @param loginUser 登录用户
+     */
+    void checkSpaceAuth(Space oldSpace, User loginUser);
 }

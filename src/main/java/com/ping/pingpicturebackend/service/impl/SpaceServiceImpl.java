@@ -304,6 +304,7 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space>
      * @param oldSpace 空间
      * @param loginUser 登录用户
      */
+    @Override
     public void checkSpaceAuth(Space oldSpace, User loginUser) {
         // 仅本人或管理员可访问
         if (!oldSpace.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
