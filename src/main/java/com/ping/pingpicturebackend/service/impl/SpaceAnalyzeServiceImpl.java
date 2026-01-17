@@ -1,6 +1,8 @@
 package com.ping.pingpicturebackend.service.impl;
 
 import cn.hutool.core.util.NumberUtil;
+import cn.hutool.core.util.ObjUtil;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ping.pingpicturebackend.exception.BusinessException;
@@ -9,11 +11,13 @@ import com.ping.pingpicturebackend.exception.ThrowUtils;
 import com.ping.pingpicturebackend.mapper.SpaceMapper;
 import com.ping.pingpicturebackend.model.dto.space.analyze.SpaceAnalyzeRequest;
 import com.ping.pingpicturebackend.model.dto.space.analyze.SpaceCategoryAnalyzeRequest;
+import com.ping.pingpicturebackend.model.dto.space.analyze.SpaceTagAnalyzeRequest;
 import com.ping.pingpicturebackend.model.dto.space.analyze.SpaceUsageAnalyzeRequest;
 import com.ping.pingpicturebackend.model.entity.Picture;
 import com.ping.pingpicturebackend.model.entity.Space;
 import com.ping.pingpicturebackend.model.entity.User;
 import com.ping.pingpicturebackend.model.vo.space.analyze.SpaceCategoryAnalyzeResponse;
+import com.ping.pingpicturebackend.model.vo.space.analyze.SpaceTagAnalyzeResponse;
 import com.ping.pingpicturebackend.model.vo.space.analyze.SpaceUsageAnalyzeResponse;
 import com.ping.pingpicturebackend.service.PictureService;
 import com.ping.pingpicturebackend.service.SpaceAnalyzeService;
@@ -23,8 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -140,6 +143,44 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
                             .orElse(0L);
                     return new SpaceCategoryAnalyzeResponse(category, count, totalSize);
                 })
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 空间图片标签分析
+     *
+     * @param spaceTagAnalyzeRequest 空间标签分析请求
+     * @param loginUser              登录用户
+     * @return 分析结果数组
+     */
+    @Override
+    public List<SpaceTagAnalyzeResponse> getSpaceTagAnalyze(SpaceTagAnalyzeRequest spaceTagAnalyzeRequest, User loginUser) {
+        // 1. 校验参数
+        ThrowUtils.throwIf(spaceTagAnalyzeRequest == null, ErrorCode.PARAMS_ERROR);
+        // 2. 校验权限
+        checkSpaceAnalyzeAuth(spaceTagAnalyzeRequest, loginUser);
+        // 3. 构造查询条件
+        QueryWrapper<Picture> queryWrapper = new QueryWrapper<>();
+        fillAnalyzeQueryWrapper(spaceTagAnalyzeRequest,queryWrapper);
+        // 4. 查询所有符合条件的结果
+        queryWrapper.select("tags");
+        List<String> tagsJsonList = pictureService.getBaseMapper().selectObjs(queryWrapper)
+                .stream()
+                .filter(ObjUtil::isNotNull)
+                .map(Object::toString)
+                // 进一步过滤空的 JSON 数组字符串 "[]" 或空字符串 " "
+                .filter(tag -> !tag.trim().isEmpty())
+                .filter(tag -> !"[]".equals(tag.trim()))
+                .collect(Collectors.toList());
+        // 5. 合并所有标签并统计使用次数
+        Map<String, Long> tagCountMap = tagsJsonList.stream()
+                .flatMap(tagsJson -> JSONUtil.toList(tagsJson, String.class).stream())
+                .collect(Collectors.groupingBy(tag -> tag, Collectors.counting()));
+        // 6. 根据使用次数降序排序标签
+        return tagCountMap.entrySet().stream()
+                // 降序排列
+                .sorted((e1, e2) -> Long.compare(e2.getValue(), e1.getValue()))
+                .map(entry -> new SpaceTagAnalyzeResponse(entry.getKey(), entry.getValue()))
                 .collect(Collectors.toList());
     }
 
