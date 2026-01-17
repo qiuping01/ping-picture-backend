@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ping.pingpicturebackend.common.DeleteRequest;
 import com.ping.pingpicturebackend.model.dto.space.SpaceAddRequest;
+import com.ping.pingpicturebackend.model.dto.space.SpaceEditRequest;
 import com.ping.pingpicturebackend.model.dto.space.SpaceQueryRequest;
 import com.ping.pingpicturebackend.model.entity.Space;
 import com.ping.pingpicturebackend.model.entity.User;
@@ -65,10 +66,26 @@ public interface SpaceService extends IService<Space> {
     void fillSpaceBySpaceLevel(Space space);
 
     /**
+     * 编辑空间
+     *
+     * @param spaceEditRequest 编辑请求
+     * @param loginUser        登录用户
+     */
+    void editSpace(SpaceEditRequest spaceEditRequest, User loginUser);
+
+    /**
      * 删除空间
      *
      * @param deleteRequest 删除请求
      * @param loginUser     登录用户
      */
     void deleteSpace(DeleteRequest deleteRequest, User loginUser);
+
+    /**
+     * 空间权限校验 - 仅本人或管理员可访问
+     *
+     * @param oldSpace 空间
+     * @param loginUser 登录用户
+     */
+    void checkSpaceAuth(Space oldSpace, User loginUser);
 }

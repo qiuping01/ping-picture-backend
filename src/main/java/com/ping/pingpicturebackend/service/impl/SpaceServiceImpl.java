@@ -13,6 +13,7 @@ import com.ping.pingpicturebackend.exception.ThrowUtils;
 import com.ping.pingpicturebackend.mapper.PictureMapper;
 import com.ping.pingpicturebackend.mapper.SpaceMapper;
 import com.ping.pingpicturebackend.model.dto.space.SpaceAddRequest;
+import com.ping.pingpicturebackend.model.dto.space.SpaceEditRequest;
 import com.ping.pingpicturebackend.model.dto.space.SpaceQueryRequest;
 import com.ping.pingpicturebackend.model.entity.Picture;
 import com.ping.pingpicturebackend.model.entity.Space;
@@ -242,6 +243,33 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space>
     }
 
     /**
+     * 编辑空间
+     *
+     * @param spaceEditRequest 编辑请求
+     * @param loginUser        登录用户
+     */
+    @Override
+    public void editSpace(SpaceEditRequest spaceEditRequest, User loginUser) {
+        Long spaceId = spaceEditRequest.getId();
+        // 判断空间是否存在
+        Space oldSpace = getById(spaceId);
+        ThrowUtils.throwIf(oldSpace == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
+        // 仅本人或管理员可编辑
+        checkSpaceAuth(oldSpace, loginUser);
+        // 编辑空间
+        Space space = new Space();
+        BeanUtils.copyProperties(spaceEditRequest, space);
+        // 数据校验 - 管理员操作校验
+        validSpace(space, false);
+        // 自动填充数据
+        fillSpaceBySpaceLevel(space);
+        space.setEditTime(new Date());
+        // 操作数据库
+        boolean result = updateById(space);
+        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "编辑空间失败");
+    }
+
+    /**
      * 删除空间
      *
      * @param deleteRequest 删除请求
@@ -257,9 +285,7 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space>
         Space oldSpace = getById(spaceId);
         ThrowUtils.throwIf(oldSpace == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
         // 仅本人或管理员可删除
-        if (!oldSpace.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
-            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
-        }
+        checkSpaceAuth(oldSpace, loginUser);
         // 删除空间 - 添加事务同时删除空间下的图片
         transactionTemplate.executeWithoutResult(status -> {
             boolean result = removeById(spaceId);
@@ -272,6 +298,19 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space>
         });
     }
 
+    /**
+     * 空间权限校验 - 仅本人或管理员可访问
+     *
+     * @param oldSpace 空间
+     * @param loginUser 登录用户
+     */
+    @Override
+    public void checkSpaceAuth(Space oldSpace, User loginUser) {
+        // 仅本人或管理员可访问
+        if (!oldSpace.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+    }
 }
 
 
