@@ -169,8 +169,8 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
                 .filter(ObjUtil::isNotNull)
                 .map(Object::toString)
                 // 进一步过滤空的 JSON 数组字符串 "[]" 或空字符串 ""
-                .filter(string -> !string.trim().isEmpty())
-                .filter(string -> !"[]".equals(string.trim()))
+                .filter(tag -> !tag.trim().isEmpty())
+                .filter(tag -> !"[]".equals(tag.trim()))
                 .collect(Collectors.toList());
         // 5. 合并所有标签并统计使用次数
         Map<String, Long> tagCountMap = tagsJsonList.stream()
