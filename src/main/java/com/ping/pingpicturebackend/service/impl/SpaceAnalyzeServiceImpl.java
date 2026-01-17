@@ -8,10 +8,12 @@ import com.ping.pingpicturebackend.exception.ErrorCode;
 import com.ping.pingpicturebackend.exception.ThrowUtils;
 import com.ping.pingpicturebackend.mapper.SpaceMapper;
 import com.ping.pingpicturebackend.model.dto.space.analyze.SpaceAnalyzeRequest;
+import com.ping.pingpicturebackend.model.dto.space.analyze.SpaceCategoryAnalyzeRequest;
 import com.ping.pingpicturebackend.model.dto.space.analyze.SpaceUsageAnalyzeRequest;
 import com.ping.pingpicturebackend.model.entity.Picture;
 import com.ping.pingpicturebackend.model.entity.Space;
 import com.ping.pingpicturebackend.model.entity.User;
+import com.ping.pingpicturebackend.model.vo.space.analyze.SpaceCategoryAnalyzeResponse;
 import com.ping.pingpicturebackend.model.vo.space.analyze.SpaceUsageAnalyzeResponse;
 import com.ping.pingpicturebackend.service.PictureService;
 import com.ping.pingpicturebackend.service.SpaceAnalyzeService;
@@ -22,6 +24,8 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * 空间分析服务接口实现
@@ -99,6 +103,44 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
             spaceUsageAnalyzeResponse.setCountUsageRatio(countUsageRatio);
             return spaceUsageAnalyzeResponse;
         }
+    }
+
+    /**
+     * 空间图片分类分析
+     *
+     * @param spaceCategoryAnalyzeRequest 空间分类分析请求
+     * @param loginUser                   登录用户
+     * @return 分析结果数组
+     */
+    @Override
+    public List<SpaceCategoryAnalyzeResponse> getSpaceCategoryAnalyze(SpaceCategoryAnalyzeRequest spaceCategoryAnalyzeRequest,
+                                                                      User loginUser) {
+        // 1. 校验参数
+        ThrowUtils.throwIf(spaceCategoryAnalyzeRequest == null, ErrorCode.PARAMS_ERROR);
+        // 2. 校验权限
+        checkSpaceAnalyzeAuth(spaceCategoryAnalyzeRequest, loginUser);
+        // 3. 构造查询条件
+        QueryWrapper<Picture> queryWrapper = new QueryWrapper<>();
+        // 使用 MyBatis-Plus 分组查询
+        queryWrapper.select("category",
+                        "count(*) as count",
+                        "sum(picSize) as totalSize")
+                .groupBy("category");
+        // 4. 查询并转换结果
+        return pictureService.getBaseMapper().selectMaps(queryWrapper)
+                .stream()
+                .map(result -> {
+                    String category = result.get("category") != null ? result.get("category").toString() : "未分类";
+                    // 计数和大小：确保非null，否则给0
+                    Long count = Optional.ofNullable(result.get("count"))
+                            .map(num -> ((Number) num).longValue())
+                            .orElse(0L);
+                    Long totalSize = Optional.ofNullable(result.get("totalSize"))
+                            .map(num -> ((Number) num).longValue())
+                            .orElse(0L);
+                    return new SpaceCategoryAnalyzeResponse(category, count, totalSize);
+                })
+                .collect(Collectors.toList());
     }
 
     /**

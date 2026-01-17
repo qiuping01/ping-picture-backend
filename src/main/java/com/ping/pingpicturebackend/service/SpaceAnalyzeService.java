@@ -1,10 +1,14 @@
 package com.ping.pingpicturebackend.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.ping.pingpicturebackend.model.dto.space.analyze.SpaceCategoryAnalyzeRequest;
 import com.ping.pingpicturebackend.model.dto.space.analyze.SpaceUsageAnalyzeRequest;
 import com.ping.pingpicturebackend.model.entity.Space;
 import com.ping.pingpicturebackend.model.entity.User;
+import com.ping.pingpicturebackend.model.vo.space.analyze.SpaceCategoryAnalyzeResponse;
 import com.ping.pingpicturebackend.model.vo.space.analyze.SpaceUsageAnalyzeResponse;
+
+import java.util.List;
 
 /**
  * 空间分析服务接口
@@ -20,4 +24,13 @@ public interface SpaceAnalyzeService extends IService<Space> {
      */
     SpaceUsageAnalyzeResponse getSpaceUsageAnalyze(SpaceUsageAnalyzeRequest spaceUsageAnalyzeRequest,
                                                    User loginUser);
+
+    /**
+     * 空间图片分类分析
+     *
+     * @param spaceCategoryAnalyzeRequest 空间分类分析请求
+     * @param loginUser                   登录用户
+     * @return 分析结果数组
+     */
+    List<SpaceCategoryAnalyzeResponse> getSpaceCategoryAnalyze(SpaceCategoryAnalyzeRequest spaceCategoryAnalyzeRequest, User loginUser);
 }
