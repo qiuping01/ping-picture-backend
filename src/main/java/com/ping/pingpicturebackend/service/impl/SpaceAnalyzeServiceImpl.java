@@ -9,14 +9,12 @@ import com.ping.pingpicturebackend.exception.BusinessException;
 import com.ping.pingpicturebackend.exception.ErrorCode;
 import com.ping.pingpicturebackend.exception.ThrowUtils;
 import com.ping.pingpicturebackend.mapper.SpaceMapper;
-import com.ping.pingpicturebackend.model.dto.space.analyze.SpaceAnalyzeRequest;
-import com.ping.pingpicturebackend.model.dto.space.analyze.SpaceCategoryAnalyzeRequest;
-import com.ping.pingpicturebackend.model.dto.space.analyze.SpaceTagAnalyzeRequest;
-import com.ping.pingpicturebackend.model.dto.space.analyze.SpaceUsageAnalyzeRequest;
+import com.ping.pingpicturebackend.model.dto.space.analyze.*;
 import com.ping.pingpicturebackend.model.entity.Picture;
 import com.ping.pingpicturebackend.model.entity.Space;
 import com.ping.pingpicturebackend.model.entity.User;
 import com.ping.pingpicturebackend.model.vo.space.analyze.SpaceCategoryAnalyzeResponse;
+import com.ping.pingpicturebackend.model.vo.space.analyze.SpaceSizeAnalyzeResponse;
 import com.ping.pingpicturebackend.model.vo.space.analyze.SpaceTagAnalyzeResponse;
 import com.ping.pingpicturebackend.model.vo.space.analyze.SpaceUsageAnalyzeResponse;
 import com.ping.pingpicturebackend.service.PictureService;
@@ -124,7 +122,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
         checkSpaceAnalyzeAuth(spaceCategoryAnalyzeRequest, loginUser);
         // 3. 构造查询条件
         QueryWrapper<Picture> queryWrapper = new QueryWrapper<>();
-        fillAnalyzeQueryWrapper(spaceCategoryAnalyzeRequest,queryWrapper);
+        fillAnalyzeQueryWrapper(spaceCategoryAnalyzeRequest, queryWrapper);
         // 使用 MyBatis-Plus 分组查询
         queryWrapper.select("category",
                         "count(*) as count",
@@ -162,7 +160,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
         checkSpaceAnalyzeAuth(spaceTagAnalyzeRequest, loginUser);
         // 3. 构造查询条件
         QueryWrapper<Picture> queryWrapper = new QueryWrapper<>();
-        fillAnalyzeQueryWrapper(spaceTagAnalyzeRequest,queryWrapper);
+        fillAnalyzeQueryWrapper(spaceTagAnalyzeRequest, queryWrapper);
         // 4. 查询所有符合条件的结果
         queryWrapper.select("tags");
         List<String> tagsJsonList = pictureService.getBaseMapper().selectObjs(queryWrapper)
@@ -182,6 +180,55 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
                 // 降序排列
                 .sorted((e1, e2) -> Long.compare(e2.getValue(), e1.getValue()))
                 .map(entry -> new SpaceTagAnalyzeResponse(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 根据空间图片大小范围统计对应数量
+     *
+     * @param spaceSizeAnalyzeRequest 空间图片大小分析请求
+     * @param loginUser               登录用户
+     * @return 分析结果数组
+     */
+    @Override
+    public List<SpaceSizeAnalyzeResponse> getSpaceSizeAnalyze(SpaceSizeAnalyzeRequest spaceSizeAnalyzeRequest, User loginUser) {
+        // 1. 校验参数
+        ThrowUtils.throwIf(spaceSizeAnalyzeRequest == null, ErrorCode.PARAMS_ERROR);
+        // 2. 校验权限
+        checkSpaceAnalyzeAuth(spaceSizeAnalyzeRequest, loginUser);
+        // 3. 构造查询条件
+        QueryWrapper<Picture> queryWrapper = new QueryWrapper<>();
+        fillAnalyzeQueryWrapper(spaceSizeAnalyzeRequest, queryWrapper);
+        // 4. 查询所有符合条件的结果
+        queryWrapper.select("picSize");
+        List<Long> picSizeList = pictureService.getBaseMapper().selectObjs(queryWrapper)
+                .stream()
+                .filter(ObjUtil::isNotNull)
+                .map(size -> ((Number) size).longValue())
+                .collect(Collectors.toList());
+        // 5. 使用有序 Map 按图片范围大小分段统计数量："<100KB"、"100KB-500KB"、"500KB-1MB"、">1MB"
+        // 一次遍历统计所有范围
+        long[] counts = new long[4];
+        // 0:<100KB, 1:100-500KB, 2:500KB-1MB, 3:>1MB
+        for (Long size : picSizeList) {
+            if (size < 100 * 1024) {
+                counts[0]++;
+            } else if (size < 500 * 1024) {
+                counts[1]++;
+            } else if (size < 1024 * 1024) {
+                counts[2]++;
+            } else {
+                counts[3]++;
+            }
+        }
+        LinkedHashMap<String, Long> sizeRangesMap = new LinkedHashMap<>();
+        sizeRangesMap.put("<100KB", counts[0]);
+        sizeRangesMap.put("100KB-500KB", counts[1]);
+        sizeRangesMap.put("500KB-1MB", counts[2]);
+        sizeRangesMap.put(">1MB", counts[3]);
+        // 6. 返回分段统计
+        return sizeRangesMap.entrySet().stream()
+                .map(entry -> new SpaceSizeAnalyzeResponse(entry.getKey(), entry.getValue()))
                 .collect(Collectors.toList());
     }
 

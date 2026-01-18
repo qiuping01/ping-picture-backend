@@ -2,11 +2,13 @@ package com.ping.pingpicturebackend.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ping.pingpicturebackend.model.dto.space.analyze.SpaceCategoryAnalyzeRequest;
+import com.ping.pingpicturebackend.model.dto.space.analyze.SpaceSizeAnalyzeRequest;
 import com.ping.pingpicturebackend.model.dto.space.analyze.SpaceTagAnalyzeRequest;
 import com.ping.pingpicturebackend.model.dto.space.analyze.SpaceUsageAnalyzeRequest;
 import com.ping.pingpicturebackend.model.entity.Space;
 import com.ping.pingpicturebackend.model.entity.User;
 import com.ping.pingpicturebackend.model.vo.space.analyze.SpaceCategoryAnalyzeResponse;
+import com.ping.pingpicturebackend.model.vo.space.analyze.SpaceSizeAnalyzeResponse;
 import com.ping.pingpicturebackend.model.vo.space.analyze.SpaceTagAnalyzeResponse;
 import com.ping.pingpicturebackend.model.vo.space.analyze.SpaceUsageAnalyzeResponse;
 
@@ -44,4 +46,13 @@ public interface SpaceAnalyzeService extends IService<Space> {
      * @return 分析结果数组
      */
     List<SpaceTagAnalyzeResponse> getSpaceTagAnalyze(SpaceTagAnalyzeRequest spaceTagAnalyzeRequest, User loginUser);
+
+    /**
+     * 根据空间图片大小范围统计对应数量
+     *
+     * @param spaceSizeAnalyzeRequest 空间图片大小分析请求
+     * @param loginUser               登录用户
+     * @return 分析结果数组
+     */
+    List<SpaceSizeAnalyzeResponse> getSpaceSizeAnalyze(SpaceSizeAnalyzeRequest spaceSizeAnalyzeRequest, User loginUser);
 }
