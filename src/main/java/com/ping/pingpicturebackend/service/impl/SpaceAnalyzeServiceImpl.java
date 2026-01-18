@@ -207,19 +207,25 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
                 .map(size -> ((Number) size).longValue())
                 .collect(Collectors.toList());
         // 5. 使用有序 Map 按图片范围大小分段统计数量："<100KB"、"100KB-500KB"、"500KB-1MB"、">1MB"
+        // 一次遍历统计所有范围
+        long[] counts = new long[4];
+        // 0:<100KB, 1:100-500KB, 2:500KB-1MB, 3:>1MB
+        for (Long size : picSizeList) {
+            if (size < 100 * 1024) {
+                counts[0]++;
+            } else if (size < 500 * 1024) {
+                counts[1]++;
+            } else if (size < 1024 * 1024) {
+                counts[2]++;
+            } else {
+                counts[3]++;
+            }
+        }
         LinkedHashMap<String, Long> sizeRangesMap = new LinkedHashMap<>();
-        sizeRangesMap.put("<100KB", picSizeList.stream()
-                .filter(size -> size < 100 * 1024)
-                .count());
-        sizeRangesMap.put("100KB-500KB", picSizeList.stream()
-                .filter(size -> size >= 100 * 1024 && size < 500 * 1024)
-                .count());
-        sizeRangesMap.put("500KB-1MB", picSizeList.stream()
-                .filter(size -> size >= 500 * 1024 && size < 1024 * 1024)
-                .count());
-        sizeRangesMap.put(">1MB", picSizeList.stream()
-                .filter(size -> size >= 1024 * 1024)
-                .count());
+        sizeRangesMap.put("<100KB", counts[0]);
+        sizeRangesMap.put("100KB-500KB", counts[1]);
+        sizeRangesMap.put("500KB-1MB", counts[2]);
+        sizeRangesMap.put(">1MB", counts[3]);
         // 6. 返回分段统计
         return sizeRangesMap.entrySet().stream()
                 .map(entry -> new SpaceSizeAnalyzeResponse(entry.getKey(), entry.getValue()))
