@@ -5,10 +5,12 @@ import com.ping.pingpicturebackend.common.ResultUtils;
 import com.ping.pingpicturebackend.exception.ErrorCode;
 import com.ping.pingpicturebackend.exception.ThrowUtils;
 import com.ping.pingpicturebackend.model.dto.space.analyze.SpaceCategoryAnalyzeRequest;
+import com.ping.pingpicturebackend.model.dto.space.analyze.SpaceSizeAnalyzeRequest;
 import com.ping.pingpicturebackend.model.dto.space.analyze.SpaceTagAnalyzeRequest;
 import com.ping.pingpicturebackend.model.dto.space.analyze.SpaceUsageAnalyzeRequest;
 import com.ping.pingpicturebackend.model.entity.User;
 import com.ping.pingpicturebackend.model.vo.space.analyze.SpaceCategoryAnalyzeResponse;
+import com.ping.pingpicturebackend.model.vo.space.analyze.SpaceSizeAnalyzeResponse;
 import com.ping.pingpicturebackend.model.vo.space.analyze.SpaceTagAnalyzeResponse;
 import com.ping.pingpicturebackend.model.vo.space.analyze.SpaceUsageAnalyzeResponse;
 import com.ping.pingpicturebackend.service.SpaceAnalyzeService;
@@ -71,6 +73,18 @@ public class SpaceAnalyzeController {
         ThrowUtils.throwIf(spaceTagAnalyzeRequest == null, ErrorCode.PARAMS_ERROR);
         User loginUser = userService.getLoginUser(request);
         List<SpaceTagAnalyzeResponse> resultList = spaceAnalyzeService.getSpaceTagAnalyze(spaceTagAnalyzeRequest, loginUser);
+        return ResultUtils.success(resultList);
+    }
+
+    /**
+     * 根据空间图片大小范围统计对应数量
+     */
+    @PostMapping("/size")
+    public BaseResponse<List<SpaceSizeAnalyzeResponse>> getSpaceSizeAnalyze(@RequestBody SpaceSizeAnalyzeRequest spaceSizeAnalyzeRequest,
+                                                                            HttpServletRequest request) {
+        ThrowUtils.throwIf(spaceSizeAnalyzeRequest == null, ErrorCode.PARAMS_ERROR);
+        User loginUser = userService.getLoginUser(request);
+        List<SpaceSizeAnalyzeResponse> resultList = spaceAnalyzeService.getSpaceSizeAnalyze(spaceSizeAnalyzeRequest, loginUser);
         return ResultUtils.success(resultList);
     }
 }
