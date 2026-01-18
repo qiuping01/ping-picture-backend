@@ -124,6 +124,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
         checkSpaceAnalyzeAuth(spaceCategoryAnalyzeRequest, loginUser);
         // 3. 构造查询条件
         QueryWrapper<Picture> queryWrapper = new QueryWrapper<>();
+        fillAnalyzeQueryWrapper(spaceCategoryAnalyzeRequest,queryWrapper);
         // 使用 MyBatis-Plus 分组查询
         queryWrapper.select("category",
                         "count(*) as count",
