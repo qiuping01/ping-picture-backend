@@ -161,7 +161,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
         // 3. 构造查询条件
         QueryWrapper<Picture> queryWrapper = new QueryWrapper<>();
         fillAnalyzeQueryWrapper(spaceTagAnalyzeRequest, queryWrapper);
-        // 4. 查询所有符合条件的结果
+        // 4. 查询所有符合条件的结果 - 标签
         queryWrapper.select("tags");
         List<String> tagsJsonList = pictureService.getBaseMapper().selectObjs(queryWrapper)
                 .stream()
@@ -199,7 +199,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
         // 3. 构造查询条件
         QueryWrapper<Picture> queryWrapper = new QueryWrapper<>();
         fillAnalyzeQueryWrapper(spaceSizeAnalyzeRequest, queryWrapper);
-        // 4. 查询所有符合条件的结果
+        // 4. 查询所有符合条件的结果 - 图片大小
         queryWrapper.select("picSize");
         List<Long> picSizeList = pictureService.getBaseMapper().selectObjs(queryWrapper)
                 .stream()
