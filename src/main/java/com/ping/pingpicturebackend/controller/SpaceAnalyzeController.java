@@ -4,15 +4,9 @@ import com.ping.pingpicturebackend.common.BaseResponse;
 import com.ping.pingpicturebackend.common.ResultUtils;
 import com.ping.pingpicturebackend.exception.ErrorCode;
 import com.ping.pingpicturebackend.exception.ThrowUtils;
-import com.ping.pingpicturebackend.model.dto.space.analyze.SpaceCategoryAnalyzeRequest;
-import com.ping.pingpicturebackend.model.dto.space.analyze.SpaceSizeAnalyzeRequest;
-import com.ping.pingpicturebackend.model.dto.space.analyze.SpaceTagAnalyzeRequest;
-import com.ping.pingpicturebackend.model.dto.space.analyze.SpaceUsageAnalyzeRequest;
+import com.ping.pingpicturebackend.model.dto.space.analyze.*;
 import com.ping.pingpicturebackend.model.entity.User;
-import com.ping.pingpicturebackend.model.vo.space.analyze.SpaceCategoryAnalyzeResponse;
-import com.ping.pingpicturebackend.model.vo.space.analyze.SpaceSizeAnalyzeResponse;
-import com.ping.pingpicturebackend.model.vo.space.analyze.SpaceTagAnalyzeResponse;
-import com.ping.pingpicturebackend.model.vo.space.analyze.SpaceUsageAnalyzeResponse;
+import com.ping.pingpicturebackend.model.vo.space.analyze.*;
 import com.ping.pingpicturebackend.service.SpaceAnalyzeService;
 import com.ping.pingpicturebackend.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -85,6 +79,18 @@ public class SpaceAnalyzeController {
         ThrowUtils.throwIf(spaceSizeAnalyzeRequest == null, ErrorCode.PARAMS_ERROR);
         User loginUser = userService.getLoginUser(request);
         List<SpaceSizeAnalyzeResponse> resultList = spaceAnalyzeService.getSpaceSizeAnalyze(spaceSizeAnalyzeRequest, loginUser);
+        return ResultUtils.success(resultList);
+    }
+
+    /**
+     * 获取空间用户上传行为分析数据
+     */
+    @PostMapping("/user")
+    public BaseResponse<List<SpaceUserAnalyzeResponse>> getSpaceUserAnalyze(@RequestBody SpaceUserAnalyzeRequest spaceUserAnalyzeRequest,
+                                                                            HttpServletRequest request) {
+        ThrowUtils.throwIf(spaceUserAnalyzeRequest == null, ErrorCode.PARAMS_ERROR);
+        User loginUser = userService.getLoginUser(request);
+        List<SpaceUserAnalyzeResponse> resultList = spaceAnalyzeService.getSpaceUserAnalyze(spaceUserAnalyzeRequest, loginUser);
         return ResultUtils.success(resultList);
     }
 }

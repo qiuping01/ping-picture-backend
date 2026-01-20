@@ -2,6 +2,7 @@ package com.ping.pingpicturebackend.service.impl;
 
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -13,10 +14,7 @@ import com.ping.pingpicturebackend.model.dto.space.analyze.*;
 import com.ping.pingpicturebackend.model.entity.Picture;
 import com.ping.pingpicturebackend.model.entity.Space;
 import com.ping.pingpicturebackend.model.entity.User;
-import com.ping.pingpicturebackend.model.vo.space.analyze.SpaceCategoryAnalyzeResponse;
-import com.ping.pingpicturebackend.model.vo.space.analyze.SpaceSizeAnalyzeResponse;
-import com.ping.pingpicturebackend.model.vo.space.analyze.SpaceTagAnalyzeResponse;
-import com.ping.pingpicturebackend.model.vo.space.analyze.SpaceUsageAnalyzeResponse;
+import com.ping.pingpicturebackend.model.vo.space.analyze.*;
 import com.ping.pingpicturebackend.service.PictureService;
 import com.ping.pingpicturebackend.service.SpaceAnalyzeService;
 import com.ping.pingpicturebackend.service.SpaceService;
@@ -229,6 +227,52 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
         // 6. 返回分段统计
         return sizeRangesMap.entrySet().stream()
                 .map(entry -> new SpaceSizeAnalyzeResponse(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 获取空间用户上传行为分析数据
+     *
+     * @param spaceUserAnalyzeRequest 用户上传行为分析请求
+     * @param loginUser               登录用户
+     * @return 分析结果
+     */
+    @Override
+    public List<SpaceUserAnalyzeResponse> getSpaceUserAnalyze(SpaceUserAnalyzeRequest spaceUserAnalyzeRequest, User loginUser) {
+        // 1. 校验参数
+        ThrowUtils.throwIf(spaceUserAnalyzeRequest == null, ErrorCode.PARAMS_ERROR);
+        // 2. 校验权限
+        checkSpaceAnalyzeAuth(spaceUserAnalyzeRequest, loginUser);
+        // 3. 构造查询条件
+        QueryWrapper<Picture> queryWrapper = new QueryWrapper<>();
+        fillAnalyzeQueryWrapper(spaceUserAnalyzeRequest, queryWrapper);
+        // 4. 指定查询用户
+        Long userId = spaceUserAnalyzeRequest.getUserId();
+        queryWrapper.eq(ObjUtil.isNotNull(userId), "userId", userId);
+        // 5. 指定查询时间维度
+        String timeDimension = spaceUserAnalyzeRequest.getTimeDimension();
+        switch (timeDimension) {
+            case "day":
+                queryWrapper.select("DATE_FORMAT(createTime, '%Y-%m-%d') AS period", "COUNT(*) AS count");
+                break;
+            case "week":
+                queryWrapper.select("YEARWEEK(createTime) AS period", "COUNT(*) AS count");
+                break;
+            case "month":
+                queryWrapper.select("DATE_FORMAT(createTime, '%Y-%m') AS period", "COUNT(*) AS count");
+                break;
+            default:
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "不支持的时间维度");
+        }
+        // 6. 按时间维度分组统计上传数量
+        queryWrapper.groupBy("period").orderByAsc("period");
+        List<Map<String, Object>> queryResult = pictureService.getBaseMapper().selectMaps(queryWrapper);
+        return queryResult.stream()
+                .map(result -> {
+                    String period = result.get("period").toString();
+                    Long count = ((Number) result.get("count")).longValue();
+                    return new SpaceUserAnalyzeResponse(period, count);
+                })
                 .collect(Collectors.toList());
     }
 
