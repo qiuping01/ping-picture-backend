@@ -277,6 +277,29 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
     }
 
     /**
+     * 获取空间排行
+     *
+     * @param spaceRankAnalyzeRequest 空间排行分析请求
+     * @param loginUser               登录用户
+     * @return 分析结果
+     */
+    @Override
+    public List<Space> getSpaceRank(SpaceRankAnalyzeRequest spaceRankAnalyzeRequest, User loginUser) {
+        ThrowUtils.throwIf(spaceRankAnalyzeRequest == null, ErrorCode.PARAMS_ERROR);
+        // 1. 校验权限 - 仅管理员可访问
+        if (!userService.isAdmin(loginUser)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "无权限访问");
+        }
+        // 2. 构造查询条件
+        QueryWrapper<Space> queryWrapper = new QueryWrapper<>();
+        queryWrapper.select("id", "spaceName", "userId", "totalSize")
+                .orderByDesc("totalSize")
+                .last("LIMIT " + spaceRankAnalyzeRequest.getTopN()); // 获取前 N 个空间
+        // 3. 查询结果
+        return spaceService.list(queryWrapper);
+    }
+
+    /**
      * 根据分析范围填充查询对象
      *
      * @param spaceAnalyzeRequest 分析请求
