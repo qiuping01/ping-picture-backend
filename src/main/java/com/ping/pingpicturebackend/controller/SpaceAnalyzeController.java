@@ -5,6 +5,7 @@ import com.ping.pingpicturebackend.common.ResultUtils;
 import com.ping.pingpicturebackend.exception.ErrorCode;
 import com.ping.pingpicturebackend.exception.ThrowUtils;
 import com.ping.pingpicturebackend.model.dto.space.analyze.*;
+import com.ping.pingpicturebackend.model.entity.Space;
 import com.ping.pingpicturebackend.model.entity.User;
 import com.ping.pingpicturebackend.model.vo.space.analyze.*;
 import com.ping.pingpicturebackend.service.SpaceAnalyzeService;
@@ -91,6 +92,17 @@ public class SpaceAnalyzeController {
         ThrowUtils.throwIf(spaceUserAnalyzeRequest == null, ErrorCode.PARAMS_ERROR);
         User loginUser = userService.getLoginUser(request);
         List<SpaceUserAnalyzeResponse> resultList = spaceAnalyzeService.getSpaceUserAnalyze(spaceUserAnalyzeRequest, loginUser);
+        return ResultUtils.success(resultList);
+    }
+
+    /**
+     * 获取空间排行
+     */
+    @PostMapping("/rank")
+    public BaseResponse<List<Space>> getSpaceRank(@RequestBody SpaceRankAnalyzeRequest spaceRankAnalyzeRequest, HttpServletRequest request) {
+        ThrowUtils.throwIf(spaceRankAnalyzeRequest == null, ErrorCode.PARAMS_ERROR);
+        User loginUser = userService.getLoginUser(request);
+        List<Space> resultList = spaceAnalyzeService.getSpaceRank(spaceRankAnalyzeRequest, loginUser);
         return ResultUtils.success(resultList);
     }
 }
