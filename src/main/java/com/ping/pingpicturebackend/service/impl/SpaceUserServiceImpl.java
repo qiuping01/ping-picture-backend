@@ -86,7 +86,9 @@ public class SpaceUserServiceImpl extends ServiceImpl<SpaceUserMapper, SpaceUser
             Space space = spaceService.getById(spaceId);
             ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
         }
-        // 编辑时，校验空间角色
+        // 编辑时，校验 id 和空间角色
+        Long id = spaceUser.getId();
+        ThrowUtils.throwIf(id == null || id <= 0, ErrorCode.PARAMS_ERROR);
         String spaceRole = spaceUser.getSpaceRole();
         SpaceRoleEnum spaceRoleEnum = SpaceRoleEnum.getEnumByValue(spaceRole);
         if (spaceRole != null && spaceRoleEnum == null) {
