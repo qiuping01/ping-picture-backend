@@ -10,28 +10,28 @@ import com.ping.pingpicturebackend.common.DeleteRequest;
 import com.ping.pingpicturebackend.exception.BusinessException;
 import com.ping.pingpicturebackend.exception.ErrorCode;
 import com.ping.pingpicturebackend.exception.ThrowUtils;
+import com.ping.pingpicturebackend.mapper.SpaceUserMapper;
 import com.ping.pingpicturebackend.model.dto.spaceuser.SpaceUserAddRequest;
 import com.ping.pingpicturebackend.model.dto.spaceuser.SpaceUserEditRequest;
 import com.ping.pingpicturebackend.model.dto.spaceuser.SpaceUserQueryRequest;
 import com.ping.pingpicturebackend.model.entity.Space;
 import com.ping.pingpicturebackend.model.entity.SpaceUser;
 import com.ping.pingpicturebackend.model.entity.User;
-import com.ping.pingpicturebackend.model.enums.SpaceLevelEnum;
 import com.ping.pingpicturebackend.model.enums.SpaceRoleEnum;
-import com.ping.pingpicturebackend.model.enums.SpaceTypeEnum;
 import com.ping.pingpicturebackend.model.vo.SpaceUserVO;
 import com.ping.pingpicturebackend.model.vo.SpaceVO;
 import com.ping.pingpicturebackend.model.vo.UserVO;
 import com.ping.pingpicturebackend.service.SpaceService;
 import com.ping.pingpicturebackend.service.SpaceUserService;
-import com.ping.pingpicturebackend.mapper.SpaceUserMapper;
 import com.ping.pingpicturebackend.service.UserService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Resource;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
