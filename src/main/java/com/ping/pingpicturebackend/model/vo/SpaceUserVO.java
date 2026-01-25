@@ -1,14 +1,17 @@
 package com.ping.pingpicturebackend.model.vo;
 
 import com.ping.pingpicturebackend.model.entity.SpaceUser;
+import lombok.Data;
 import org.springframework.beans.BeanUtils;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  * 空间成员视图
  */
-public class SpaceUserVO {
+@Data
+public class SpaceUserVO implements Serializable {
 
     /**
      * id
