@@ -3,6 +3,9 @@ package com.ping.pingpicturebackend.model.enums;
 import cn.hutool.core.util.ObjUtil;
 import lombok.Getter;
 
+/**
+ * 空间类型枚举
+ */
 @Getter
 public enum SpaceTypeEnum {
 

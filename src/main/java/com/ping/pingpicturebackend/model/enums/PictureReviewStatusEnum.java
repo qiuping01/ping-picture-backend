@@ -4,7 +4,7 @@ import cn.hutool.core.util.ObjUtil;
 import lombok.Getter;
 
 /**
- * 用户角色枚举
+ * 图片审核状态枚举
  */
 @Getter
 public enum PictureReviewStatusEnum {

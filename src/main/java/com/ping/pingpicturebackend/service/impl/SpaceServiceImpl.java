@@ -12,13 +12,16 @@ import com.ping.pingpicturebackend.exception.ErrorCode;
 import com.ping.pingpicturebackend.exception.ThrowUtils;
 import com.ping.pingpicturebackend.mapper.PictureMapper;
 import com.ping.pingpicturebackend.mapper.SpaceMapper;
+import com.ping.pingpicturebackend.mapper.SpaceUserMapper;
 import com.ping.pingpicturebackend.model.dto.space.SpaceAddRequest;
 import com.ping.pingpicturebackend.model.dto.space.SpaceEditRequest;
 import com.ping.pingpicturebackend.model.dto.space.SpaceQueryRequest;
 import com.ping.pingpicturebackend.model.entity.Picture;
 import com.ping.pingpicturebackend.model.entity.Space;
+import com.ping.pingpicturebackend.model.entity.SpaceUser;
 import com.ping.pingpicturebackend.model.entity.User;
 import com.ping.pingpicturebackend.model.enums.SpaceLevelEnum;
+import com.ping.pingpicturebackend.model.enums.SpaceRoleEnum;
 import com.ping.pingpicturebackend.model.enums.SpaceTypeEnum;
 import com.ping.pingpicturebackend.model.vo.SpaceVO;
 import com.ping.pingpicturebackend.model.vo.UserVO;
@@ -48,6 +51,9 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space>
 
     @Resource
     private PictureMapper pictureMapper;
+
+    @Resource
+    private SpaceUserMapper spaceUserMapper;
 
     @Resource
     private TransactionTemplate transactionTemplate;
@@ -100,6 +106,17 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space>
                 // 写入数据库
                 boolean result = this.save(space);
                 ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "创建失败");
+                // 如果创建的是团队空间，关联新增团队成员记录
+                Integer spaceType = space.getSpaceType();
+                SpaceTypeEnum spaceTypeEnum = SpaceTypeEnum.getEnumByValue(spaceType);
+                if (spaceTypeEnum == SpaceTypeEnum.TEAM) {
+                    SpaceUser spaceUser = new SpaceUser();
+                    spaceUser.setSpaceId(space.getId());
+                    spaceUser.setUserId(userId);
+                    spaceUser.setSpaceRole(SpaceRoleEnum.ADMIN.getValue());
+                    int insertResult = spaceUserMapper.insert(spaceUser);
+                    ThrowUtils.throwIf(insertResult == 0, ErrorCode.OPERATION_ERROR, "创建团队成员记录失败");
+                }
                 // 返回新写入的空间 id
                 return space.getId();
             });
