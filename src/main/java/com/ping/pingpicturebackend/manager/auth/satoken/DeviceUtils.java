@@ -1,4 +1,4 @@
-package com.ping.pingpicturebackend.satoken;
+package com.ping.pingpicturebackend.manager.auth.satoken;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.Header;
