@@ -1,4 +1,4 @@
-package com.ping.pingpicturebackend.satoken;
+package com.ping.pingpicturebackend.manager.auth.satoken;
 
 import cn.dev33.satoken.stp.StpInterface;
 import cn.dev33.satoken.stp.StpUtil;

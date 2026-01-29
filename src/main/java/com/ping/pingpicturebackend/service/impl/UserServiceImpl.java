@@ -14,7 +14,7 @@ import com.ping.pingpicturebackend.model.entity.User;
 import com.ping.pingpicturebackend.model.enums.UserRoleEnum;
 import com.ping.pingpicturebackend.model.vo.LoginUserVO;
 import com.ping.pingpicturebackend.model.vo.UserVO;
-import com.ping.pingpicturebackend.satoken.DeviceUtils;
+import com.ping.pingpicturebackend.manager.auth.satoken.DeviceUtils;
 import com.ping.pingpicturebackend.service.UserService;
 import com.ping.pingpicturebackend.mapper.UserMapper;
 import lombok.extern.slf4j.Slf4j;
