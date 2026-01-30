@@ -72,6 +72,9 @@ public class PictureController {
     @Resource
     private SpaceUserAuthManager spaceUserAuthManager;
 
+    @Resource
+    private AliYunAiApi aliYunAiApi;
+
     /**
      * 本地缓存
      */
@@ -83,8 +86,6 @@ public class PictureController {
                     // 缓存 5 分钟移除
                     .expireAfterWrite(5L, TimeUnit.MINUTES)
                     .build();
-    @Autowired
-    private AliYunAiApi aliYunAiApi;
 
     /**
      * 上传图片
