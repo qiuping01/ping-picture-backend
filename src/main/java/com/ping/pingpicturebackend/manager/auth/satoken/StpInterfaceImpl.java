@@ -53,11 +53,8 @@ public class StpInterfaceImpl implements StpInterface {
     @Resource
     private SpaceService spaceService;
 
-    private final SpaceUserAuthManager spaceUserAuthManager;
-
-    public StpInterfaceImpl(SpaceUserAuthManager spaceUserAuthManager) {
-        this.spaceUserAuthManager = spaceUserAuthManager;
-    }
+    @Resource
+    private SpaceUserAuthManager spaceUserAuthManager;
 
     /**
      * 返回一个账号所拥有的权限码集合
