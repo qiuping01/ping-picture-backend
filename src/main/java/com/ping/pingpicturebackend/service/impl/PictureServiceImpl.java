@@ -562,7 +562,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         Picture oldPicture = getById(picId);
         ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR, "图片不存在");
         // 校验操作权限
-        this.checkPictureAuth(loginUser, oldPicture);
+        // 已经改为使用注解鉴权
+//        this.checkPictureAuth(loginUser, oldPicture);
         // 开启事务 - 更新空间额度
         transactionTemplate.executeWithoutResult(status -> {
             // 操作数据库 - 删除图片信息
@@ -608,7 +609,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         // 设置编辑时间
         picture.setUpdateTime(new Date());
         // 校验图片空间
-        this.checkPictureAuth(loginUser, oldPicture);
+        // 已经改为使用注解鉴权
+//        this.checkPictureAuth(loginUser, oldPicture);
         // 补充审核参数
         this.fillReviewParams(picture, loginUser);
         // 操作数据库
@@ -755,7 +757,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         Picture picture = Optional.ofNullable(this.getById(pictureId))
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR, "图片不存在"));
         // 权限校验
-        checkPictureAuth(loginUser,picture);
+        // 已经改为使用注解鉴权
+//        checkPictureAuth(loginUser,picture);
         // 构造扩图请求参数
         CreateOutPaintingTaskRequest taskRequest = new CreateOutPaintingTaskRequest();
         CreateOutPaintingTaskRequest.Input input = new CreateOutPaintingTaskRequest.Input();
