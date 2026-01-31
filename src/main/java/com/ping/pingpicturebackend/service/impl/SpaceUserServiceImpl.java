@@ -61,6 +61,12 @@ public class SpaceUserServiceImpl extends ServiceImpl<SpaceUserMapper, SpaceUser
         SpaceUser spaceUser = new SpaceUser();
         BeanUtils.copyProperties(spaceUserAddRequest, spaceUser);
         validSpaceUser(spaceUser, true);
+        // 检查是否已添加过
+        boolean exists = this.lambdaQuery()
+                .eq(SpaceUser::getUserId, spaceUserAddRequest.getUserId())
+                .select(SpaceUser::getUserId)
+                .exists();
+        ThrowUtils.throwIf(exists, ErrorCode.OPERATION_ERROR, "已添加过该成员");
         // 操作数据库
         boolean result = this.save(spaceUser);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "创建失败");
@@ -85,10 +91,11 @@ public class SpaceUserServiceImpl extends ServiceImpl<SpaceUserMapper, SpaceUser
             ThrowUtils.throwIf(user == null, ErrorCode.NOT_FOUND_ERROR, "用户不存在");
             Space space = spaceService.getById(spaceId);
             ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
+        } else {
+            // 编辑时，校验 id 和空间角色
+            Long id = spaceUser.getId();
+            ThrowUtils.throwIf(id == null || id <= 0, ErrorCode.PARAMS_ERROR);
         }
-        // 编辑时，校验 id 和空间角色
-        Long id = spaceUser.getId();
-        ThrowUtils.throwIf(id == null || id <= 0, ErrorCode.PARAMS_ERROR);
         String spaceRole = spaceUser.getSpaceRole();
         SpaceRoleEnum spaceRoleEnum = SpaceRoleEnum.getEnumByValue(spaceRole);
         if (spaceRole != null && spaceRoleEnum == null) {
@@ -211,7 +218,7 @@ public class SpaceUserServiceImpl extends ServiceImpl<SpaceUserMapper, SpaceUser
         SpaceUser spaceUser = new SpaceUser();
         BeanUtils.copyProperties(spaceUserEditRequest, spaceUser);
         // 数据校验
-        validSpaceUser(spaceUser,false);
+        validSpaceUser(spaceUser, false);
         // 判断该条关系是否存在 - 查库操作往后放
         SpaceUser oldSpaceUser = this.getById(spaceUserEditRequest.getId());
         if (oldSpaceUser == null) {
