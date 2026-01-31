@@ -1,6 +1,7 @@
 package com.ping.pingpicturebackend.exception;
 
 import cn.dev33.satoken.exception.NotLoginException;
+import cn.dev33.satoken.exception.NotPermissionException;
 import cn.dev33.satoken.exception.NotRoleException;
 import com.ping.pingpicturebackend.common.BaseResponse;
 import com.ping.pingpicturebackend.common.ResultUtils;
@@ -49,5 +50,11 @@ public class GlobalExceptionHandler {
     public BaseResponse<?> notLoginExceptionHandler(RuntimeException e) {
         log.error("NotLoginException", e);
         return ResultUtils.error(ErrorCode.NOT_LOGIN_ERROR, "未登录");
+    }
+
+    @ExceptionHandler(NotPermissionException.class)
+    public BaseResponse<?> notPermissionExceptionHandler(NotPermissionException e) {
+        log.error("NotPermissionException", e);
+        return ResultUtils.error(ErrorCode.NO_AUTH_ERROR, e.getMessage());
     }
 }
