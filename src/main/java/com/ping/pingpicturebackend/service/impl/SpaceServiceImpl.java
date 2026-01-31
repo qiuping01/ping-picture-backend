@@ -10,7 +10,6 @@ import com.ping.pingpicturebackend.common.DeleteRequest;
 import com.ping.pingpicturebackend.exception.BusinessException;
 import com.ping.pingpicturebackend.exception.ErrorCode;
 import com.ping.pingpicturebackend.exception.ThrowUtils;
-import com.ping.pingpicturebackend.manager.auth.StpKit;
 import com.ping.pingpicturebackend.mapper.PictureMapper;
 import com.ping.pingpicturebackend.mapper.SpaceMapper;
 import com.ping.pingpicturebackend.mapper.SpaceUserMapper;
@@ -118,8 +117,6 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space>
                     int insertResult = spaceUserMapper.insert(spaceUser);
                     ThrowUtils.throwIf(insertResult == 0, ErrorCode.OPERATION_ERROR, "创建团队成员记录失败");
                 }
-                // 团队空间使用空间 id 登录 Sa-Taken
-                StpKit.SPACE.login(space.getId());
                 // 返回新写入的空间 id
                 return space.getId();
             });
