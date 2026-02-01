@@ -7,7 +7,6 @@ import com.ping.pingpicturebackend.manager.auth.model.SpaceUserPermissionConstan
 import com.ping.pingpicturebackend.model.entity.Picture;
 import com.ping.pingpicturebackend.model.entity.Space;
 import com.ping.pingpicturebackend.model.entity.User;
-import com.ping.pingpicturebackend.model.enums.SpaceRoleEnum;
 import com.ping.pingpicturebackend.model.enums.SpaceTypeEnum;
 import com.ping.pingpicturebackend.service.PictureService;
 import com.ping.pingpicturebackend.service.SpaceService;
@@ -81,7 +80,7 @@ public class WsHandshakeInterceptor implements HandshakeInterceptor {
         }
         // 3.1. 校验是否是团队空间
         Long spaceId = picture.getSpaceId();
-        Space space;
+        Space space = null;
         if (spaceId == null || spaceId <= 0) {
             log.error("WebSocket 连接失败，图片关联的空间ID非法（为空或非正数），pictureId: {}, spaceId: {}", pictureId, spaceId);
             return false;
