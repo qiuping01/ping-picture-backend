@@ -5,7 +5,6 @@ import cn.hutool.json.JSONUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import com.ping.pingpicturebackend.manager.websocket.disruptor.PictureEditEventProducer;
 import com.ping.pingpicturebackend.manager.websocket.model.PictureEditActionEnum;
 import com.ping.pingpicturebackend.manager.websocket.model.PictureEditMessageTypeEnum;
 import com.ping.pingpicturebackend.manager.websocket.model.PictureEditRequestMessage;
