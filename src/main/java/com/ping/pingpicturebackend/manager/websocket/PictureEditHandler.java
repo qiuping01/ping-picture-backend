@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.ping.pingpicturebackend.manager.websocket.disruptor.PictureEditEventProducer;
 import com.ping.pingpicturebackend.manager.websocket.model.PictureEditActionEnum;
 import com.ping.pingpicturebackend.manager.websocket.model.PictureEditMessageTypeEnum;
 import com.ping.pingpicturebackend.manager.websocket.model.PictureEditRequestMessage;
@@ -32,6 +33,9 @@ public class PictureEditHandler extends TextWebSocketHandler {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private PictureEditEventProducer pictureEditEventProducer;
 
     /**
      * 每张图片的编辑状态
@@ -80,26 +84,9 @@ public class PictureEditHandler extends TextWebSocketHandler {
         // 从 Session 属性中获取公共参数
         User user = (User) session.getAttributes().get("user");
         Long pictureId = (Long) session.getAttributes().get("pictureId");
-        // 调用对应的消息处理方法
-        switch (pictureEditMessageTypeEnum) {
-            case ENTER_EDIT:
-                handleEnterEditMessage(pictureEditRequestMessage, session, user, pictureId);
-                break;
-            case EXIT_EDIT:
-                handleExitEditMessage(pictureEditRequestMessage, session, user, pictureId);
-                break;
-            case EDIT_ACTION:
-                handleEditActionMessage(pictureEditRequestMessage, session, user, pictureId);
-                break;
-            default:
-                // 其他消息类型，给当前前端返回错误提示
-                PictureEditResponseMessage responseMessage = new PictureEditResponseMessage();
-                responseMessage.setType(PictureEditMessageTypeEnum.ERROR.getValue());
-                responseMessage.setMessage("无效的消息类型");
-                responseMessage.setUser(userService.getUserVO(user));
-                // 考虑到只是通知错误信息不考虑补全精度
-                session.sendMessage(new TextMessage(JSONUtil.toJsonStr(responseMessage)));
-        }
+        // 调用对应的消息处理方法 - 改为使用事件生产者
+        // 生产消息
+        pictureEditEventProducer.publishEvent(pictureEditRequestMessage, session, user, pictureId);
     }
 
     /**
@@ -118,7 +105,7 @@ public class PictureEditHandler extends TextWebSocketHandler {
             return;
         }
         sessionSet.remove(session);
-        if(sessionSet.isEmpty()){
+        if (sessionSet.isEmpty()) {
             pictureEditingSessions.remove(pictureId);
         }
         // 构造响应
