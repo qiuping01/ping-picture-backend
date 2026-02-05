@@ -164,7 +164,7 @@
                 <version>${spring-boot.version}</version>
                 <configuration>
                     <mainClass>
-                        com.ping.pingpicturebackend.PingPictureBackendApplication
+                        com.ping.pingpicture.PingPictureBackendApplication
                     </mainClass>
                     <skip>true</skip>
                 </configuration>

@@ -1,9 +1,9 @@
 package com.ping.pingpicturebackend.controller;
 
-import com.ping.pingpicturebackend.common.BaseResponse;
-import com.ping.pingpicturebackend.common.ResultUtils;
-import com.ping.pingpicturebackend.exception.ErrorCode;
-import com.ping.pingpicturebackend.exception.ThrowUtils;
+import com.ping.pingpicture.infrastructure.common.BaseResponse;
+import com.ping.pingpicture.infrastructure.common.ResultUtils;
+import com.ping.pingpicture.infrastructure.exception.ErrorCode;
+import com.ping.pingpicture.infrastructure.exception.ThrowUtils;
 import com.ping.pingpicturebackend.model.dto.space.analyze.*;
 import com.ping.pingpicturebackend.model.entity.Space;
 import com.ping.pingpicturebackend.model.entity.User;

@@ -6,9 +6,9 @@ import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpStatus;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.http.Method;
-import com.ping.pingpicturebackend.exception.BusinessException;
-import com.ping.pingpicturebackend.exception.ErrorCode;
-import com.ping.pingpicturebackend.exception.ThrowUtils;
+import com.ping.pingpicture.infrastructure.exception.BusinessException;
+import com.ping.pingpicture.infrastructure.exception.ErrorCode;
+import com.ping.pingpicture.infrastructure.exception.ThrowUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.File;

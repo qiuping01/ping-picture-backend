@@ -1,8 +1,8 @@
 package com.ping.pingpicturebackend.manager.upload;
 
 import cn.hutool.core.io.FileUtil;
-import com.ping.pingpicturebackend.exception.ErrorCode;
-import com.ping.pingpicturebackend.exception.ThrowUtils;
+import com.ping.pingpicture.infrastructure.exception.ErrorCode;
+import com.ping.pingpicture.infrastructure.exception.ThrowUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 

@@ -4,8 +4,8 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.Header;
 import cn.hutool.http.useragent.UserAgent;
 import cn.hutool.http.useragent.UserAgentUtil;
-import com.ping.pingpicturebackend.exception.ErrorCode;
-import com.ping.pingpicturebackend.exception.ThrowUtils;
+import com.ping.pingpicture.infrastructure.exception.ErrorCode;
+import com.ping.pingpicture.infrastructure.exception.ThrowUtils;
 
 import javax.servlet.http.HttpServletRequest;
 

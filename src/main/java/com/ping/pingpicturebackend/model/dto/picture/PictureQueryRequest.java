@@ -1,6 +1,6 @@
 package com.ping.pingpicturebackend.model.dto.picture;
 
-import com.ping.pingpicturebackend.common.PageRequest;
+import com.ping.pingpicture.infrastructure.common.PageRequest;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

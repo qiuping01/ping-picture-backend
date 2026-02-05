@@ -1,6 +1,6 @@
 package com.ping.pingpicturebackend.model.dto.picture;
 
-import com.ping.pingpicturebackend.api.aliyunai.model.CreateOutPaintingTaskRequest;
+import com.ping.pingpicture.infrastructure.api.aliyunai.model.CreateOutPaintingTaskRequest;
 import lombok.Data;
 
 import java.io.Serializable;

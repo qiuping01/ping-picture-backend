@@ -2,11 +2,11 @@ package com.ping.pingpicturebackend.controller;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import cn.hutool.core.util.ObjectUtil;
-import com.ping.pingpicturebackend.common.BaseResponse;
-import com.ping.pingpicturebackend.common.DeleteRequest;
-import com.ping.pingpicturebackend.common.ResultUtils;
-import com.ping.pingpicturebackend.exception.ErrorCode;
-import com.ping.pingpicturebackend.exception.ThrowUtils;
+import com.ping.pingpicture.infrastructure.common.BaseResponse;
+import com.ping.pingpicture.infrastructure.common.DeleteRequest;
+import com.ping.pingpicture.infrastructure.common.ResultUtils;
+import com.ping.pingpicture.infrastructure.exception.ErrorCode;
+import com.ping.pingpicture.infrastructure.exception.ThrowUtils;
 import com.ping.pingpicturebackend.manager.auth.model.SpaceUserPermissionConstant;
 import com.ping.pingpicturebackend.model.dto.spaceuser.SpaceUserAddRequest;
 import com.ping.pingpicturebackend.model.dto.spaceuser.SpaceUserEditRequest;

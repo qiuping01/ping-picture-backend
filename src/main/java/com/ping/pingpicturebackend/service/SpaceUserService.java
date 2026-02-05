@@ -2,7 +2,7 @@ package com.ping.pingpicturebackend.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.ping.pingpicturebackend.common.DeleteRequest;
+import com.ping.pingpicture.infrastructure.common.DeleteRequest;
 import com.ping.pingpicturebackend.model.dto.spaceuser.SpaceUserAddRequest;
 import com.ping.pingpicturebackend.model.dto.spaceuser.SpaceUserEditRequest;
 import com.ping.pingpicturebackend.model.dto.spaceuser.SpaceUserQueryRequest;

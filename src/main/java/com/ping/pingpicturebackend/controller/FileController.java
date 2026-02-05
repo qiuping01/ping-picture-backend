@@ -1,13 +1,12 @@
 package com.ping.pingpicturebackend.controller;
 
 import cn.dev33.satoken.annotation.SaCheckRole;
-import com.ping.pingpicturebackend.annotation.AuthCheck;
-import com.ping.pingpicturebackend.common.BaseResponse;
-import com.ping.pingpicturebackend.common.ResultUtils;
+import com.ping.pingpicture.infrastructure.common.BaseResponse;
+import com.ping.pingpicture.infrastructure.common.ResultUtils;
 import com.ping.pingpicturebackend.constant.UserConstant;
-import com.ping.pingpicturebackend.exception.BusinessException;
-import com.ping.pingpicturebackend.exception.ErrorCode;
-import com.ping.pingpicturebackend.manager.CosManager;
+import com.ping.pingpicture.infrastructure.exception.BusinessException;
+import com.ping.pingpicture.infrastructure.exception.ErrorCode;
+import com.ping.pingpicture.infrastructure.api.CosManager;
 import com.qcloud.cos.model.COSObject;
 import com.qcloud.cos.model.COSObjectInputStream;
 import com.qcloud.cos.utils.IOUtils;
@@ -16,14 +15,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * 文件上传检查接口

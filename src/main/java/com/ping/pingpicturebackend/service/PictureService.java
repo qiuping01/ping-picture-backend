@@ -2,13 +2,12 @@ package com.ping.pingpicturebackend.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.ping.pingpicturebackend.api.aliyunai.model.CreateOutPaintingTaskResponse;
+import com.ping.pingpicture.infrastructure.api.aliyunai.model.CreateOutPaintingTaskResponse;
 import com.ping.pingpicturebackend.model.dto.picture.*;
 import com.ping.pingpicturebackend.model.entity.Picture;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ping.pingpicturebackend.model.entity.User;
 import com.ping.pingpicturebackend.model.vo.PictureVO;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 

@@ -1,7 +1,7 @@
 package com.ping.pingpicturebackend.controller;
 
-import com.ping.pingpicturebackend.common.BaseResponse;
-import com.ping.pingpicturebackend.common.ResultUtils;
+import com.ping.pingpicture.infrastructure.common.BaseResponse;
+import com.ping.pingpicture.infrastructure.common.ResultUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
