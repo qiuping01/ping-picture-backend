@@ -12,12 +12,12 @@ import com.ping.pingpicture.infrastructure.mapper.SpaceMapper;
 import com.ping.pingpicturebackend.model.dto.space.analyze.*;
 import com.ping.pingpicturebackend.model.entity.Picture;
 import com.ping.pingpicturebackend.model.entity.Space;
-import com.ping.pingpicturebackend.model.entity.User;
+import com.ping.pingpicture.domain.user.entity.User;
 import com.ping.pingpicturebackend.model.vo.space.analyze.*;
 import com.ping.pingpicturebackend.service.PictureService;
 import com.ping.pingpicturebackend.service.SpaceAnalyzeService;
 import com.ping.pingpicturebackend.service.SpaceService;
-import com.ping.pingpicturebackend.service.UserService;
+import com.ping.pingpicture.application.service.UserApplicationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +34,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
         implements SpaceAnalyzeService {
 
     @Resource
-    private UserService userService;
+    private UserApplicationService userApplicationService;
 
     @Resource
     private SpaceService spaceService;
@@ -286,7 +286,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
     public List<Space> getSpaceRank(SpaceRankAnalyzeRequest spaceRankAnalyzeRequest, User loginUser) {
         ThrowUtils.throwIf(spaceRankAnalyzeRequest == null, ErrorCode.PARAMS_ERROR);
         // 1. 校验权限 - 仅管理员可访问
-        if (!userService.isAdmin(loginUser)) {
+        if (!userApplicationService.isAdmin(loginUser)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "无权限访问");
         }
         // 2. 构造查询条件
@@ -338,7 +338,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
         boolean queryAll = spaceAnalyzeRequest.isQueryAll();
         // 全空间分析或者公共图库权限校验：仅管理员可访问
         if (queryAll || queryPublic) {
-            ThrowUtils.throwIf(!userService.isAdmin(loginUser), ErrorCode.NO_AUTH_ERROR, "无权限访问");
+            ThrowUtils.throwIf(!userApplicationService.isAdmin(loginUser), ErrorCode.NO_AUTH_ERROR, "无权限访问");
         } else {
             // 指定空间分析权限校验：仅空间管理员可访问
             ThrowUtils.throwIf((spaceId == null || spaceId <= 0), ErrorCode.PARAMS_ERROR);

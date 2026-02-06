@@ -16,14 +16,14 @@ import com.ping.pingpicturebackend.model.dto.spaceuser.SpaceUserEditRequest;
 import com.ping.pingpicturebackend.model.dto.spaceuser.SpaceUserQueryRequest;
 import com.ping.pingpicturebackend.model.entity.Space;
 import com.ping.pingpicturebackend.model.entity.SpaceUser;
-import com.ping.pingpicturebackend.model.entity.User;
+import com.ping.pingpicture.domain.user.entity.User;
 import com.ping.pingpicturebackend.model.enums.SpaceRoleEnum;
 import com.ping.pingpicturebackend.model.vo.SpaceUserVO;
 import com.ping.pingpicturebackend.model.vo.SpaceVO;
-import com.ping.pingpicturebackend.model.vo.UserVO;
+import com.ping.pingpicture.interfaces.vo.user.UserVO;
 import com.ping.pingpicturebackend.service.SpaceService;
 import com.ping.pingpicturebackend.service.SpaceUserService;
-import com.ping.pingpicturebackend.service.UserService;
+import com.ping.pingpicture.application.service.UserApplicationService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -47,7 +47,7 @@ public class SpaceUserServiceImpl extends ServiceImpl<SpaceUserMapper, SpaceUser
     private SpaceService spaceService;
 
     @Resource
-    private UserService userService;
+    private UserApplicationService userApplicationService;
 
     /**
      * 创建空间成员
@@ -87,7 +87,7 @@ public class SpaceUserServiceImpl extends ServiceImpl<SpaceUserMapper, SpaceUser
         // 创建时，空间 id 和 用户 id 必填
         if (add) {
             ThrowUtils.throwIf(ObjectUtil.hasEmpty(spaceId, userId), ErrorCode.PARAMS_ERROR);
-            User user = userService.getById(userId);
+            User user = userApplicationService.getById(userId);
             ThrowUtils.throwIf(user == null, ErrorCode.NOT_FOUND_ERROR, "用户不存在");
             Space space = spaceService.getById(spaceId);
             ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
@@ -139,8 +139,8 @@ public class SpaceUserServiceImpl extends ServiceImpl<SpaceUserMapper, SpaceUser
         // 关联查询用户信息
         Long userId = spaceUser.getUserId();
         if (userId != null && userId > 0) {
-            User user = userService.getById(userId);
-            UserVO userVO = userService.getUserVO(user);
+            User user = userApplicationService.getById(userId);
+            UserVO userVO = userApplicationService.getUserVO(user);
             spaceUserVO.setUser(userVO);
         }
         // 关联查询空间信息
@@ -179,7 +179,7 @@ public class SpaceUserServiceImpl extends ServiceImpl<SpaceUserMapper, SpaceUser
                 .filter(ObjUtil::isNotEmpty)
                 .collect(Collectors.toSet());
         // 查询用户信息
-        Map<Long, List<User>> userIdUserListMap = userService.listByIds(userIdSet).stream()
+        Map<Long, List<User>> userIdUserListMap = userApplicationService.listByIds(userIdSet).stream()
                 .collect(Collectors.groupingBy(User::getId));
         // 查询空间信息
         Map<Long, List<Space>> spaceIdSpaceListMap = spaceService.listByIds(spaceIdSet).stream()
@@ -193,7 +193,7 @@ public class SpaceUserServiceImpl extends ServiceImpl<SpaceUserMapper, SpaceUser
             if (userIdUserListMap.containsKey(userId)) {
                 user = userIdUserListMap.get(userId).get(0);
             }
-            spaceUserVO.setUser(userService.getUserVO(user));
+            spaceUserVO.setUser(userApplicationService.getUserVO(user));
             // 填充空间信息
             Space space = null;
             if (spaceIdSpaceListMap.containsKey(spaceId)) {

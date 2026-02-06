@@ -3,7 +3,7 @@ package com.ping.pingpicturebackend.manager.websocket.disruptor;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.ping.pingpicturebackend.manager.websocket.model.PictureEditRequestMessage;
-import com.ping.pingpicturebackend.model.entity.User;
+import com.ping.pingpicture.domain.user.entity.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;

@@ -1,5 +1,6 @@
 package com.ping.pingpicturebackend.model.vo;
 
+import com.ping.pingpicture.interfaces.vo.user.UserVO;
 import com.ping.pingpicturebackend.model.entity.Space;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;

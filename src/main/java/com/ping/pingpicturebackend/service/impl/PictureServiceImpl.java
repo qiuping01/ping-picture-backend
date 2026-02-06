@@ -23,13 +23,13 @@ import com.ping.pingpicturebackend.model.dto.file.UploadPictureResult;
 import com.ping.pingpicturebackend.model.dto.picture.*;
 import com.ping.pingpicturebackend.model.entity.Picture;
 import com.ping.pingpicturebackend.model.entity.Space;
-import com.ping.pingpicturebackend.model.entity.User;
+import com.ping.pingpicture.domain.user.entity.User;
 import com.ping.pingpicturebackend.model.enums.PictureReviewStatusEnum;
 import com.ping.pingpicturebackend.model.vo.PictureVO;
-import com.ping.pingpicturebackend.model.vo.UserVO;
+import com.ping.pingpicture.interfaces.vo.user.UserVO;
 import com.ping.pingpicturebackend.service.PictureService;
 import com.ping.pingpicturebackend.service.SpaceService;
-import com.ping.pingpicturebackend.service.UserService;
+import com.ping.pingpicture.application.service.UserApplicationService;
 import com.ping.pingpicture.infrastructure.utils.ColorSimilarUtils;
 import com.ping.pingpicture.infrastructure.utils.ColorTransformUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -62,7 +62,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         implements PictureService {
 
     @Resource
-    private UserService userService;
+    private UserApplicationService userApplicationService;
 
     @Resource
     private FilePictureUpload filePictureUpload;
@@ -145,7 +145,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
             Picture oldPicture = this.getById(pictureId);
             ThrowUtils.throwIf(oldPicture == null, ErrorCode.PARAMS_ERROR, "图片不存在");
             // 仅本人或管理员可编辑
-            if (!oldPicture.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
+            if (!oldPicture.getUserId().equals(loginUser.getId()) && !userApplicationService.isAdmin(loginUser)) {
                 throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
             }
             // 异步清理图片
@@ -310,8 +310,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         // 关联查询用户信息
         Long userId = picture.getUserId();
         if (userId != null && userId > 0) {
-            User user = userService.getById(userId);
-            UserVO userVO = userService.getUserVO(user);
+            User user = userApplicationService.getById(userId);
+            UserVO userVO = userApplicationService.getUserVO(user);
             pictureVO.setUser(userVO);
         }
         return pictureVO;
@@ -342,7 +342,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
                 .filter(Objects::nonNull)  // 过滤null值
                 .collect(Collectors.toSet());
         // 3. 批量查询用户
-        Map<Long, List<User>> userIdUserListMap = userService.listByIds(userIdSet)
+        Map<Long, List<User>> userIdUserListMap = userApplicationService.listByIds(userIdSet)
                 .stream()
                 .collect(Collectors.groupingBy(User::getId));
         // 4. 填充用户信息
@@ -352,7 +352,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
             if (userIdUserListMap.containsKey(userId)) {
                 user = userIdUserListMap.get(userId).get(0);
             }
-            pictureVO.setUser(userService.getUserVO(user));
+            pictureVO.setUser(userApplicationService.getUserVO(user));
         });
         pictureVOPage.setRecords(pictureVOList);
         return pictureVOPage;
@@ -403,7 +403,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
     @Override
     public void fillReviewParams(Picture picture, User loginUser) {
         // 管理员自动过审
-        if (userService.isAdmin(loginUser)) {
+        if (userApplicationService.isAdmin(loginUser)) {
             picture.setReviewStatus(PictureReviewStatusEnum.PASS.getValue());
             picture.setReviewerId(loginUser.getId());
             picture.setReviewMessage("管理员自动过审");
@@ -538,7 +538,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         Long spaceId = picture.getSpaceId();
         if (spaceId == null) {
             // 公共图库仅本人和管理员能操作
-            if (!picture.getUserId().equals(loginUser.getId()) && userService.isAdmin(loginUser)) {
+            if (!picture.getUserId().equals(loginUser.getId()) && userApplicationService.isAdmin(loginUser)) {
                 throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "没有权限");
             }
         } else {

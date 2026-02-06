@@ -3,7 +3,7 @@ package com.ping.pingpicturebackend.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ping.pingpicturebackend.model.dto.space.analyze.*;
 import com.ping.pingpicturebackend.model.entity.Space;
-import com.ping.pingpicturebackend.model.entity.User;
+import com.ping.pingpicture.domain.user.entity.User;
 import com.ping.pingpicturebackend.model.vo.space.analyze.*;
 
 import java.util.List;

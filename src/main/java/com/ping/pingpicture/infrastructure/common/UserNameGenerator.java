@@ -2,7 +2,7 @@ package com.ping.pingpicture.infrastructure.common;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ping.pingpicture.infrastructure.mapper.UserMapper;
-import com.ping.pingpicturebackend.model.entity.User;
+import com.ping.pingpicture.domain.user.entity.User;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

@@ -6,11 +6,11 @@ import com.ping.pingpicturebackend.manager.auth.SpaceUserAuthManager;
 import com.ping.pingpicturebackend.manager.auth.model.SpaceUserPermissionConstant;
 import com.ping.pingpicturebackend.model.entity.Picture;
 import com.ping.pingpicturebackend.model.entity.Space;
-import com.ping.pingpicturebackend.model.entity.User;
+import com.ping.pingpicture.domain.user.entity.User;
 import com.ping.pingpicturebackend.model.enums.SpaceTypeEnum;
 import com.ping.pingpicturebackend.service.PictureService;
 import com.ping.pingpicturebackend.service.SpaceService;
-import com.ping.pingpicturebackend.service.UserService;
+import com.ping.pingpicture.application.service.UserApplicationService;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.server.ServerHttpRequest;
@@ -33,7 +33,7 @@ import java.util.Map;
 public class WsHandshakeInterceptor implements HandshakeInterceptor {
 
     @Resource
-    private UserService userService;
+    private UserApplicationService userApplicationService;
 
     @Resource
     private PictureService pictureService;
@@ -67,7 +67,7 @@ public class WsHandshakeInterceptor implements HandshakeInterceptor {
             return false;
         }
         // 2. 获取登录用户信息
-        User loginUser = userService.getLoginUser(servletRequest);
+        User loginUser = userApplicationService.getLoginUser(servletRequest);
         if (ObjUtil.isEmpty(loginUser)) {
             log.error("WebSocket 连接失败，未登录用户，拒绝握手");
             return false;

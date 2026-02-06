@@ -7,7 +7,7 @@ import com.ping.pingpicturebackend.model.dto.spaceuser.SpaceUserAddRequest;
 import com.ping.pingpicturebackend.model.dto.spaceuser.SpaceUserEditRequest;
 import com.ping.pingpicturebackend.model.dto.spaceuser.SpaceUserQueryRequest;
 import com.ping.pingpicturebackend.model.entity.SpaceUser;
-import com.ping.pingpicturebackend.model.entity.User;
+import com.ping.pingpicture.domain.user.entity.User;
 import com.ping.pingpicturebackend.model.vo.SpaceUserVO;
 
 import java.util.List;

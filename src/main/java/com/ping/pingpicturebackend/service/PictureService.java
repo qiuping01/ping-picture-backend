@@ -6,7 +6,7 @@ import com.ping.pingpicture.infrastructure.api.aliyunai.model.CreateOutPaintingT
 import com.ping.pingpicturebackend.model.dto.picture.*;
 import com.ping.pingpicturebackend.model.entity.Picture;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.ping.pingpicturebackend.model.entity.User;
+import com.ping.pingpicture.domain.user.entity.User;
 import com.ping.pingpicturebackend.model.vo.PictureVO;
 
 import java.util.List;

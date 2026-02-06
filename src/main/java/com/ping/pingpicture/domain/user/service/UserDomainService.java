@@ -1,21 +1,22 @@
-package com.ping.pingpicturebackend.service;
+package com.ping.pingpicture.domain.user.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.ping.pingpicturebackend.model.dto.user.UserQueryRequest;
-import com.ping.pingpicturebackend.model.entity.User;
-import com.baomidou.mybatisplus.extension.service.IService;
-import com.ping.pingpicturebackend.model.vo.LoginUserVO;
-import com.ping.pingpicturebackend.model.vo.UserVO;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.ping.pingpicture.domain.user.entity.User;
+import com.ping.pingpicture.interfaces.dto.user.UserQueryRequest;
+import com.ping.pingpicture.interfaces.vo.user.LoginUserVO;
+import com.ping.pingpicture.interfaces.vo.user.UserVO;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author 21877
  * @description 针对表【user(用户)】的数据库操作Service
  * @createDate 2025-10-30 22:06:44
  */
-public interface UserService extends IService<User> {
+public interface UserDomainService {
 
     /**
      * 用户注册
@@ -25,7 +26,8 @@ public interface UserService extends IService<User> {
      * @param checkPassword 校验密码
      * @return 用户ID
      */
-    long userRegister(String userAccount, String userPassword, String checkPassword);
+    long userRegister(String userAccount, String userPassword,
+                      String checkPassword);
 
     /**
      * 用户登录
@@ -52,7 +54,7 @@ public interface UserService extends IService<User> {
      * @param userList 用户列表
      * @return 脱敏后的用户列表
      */
-    List<UserVO> getUserVoList(List<User> userList);
+    List<UserVO> getUserVOList(List<User> userList);
 
     /**
      * 获取加密后的密码
@@ -102,5 +104,19 @@ public interface UserService extends IService<User> {
      * @return 如果当前用户是管理员，则返回true，否则返回false
      */
     boolean isAdmin(User loginUser);
+
+    User getById(long id);
+
+    boolean removeById(Long id);
+
+    boolean updateById(User user);
+
+    Page<User> page(Page<User> userPage, QueryWrapper<User> queryWrapper);
+
+    List<User> listByIds(Set<Long> userIdSet);
+
+    long addUser(User user);
+
+    Boolean saveUser(User userEntity);
 }
 

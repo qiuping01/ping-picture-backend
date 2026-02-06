@@ -5,18 +5,18 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ping.pingpicture.infrastructure.common.BaseResponse;
 import com.ping.pingpicture.infrastructure.common.DeleteRequest;
 import com.ping.pingpicture.infrastructure.common.ResultUtils;
-import com.ping.pingpicturebackend.constant.UserConstant;
+import com.ping.pingpicture.domain.user.constant.UserConstant;
 import com.ping.pingpicture.infrastructure.exception.BusinessException;
 import com.ping.pingpicture.infrastructure.exception.ErrorCode;
 import com.ping.pingpicture.infrastructure.exception.ThrowUtils;
 import com.ping.pingpicturebackend.manager.auth.SpaceUserAuthManager;
 import com.ping.pingpicturebackend.model.dto.space.*;
 import com.ping.pingpicturebackend.model.entity.Space;
-import com.ping.pingpicturebackend.model.entity.User;
+import com.ping.pingpicture.domain.user.entity.User;
 import com.ping.pingpicturebackend.model.enums.SpaceLevelEnum;
 import com.ping.pingpicturebackend.model.vo.SpaceVO;
 import com.ping.pingpicturebackend.service.SpaceService;
-import com.ping.pingpicturebackend.service.UserService;
+import com.ping.pingpicture.application.service.UserApplicationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
@@ -39,7 +39,7 @@ public class SpaceController {
     private SpaceService spaceService;
 
     @Resource
-    private UserService userService;
+    private UserApplicationService userApplicationService;
 
     @Resource
     private SpaceUserAuthManager spaceUserAuthManager;
@@ -50,7 +50,7 @@ public class SpaceController {
     @PostMapping("/add")
     public BaseResponse<Long> addSpace(@RequestBody SpaceAddRequest spaceAddRequest, HttpServletRequest request) {
         ThrowUtils.throwIf(spaceAddRequest == null, ErrorCode.PARAMS_ERROR);
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         long newSpaceId = spaceService.addSpace(spaceAddRequest, loginUser);
         return ResultUtils.success(newSpaceId);
     }
@@ -63,7 +63,7 @@ public class SpaceController {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         spaceService.deleteSpace(deleteRequest, loginUser);
         return ResultUtils.success(true);
     }
@@ -117,7 +117,7 @@ public class SpaceController {
         ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
         SpaceVO spaceVO = spaceService.getSpaceVO(space);
         // 获取权限列表
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         List<String> permissionList = spaceUserAuthManager.getPermissionList(space, loginUser);
         spaceVO.setPermissionList(permissionList);
         return ResultUtils.success(spaceVO);
@@ -163,7 +163,7 @@ public class SpaceController {
         if (spaceEditRequest == null || spaceEditRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         spaceService.editSpace(spaceEditRequest, loginUser);
         return ResultUtils.success(true);
     }

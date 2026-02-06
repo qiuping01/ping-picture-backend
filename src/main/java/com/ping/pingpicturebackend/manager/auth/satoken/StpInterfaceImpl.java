@@ -19,13 +19,13 @@ import com.ping.pingpicturebackend.manager.auth.model.SpaceUserPermissionConstan
 import com.ping.pingpicturebackend.model.entity.Picture;
 import com.ping.pingpicturebackend.model.entity.Space;
 import com.ping.pingpicturebackend.model.entity.SpaceUser;
-import com.ping.pingpicturebackend.model.entity.User;
+import com.ping.pingpicture.domain.user.entity.User;
 import com.ping.pingpicturebackend.model.enums.SpaceRoleEnum;
 import com.ping.pingpicturebackend.model.enums.SpaceTypeEnum;
 import com.ping.pingpicturebackend.service.PictureService;
 import com.ping.pingpicturebackend.service.SpaceService;
 import com.ping.pingpicturebackend.service.SpaceUserService;
-import com.ping.pingpicturebackend.service.UserService;
+import com.ping.pingpicture.application.service.UserApplicationService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -36,7 +36,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Field;
 import java.util.*;
 
-import static com.ping.pingpicturebackend.constant.UserConstant.USER_LOGIN_STATE;
+import static com.ping.pingpicture.domain.user.constant.UserConstant.USER_LOGIN_STATE;
 
 @Component // 保证此类被 SpringBoot 扫描，完成 Sa-Token 的自定义权限验证扩展
 public class StpInterfaceImpl implements StpInterface {
@@ -48,7 +48,7 @@ public class StpInterfaceImpl implements StpInterface {
     private PictureService pictureService;
 
     @Resource
-    private UserService userService;
+    private UserApplicationService userApplicationService;
 
     @Resource
     private SpaceService spaceService;
@@ -119,7 +119,7 @@ public class StpInterfaceImpl implements StpInterface {
             spaceId = picture.getSpaceId();
             // 公共图库,仅本人或管理员可操作
             if (spaceId == null) {
-                if (picture.getUserId().equals(userId) || userService.isAdmin(loginUser)) {
+                if (picture.getUserId().equals(userId) || userApplicationService.isAdmin(loginUser)) {
                     return ADMIN_PERMISSIONS;
                 } else {
                     // 不是自己的图片，仅可查看
@@ -136,7 +136,7 @@ public class StpInterfaceImpl implements StpInterface {
         // 根据 Space 类型判断权限
         if (space.getSpaceType() == SpaceTypeEnum.PRIVATE.getValue()) {
             // 私有空间，仅本人或管理员有权限
-            if (space.getUserId().equals(userId) || userService.isAdmin(loginUser)) {
+            if (space.getUserId().equals(userId) || userApplicationService.isAdmin(loginUser)) {
                 return ADMIN_PERMISSIONS;
             } else {
                 // 无权限返回空

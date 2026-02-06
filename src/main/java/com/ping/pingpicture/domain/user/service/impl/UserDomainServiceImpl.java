@@ -1,35 +1,42 @@
-package com.ping.pingpicturebackend.service.impl;
+package com.ping.pingpicture.domain.user.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ping.pingpicture.domain.user.entity.User;
+import com.ping.pingpicture.domain.user.repository.UserRepository;
+import com.ping.pingpicture.domain.user.service.UserDomainService;
+import com.ping.pingpicture.domain.user.valueobject.UserRoleEnum;
+import com.ping.pingpicture.infrastructure.common.BaseResponse;
+import com.ping.pingpicture.infrastructure.common.ResultUtils;
 import com.ping.pingpicture.infrastructure.common.UserNameGenerator;
 import com.ping.pingpicture.infrastructure.exception.BusinessException;
 import com.ping.pingpicture.infrastructure.exception.ErrorCode;
-import com.ping.pingpicturebackend.model.dto.user.UserQueryRequest;
-import com.ping.pingpicturebackend.model.entity.User;
-import com.ping.pingpicturebackend.model.enums.UserRoleEnum;
-import com.ping.pingpicturebackend.model.vo.LoginUserVO;
-import com.ping.pingpicturebackend.model.vo.UserVO;
-import com.ping.pingpicturebackend.manager.auth.satoken.DeviceUtils;
-import com.ping.pingpicturebackend.service.UserService;
+import com.ping.pingpicture.infrastructure.exception.ThrowUtils;
 import com.ping.pingpicture.infrastructure.mapper.UserMapper;
+import com.ping.pingpicture.interfaces.dto.user.UserQueryRequest;
+import com.ping.pingpicture.interfaces.vo.user.LoginUserVO;
+import com.ping.pingpicture.interfaces.vo.user.UserVO;
+import com.ping.pingpicturebackend.manager.auth.satoken.DeviceUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.ping.pingpicturebackend.constant.UserConstant.USER_LOGIN_STATE;
+import static com.ping.pingpicture.domain.user.constant.UserConstant.USER_LOGIN_STATE;
 
 /**
  * @author 21877
@@ -38,11 +45,13 @@ import static com.ping.pingpicturebackend.constant.UserConstant.USER_LOGIN_STATE
  */
 @Slf4j
 @Service
-public class UserServiceImpl extends ServiceImpl<UserMapper, User>
-        implements UserService {
+public class UserDomainServiceImpl implements UserDomainService {
 
     @Resource
     private UserNameGenerator userNameGenerator;
+
+    @Resource
+    private UserRepository userRepository;
 
     /**
      * 用户注册
@@ -54,23 +63,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      */
     @Override
     public long userRegister(String userAccount, String userPassword, String checkPassword) {
-        // 1. 校验参数
-        if (StrUtil.hasBlank(userAccount, userPassword, checkPassword)) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
-        }
-        if (userAccount.length() < 4) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户账号过短");
-        }
-        if (userPassword.length() < 8 || checkPassword.length() < 8) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户密码过短");
-        }
-        if (!userPassword.equals(checkPassword)) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "两次输入的密码不一致");
-        }
         // 2. 检查用户账户是否和数据库中已有的重复
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("userAccount", userAccount);
-        long count = this.baseMapper.selectCount(queryWrapper);
+        long count = userRepository.getBaseMapper().selectCount(queryWrapper);
         if (count > 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号重复");
         }
@@ -83,7 +79,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         user.setUserPassword(encryptPassword);
         user.setUserName(uniqueUserName);
         user.setUserRole(UserRoleEnum.USER.getValue());
-        boolean saveResult = this.save(user);
+        boolean saveResult = userRepository.save(user);
         if (!saveResult) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "注册失败，数据库错误");
         }
@@ -117,7 +113,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("userAccount", userAccount);
         queryWrapper.eq("userPassword", encryptPassword);
-        User user = this.baseMapper.selectOne(queryWrapper);
+        User user = userRepository.getBaseMapper().selectOne(queryWrapper);
         // 不存在，抛异常
         if (user == null) {
             // 使用英文存储空间更小
@@ -155,7 +151,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      * @return 脱敏后的用户列表
      */
     @Override
-    public List<UserVO> getUserVoList(List<User> userList) {
+    public List<UserVO> getUserVOList(List<User> userList) {
         if (CollUtil.isEmpty(userList)) {
             return new ArrayList<>();
         }
@@ -192,7 +188,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
         }
         // 2. 从数据库查询（获取最新结果，追求的话性能上一步即可返回）
-        User currentUser = this.getById((String)loginUserId); // 数据库中的最新用户信息
+        User currentUser = userRepository.getById((String) loginUserId); // 数据库中的最新用户信息
         if (currentUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
         }
@@ -262,6 +258,46 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     @Override
     public boolean isAdmin(User loginUser) {
         return loginUser != null && UserRoleEnum.ADMIN.getValue().equals(loginUser.getUserRole());
+    }
+
+    @Override
+    public User getById(long id) {
+        return userRepository.getById(id);
+    }
+
+    @Override
+    public boolean removeById(Long id) {
+        return userRepository.removeById(id);
+    }
+
+    @Override
+    public boolean updateById(User user) {
+        return userRepository.updateById(user);
+    }
+
+    @Override
+    public Page<User> page(Page<User> userPage, QueryWrapper<User> queryWrapper) {
+        return userRepository.page(userPage, queryWrapper);
+    }
+
+    @Override
+    public List<User> listByIds(Set<Long> userIdSet) {
+        return userRepository.listByIds(userIdSet);
+    }
+
+    @Override
+    public long addUser(User user) {
+        final String DEFAULT_PASSWORD = "12345678"; // 默认密码 12345678
+        String encryptPassword = this.getEncryptPassword(DEFAULT_PASSWORD);
+        user.setUserPassword(encryptPassword);
+        boolean result = userRepository.save(user);
+        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        return user.getId();
+    }
+
+    @Override
+    public Boolean saveUser(User userEntity) {
+        return userRepository.save(userEntity);
     }
 }
 

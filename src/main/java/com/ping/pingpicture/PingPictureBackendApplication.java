@@ -7,7 +7,7 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 @SpringBootApplication
-@MapperScan("com.ping.pingpicturebackend.mapper")
+@MapperScan("com.ping.pingpicture.infrastructure.mapper")
 @EnableAspectJAutoProxy(exposeProxy = true)
 @EnableAsync
 public class PingPictureBackendApplication {

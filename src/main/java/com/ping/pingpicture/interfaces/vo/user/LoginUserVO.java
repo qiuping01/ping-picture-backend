@@ -1,33 +1,25 @@
-package com.ping.pingpicturebackend.model.entity;
+package com.ping.pingpicture.interfaces.vo.user;
 
-import com.baomidou.mybatisplus.annotation.*;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
-import lombok.Data;
 
 /**
- * 用户
- * @TableName user
+ * 已登录用户视图（脱敏）
  */
-@TableName(value ="user")
 @Data
-public class User implements Serializable {
+public class LoginUserVO implements Serializable {
+
     /**
      * id
      */
-    @TableId(type = IdType.ASSIGN_ID)
     private Long id;
 
     /**
      * 账号
      */
     private String userAccount;
-
-    /**
-     * 密码
-     */
-    private String userPassword;
 
     /**
      * 用户昵称
@@ -64,13 +56,5 @@ public class User implements Serializable {
      */
     private Date updateTime;
 
-    /**
-     * 是否删除
-     */
-    @TableLogic
-    private Integer isDelete;
-
-    @TableField(exist = false)
     private static final long serialVersionUID = 1L;
-
 }

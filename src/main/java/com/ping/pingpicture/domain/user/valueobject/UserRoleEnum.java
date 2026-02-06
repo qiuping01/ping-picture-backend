@@ -1,10 +1,7 @@
-package com.ping.pingpicturebackend.model.enums;
+package com.ping.pingpicture.domain.user.valueobject;
 
 import cn.hutool.core.util.ObjUtil;
 import lombok.Getter;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * 用户角色枚举

@@ -1,4 +1,4 @@
-package com.ping.pingpicturebackend.constant;
+package com.ping.pingpicture.domain.user.constant;
 
 public interface UserConstant {
 

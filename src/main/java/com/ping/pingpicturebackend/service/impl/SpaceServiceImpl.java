@@ -19,14 +19,14 @@ import com.ping.pingpicturebackend.model.dto.space.SpaceQueryRequest;
 import com.ping.pingpicturebackend.model.entity.Picture;
 import com.ping.pingpicturebackend.model.entity.Space;
 import com.ping.pingpicturebackend.model.entity.SpaceUser;
-import com.ping.pingpicturebackend.model.entity.User;
+import com.ping.pingpicture.domain.user.entity.User;
 import com.ping.pingpicturebackend.model.enums.SpaceLevelEnum;
 import com.ping.pingpicturebackend.model.enums.SpaceRoleEnum;
 import com.ping.pingpicturebackend.model.enums.SpaceTypeEnum;
 import com.ping.pingpicturebackend.model.vo.SpaceVO;
-import com.ping.pingpicturebackend.model.vo.UserVO;
+import com.ping.pingpicture.interfaces.vo.user.UserVO;
 import com.ping.pingpicturebackend.service.SpaceService;
-import com.ping.pingpicturebackend.service.UserService;
+import com.ping.pingpicture.application.service.UserApplicationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -47,7 +47,7 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space>
         implements SpaceService {
 
     @Resource
-    private UserService userService;
+    private UserApplicationService userApplicationService;
 
     @Resource
     private PictureMapper pictureMapper;
@@ -88,7 +88,7 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space>
         // 2. 校验参数
         this.validSpace(space, true);
         // 3. 校验权限，非管理员只能创建普通级别的空间
-        if (SpaceLevelEnum.COMMON.getValue() != spaceAddRequest.getSpaceLevel() && !userService.isAdmin(loginUser)) {
+        if (SpaceLevelEnum.COMMON.getValue() != spaceAddRequest.getSpaceLevel() && !userApplicationService.isAdmin(loginUser)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "无权限创建高级别空间");
         }
         // 4. 控制同一用户只能创建一个同一类型的空间
@@ -204,8 +204,8 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space>
         // 关联查询用户信息
         Long userId = space.getUserId();
         if (userId != null && userId > 0) {
-            User user = userService.getById(userId);
-            UserVO userVO = userService.getUserVO(user);
+            User user = userApplicationService.getById(userId);
+            UserVO userVO = userApplicationService.getUserVO(user);
             spaceVO.setUser(userVO);
         }
         return spaceVO;
@@ -236,7 +236,7 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space>
                 .filter(Objects::nonNull)  // 过滤null值
                 .collect(Collectors.toSet());
         // 3. 批量查询用户
-        Map<Long, List<User>> userIdUserListMap = userService.listByIds(userIdSet)
+        Map<Long, List<User>> userIdUserListMap = userApplicationService.listByIds(userIdSet)
                 .stream()
                 .collect(Collectors.groupingBy(User::getId));
         // 4. 填充用户信息
@@ -246,7 +246,7 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space>
             if (userIdUserListMap.containsKey(userId)) {
                 user = userIdUserListMap.get(userId).get(0);
             }
-            spaceVO.setUser(userService.getUserVO(user));
+            spaceVO.setUser(userApplicationService.getUserVO(user));
         });
         spaceVOPage.setRecords(spaceVOList);
         return spaceVOPage;
@@ -339,7 +339,7 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space>
     @Override
     public void checkSpaceAuth(Space oldSpace, User loginUser) {
         // 仅本人或管理员可访问
-        if (!oldSpace.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
+        if (!oldSpace.getUserId().equals(loginUser.getId()) && !userApplicationService.isAdmin(loginUser)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
     }

@@ -8,7 +8,7 @@ import com.ping.pingpicturebackend.model.dto.space.SpaceAddRequest;
 import com.ping.pingpicturebackend.model.dto.space.SpaceEditRequest;
 import com.ping.pingpicturebackend.model.dto.space.SpaceQueryRequest;
 import com.ping.pingpicturebackend.model.entity.Space;
-import com.ping.pingpicturebackend.model.entity.User;
+import com.ping.pingpicture.domain.user.entity.User;
 import com.ping.pingpicturebackend.model.vo.SpaceVO;
 
 /**

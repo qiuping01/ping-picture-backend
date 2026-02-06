@@ -1,7 +1,7 @@
 package com.ping.pingpicturebackend.manager.websocket.disruptor;
 
 import com.ping.pingpicturebackend.manager.websocket.model.PictureEditRequestMessage;
-import com.ping.pingpicturebackend.model.entity.User;
+import com.ping.pingpicture.domain.user.entity.User;
 import lombok.Data;
 import org.springframework.web.socket.WebSocketSession;
 

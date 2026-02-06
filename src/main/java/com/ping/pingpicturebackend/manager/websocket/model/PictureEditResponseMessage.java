@@ -1,6 +1,6 @@
 package com.ping.pingpicturebackend.manager.websocket.model;
 
-import com.ping.pingpicturebackend.model.vo.UserVO;
+import com.ping.pingpicture.interfaces.vo.user.UserVO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

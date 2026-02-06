@@ -12,10 +12,10 @@ import com.ping.pingpicturebackend.model.dto.spaceuser.SpaceUserAddRequest;
 import com.ping.pingpicturebackend.model.dto.spaceuser.SpaceUserEditRequest;
 import com.ping.pingpicturebackend.model.dto.spaceuser.SpaceUserQueryRequest;
 import com.ping.pingpicturebackend.model.entity.SpaceUser;
-import com.ping.pingpicturebackend.model.entity.User;
+import com.ping.pingpicture.domain.user.entity.User;
 import com.ping.pingpicturebackend.model.vo.SpaceUserVO;
 import com.ping.pingpicturebackend.service.SpaceUserService;
-import com.ping.pingpicturebackend.service.UserService;
+import com.ping.pingpicture.application.service.UserApplicationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,7 +35,7 @@ public class SpaceUserController {
     private SpaceUserService spaceUserService;
 
     @Resource
-    private UserService userService;
+    private UserApplicationService userApplicationService;
 
     /**
      * 添加成员到空间
@@ -101,7 +101,7 @@ public class SpaceUserController {
      */
     @PostMapping("/list/my")
     public BaseResponse<List<SpaceUserVO>> listMyTeamSpace(HttpServletRequest request) {
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         SpaceUserQueryRequest spaceUserQueryRequest = new SpaceUserQueryRequest();
         spaceUserQueryRequest.setUserId(loginUser.getId());
         List<SpaceUser> spaceUserList = spaceUserService.list(spaceUserService.getQueryWrapper(spaceUserQueryRequest));

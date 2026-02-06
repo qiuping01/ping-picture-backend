@@ -6,8 +6,8 @@ import com.ping.pingpicturebackend.manager.websocket.PictureEditHandler;
 import com.ping.pingpicturebackend.manager.websocket.model.PictureEditMessageTypeEnum;
 import com.ping.pingpicturebackend.manager.websocket.model.PictureEditRequestMessage;
 import com.ping.pingpicturebackend.manager.websocket.model.PictureEditResponseMessage;
-import com.ping.pingpicturebackend.model.entity.User;
-import com.ping.pingpicturebackend.service.UserService;
+import com.ping.pingpicture.domain.user.entity.User;
+import com.ping.pingpicture.application.service.UserApplicationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -30,7 +30,7 @@ public class PictureEditEventWorkHandler implements WorkHandler<PictureEditEvent
     private PictureEditHandler pictureEditHandler;
 
     @Resource
-    private UserService userService;
+    private UserApplicationService userApplicationService;
 
     /**
      * 将不同类型的消息分发到对应的处理器中
@@ -63,7 +63,7 @@ public class PictureEditEventWorkHandler implements WorkHandler<PictureEditEvent
                 PictureEditResponseMessage responseMessage = new PictureEditResponseMessage();
                 responseMessage.setType(PictureEditMessageTypeEnum.ERROR.getValue());
                 responseMessage.setMessage("无效的消息类型");
-                responseMessage.setUser(userService.getUserVO(user));
+                responseMessage.setUser(userApplicationService.getUserVO(user));
                 // 考虑到只是通知错误信息不考虑补全精度
                 session.sendMessage(new TextMessage(JSONUtil.toJsonStr(responseMessage)));
         }

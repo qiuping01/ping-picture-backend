@@ -1,4 +1,4 @@
-package com.ping.pingpicturebackend.model.dto.user;
+package com.ping.pingpicture.interfaces.dto.user;
 
 import com.ping.pingpicture.infrastructure.common.PageRequest;
 import lombok.Data;

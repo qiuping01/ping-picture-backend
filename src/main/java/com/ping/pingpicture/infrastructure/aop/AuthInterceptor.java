@@ -3,9 +3,9 @@ package com.ping.pingpicture.infrastructure.aop;
 import com.ping.pingpicture.infrastructure.annotation.AuthCheck;
 import com.ping.pingpicture.infrastructure.exception.BusinessException;
 import com.ping.pingpicture.infrastructure.exception.ErrorCode;
-import com.ping.pingpicturebackend.model.entity.User;
-import com.ping.pingpicturebackend.model.enums.UserRoleEnum;
-import com.ping.pingpicturebackend.service.UserService;
+import com.ping.pingpicture.domain.user.entity.User;
+import com.ping.pingpicture.domain.user.valueobject.UserRoleEnum;
+import com.ping.pingpicture.application.service.UserApplicationService;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.springframework.web.context.request.RequestAttributes;
@@ -21,7 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 public class AuthInterceptor {
 
     @Resource
-    private UserService userService;
+    private UserApplicationService userApplicationService;
 
     /**
      * 执行拦截
@@ -41,7 +41,7 @@ public class AuthInterceptor {
         // 3. 获取当前用户登录的信息
         RequestAttributes requestAttributes = RequestContextHolder.currentRequestAttributes();
         HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         // 4. 判断是否需要对应的权限,如果不需要权限，放行
         if (mustRoleEnum == null){
             return joinPoint.proceed();

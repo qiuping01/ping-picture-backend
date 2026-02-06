@@ -3,7 +3,7 @@ package com.ping.pingpicturebackend.controller;
 import cn.dev33.satoken.annotation.SaCheckRole;
 import com.ping.pingpicture.infrastructure.common.BaseResponse;
 import com.ping.pingpicture.infrastructure.common.ResultUtils;
-import com.ping.pingpicturebackend.constant.UserConstant;
+import com.ping.pingpicture.domain.user.constant.UserConstant;
 import com.ping.pingpicture.infrastructure.exception.BusinessException;
 import com.ping.pingpicture.infrastructure.exception.ErrorCode;
 import com.ping.pingpicture.infrastructure.api.CosManager;
