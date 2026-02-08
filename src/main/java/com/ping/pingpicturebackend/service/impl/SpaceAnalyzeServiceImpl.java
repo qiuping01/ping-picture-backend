@@ -286,7 +286,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
     public List<Space> getSpaceRank(SpaceRankAnalyzeRequest spaceRankAnalyzeRequest, User loginUser) {
         ThrowUtils.throwIf(spaceRankAnalyzeRequest == null, ErrorCode.PARAMS_ERROR);
         // 1. 校验权限 - 仅管理员可访问
-        if (!userApplicationService.isAdmin(loginUser)) {
+        if (!loginUser.isAdmin()) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "无权限访问");
         }
         // 2. 构造查询条件
@@ -338,7 +338,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
         boolean queryAll = spaceAnalyzeRequest.isQueryAll();
         // 全空间分析或者公共图库权限校验：仅管理员可访问
         if (queryAll || queryPublic) {
-            ThrowUtils.throwIf(!userApplicationService.isAdmin(loginUser), ErrorCode.NO_AUTH_ERROR, "无权限访问");
+            ThrowUtils.throwIf(!loginUser.isAdmin(), ErrorCode.NO_AUTH_ERROR, "无权限访问");
         } else {
             // 指定空间分析权限校验：仅空间管理员可访问
             ThrowUtils.throwIf((spaceId == null || spaceId <= 0), ErrorCode.PARAMS_ERROR);

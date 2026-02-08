@@ -145,7 +145,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
             Picture oldPicture = this.getById(pictureId);
             ThrowUtils.throwIf(oldPicture == null, ErrorCode.PARAMS_ERROR, "图片不存在");
             // 仅本人或管理员可编辑
-            if (!oldPicture.getUserId().equals(loginUser.getId()) && !userApplicationService.isAdmin(loginUser)) {
+            if (!oldPicture.getUserId().equals(loginUser.getId()) && !loginUser.isAdmin()) {
                 throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
             }
             // 异步清理图片
@@ -310,7 +310,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         // 关联查询用户信息
         Long userId = picture.getUserId();
         if (userId != null && userId > 0) {
-            User user = userApplicationService.getById(userId);
+            User user = userApplicationService.getUserById(userId);
             UserVO userVO = userApplicationService.getUserVO(user);
             pictureVO.setUser(userVO);
         }
@@ -403,7 +403,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
     @Override
     public void fillReviewParams(Picture picture, User loginUser) {
         // 管理员自动过审
-        if (userApplicationService.isAdmin(loginUser)) {
+        if (loginUser.isAdmin()) {
             picture.setReviewStatus(PictureReviewStatusEnum.PASS.getValue());
             picture.setReviewerId(loginUser.getId());
             picture.setReviewMessage("管理员自动过审");
@@ -538,7 +538,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         Long spaceId = picture.getSpaceId();
         if (spaceId == null) {
             // 公共图库仅本人和管理员能操作
-            if (!picture.getUserId().equals(loginUser.getId()) && userApplicationService.isAdmin(loginUser)) {
+            if (!picture.getUserId().equals(loginUser.getId()) && loginUser.isAdmin()) {
                 throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "没有权限");
             }
         } else {
