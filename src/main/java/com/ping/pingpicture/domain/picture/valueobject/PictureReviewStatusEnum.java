@@ -1,4 +1,4 @@
-package com.ping.pingpicturebackend.model.enums;
+package com.ping.pingpicture.domain.picture.valueobject;
 
 import cn.hutool.core.util.ObjUtil;
 import lombok.Getter;

@@ -21,16 +21,16 @@ import com.ping.pingpicture.domain.user.constant.UserConstant;
 import com.ping.pingpicture.infrastructure.exception.BusinessException;
 import com.ping.pingpicture.infrastructure.exception.ErrorCode;
 import com.ping.pingpicture.infrastructure.exception.ThrowUtils;
+import com.ping.pingpicture.interfaces.dto.picture.*;
 import com.ping.pingpicturebackend.manager.auth.SpaceUserAuthManager;
 import com.ping.pingpicturebackend.manager.auth.model.SpaceUserPermissionConstant;
-import com.ping.pingpicturebackend.model.dto.picture.*;
-import com.ping.pingpicturebackend.model.entity.Picture;
+import com.ping.pingpicture.domain.picture.entity.Picture;
 import com.ping.pingpicturebackend.model.entity.Space;
 import com.ping.pingpicture.domain.user.entity.User;
-import com.ping.pingpicturebackend.model.enums.PictureReviewStatusEnum;
-import com.ping.pingpicturebackend.model.vo.PictureTagCategory;
-import com.ping.pingpicturebackend.model.vo.PictureVO;
-import com.ping.pingpicturebackend.service.PictureService;
+import com.ping.pingpicture.domain.picture.valueobject.PictureReviewStatusEnum;
+import com.ping.pingpicture.interfaces.vo.picture.PictureTagCategory;
+import com.ping.pingpicture.interfaces.vo.picture.PictureVO;
+import com.ping.pingpicture.domain.picture.service.PictureDomainService;
 import com.ping.pingpicturebackend.service.SpaceService;
 import com.ping.pingpicture.application.service.UserApplicationService;
 import lombok.extern.slf4j.Slf4j;
@@ -57,7 +57,7 @@ import java.util.concurrent.TimeUnit;
 public class PictureController {
 
     @Resource
-    private PictureService pictureService;
+    private PictureDomainService pictureApplicationService;
 
     @Resource
     private UserApplicationService userApplicationService;
@@ -96,7 +96,7 @@ public class PictureController {
                                                  HttpServletRequest request) {
         ThrowUtils.throwIf(request == null, ErrorCode.PARAMS_ERROR);
         User loginUser = userApplicationService.getLoginUser(request);
-        PictureVO pictureVO = pictureService.uploadPicture(multipartFile, pictureUploadRequest, loginUser);
+        PictureVO pictureVO = pictureApplicationService.uploadPicture(multipartFile, pictureUploadRequest, loginUser);
         return ResultUtils.success(pictureVO);
     }
 
@@ -110,7 +110,7 @@ public class PictureController {
         ThrowUtils.throwIf(request == null, ErrorCode.PARAMS_ERROR);
         User loginUser = userApplicationService.getLoginUser(request);
         String fileUrl = pictureUploadRequest.getFileUrl();
-        PictureVO pictureVO = pictureService.uploadPicture(fileUrl, pictureUploadRequest, loginUser);
+        PictureVO pictureVO = pictureApplicationService.uploadPicture(fileUrl, pictureUploadRequest, loginUser);
         return ResultUtils.success(pictureVO);
     }
 
@@ -125,7 +125,7 @@ public class PictureController {
         }
         User loginUser = userApplicationService.getLoginUser(request);
         Long picId = deleteRequest.getId();
-        pictureService.deletePicture(picId, loginUser);
+        pictureApplicationService.deletePicture(picId, loginUser);
         return ResultUtils.success(true);
     }
 
@@ -140,7 +140,7 @@ public class PictureController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         // 判断图片是否存在
-        Picture oldPicture = pictureService.getById(pictureUpdateRequest.getId());
+        Picture oldPicture = pictureApplicationService.getById(pictureUpdateRequest.getId());
         ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR, "图片不存在");
         // 将实体类和 DTO 进行转换
         Picture picture = new Picture();
@@ -148,12 +148,12 @@ public class PictureController {
         // tag 类型转换
         picture.setTags(JSONUtil.toJsonStr(pictureUpdateRequest.getTags()));
         // 图片校验
-        pictureService.validPicture(picture);
+        pictureApplicationService.validPicture(picture);
         // 补充审核参数
         User loginUser = userApplicationService.getLoginUser(request);
-        pictureService.fillReviewParams(picture, loginUser);
+        pictureApplicationService.fillReviewParams(picture, loginUser);
         // 更新图片
-        boolean result = pictureService.updateById(picture);
+        boolean result = pictureApplicationService.updateById(picture);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "更新失败");
         return ResultUtils.success(true);
     }
@@ -165,7 +165,7 @@ public class PictureController {
     @SaCheckRole(UserConstant.ADMIN_ROLE)
     public BaseResponse<Picture> getPictureById(@RequestParam Long id) {
         ThrowUtils.throwIf(id <= 0, ErrorCode.PARAMS_ERROR);
-        Picture picture = pictureService.getById(id);
+        Picture picture = pictureApplicationService.getById(id);
         ThrowUtils.throwIf(picture == null, ErrorCode.NOT_FOUND_ERROR, "图片不存在");
         return ResultUtils.success(picture);
     }
@@ -176,7 +176,7 @@ public class PictureController {
     @GetMapping("/get/vo")
     public BaseResponse<PictureVO> getPictureVOById(@RequestParam Long id, HttpServletRequest request) {
         ThrowUtils.throwIf(id <= 0, ErrorCode.PARAMS_ERROR);
-        Picture picture = pictureService.getById(id);
+        Picture picture = pictureApplicationService.getById(id);
         ThrowUtils.throwIf(picture == null, ErrorCode.NOT_FOUND_ERROR, "图片不存在");
         Space space = null;
         if (picture.getSpaceId() != null) {
@@ -192,7 +192,7 @@ public class PictureController {
         // 获取权限列表
         User loginUser = userApplicationService.getLoginUser(request);
         List<String> permissionList = spaceUserAuthManager.getPermissionList(space, loginUser);
-        PictureVO pictureVO = pictureService.getPictureVO(picture);
+        PictureVO pictureVO = pictureApplicationService.getPictureVO(picture);
         pictureVO.setPermissionList(permissionList);
         return ResultUtils.success(pictureVO);
     }
@@ -206,8 +206,8 @@ public class PictureController {
         ThrowUtils.throwIf(pictureQueryRequest == null, ErrorCode.PARAMS_ERROR);
         long current = pictureQueryRequest.getCurrent();
         long size = pictureQueryRequest.getPageSize();
-        Page<Picture> picturePage = pictureService.page(
-                new Page<>(current, size), pictureService.getQueryWrapper(pictureQueryRequest));
+        Page<Picture> picturePage = pictureApplicationService.page(
+                new Page<>(current, size), pictureApplicationService.getQueryWrapper(pictureQueryRequest));
         return ResultUtils.success(picturePage);
     }
 
@@ -245,9 +245,9 @@ public class PictureController {
 //            }
         }
         // 查数据库
-        Page<Picture> picturePage = pictureService.page(
-                new Page<>(current, size), pictureService.getQueryWrapper(pictureQueryRequest));
-        Page<PictureVO> pictureVOPage = pictureService.getPictureVOPage(picturePage);
+        Page<Picture> picturePage = pictureApplicationService.page(
+                new Page<>(current, size), pictureApplicationService.getQueryWrapper(pictureQueryRequest));
+        Page<PictureVO> pictureVOPage = pictureApplicationService.getPictureVOPage(picturePage);
         return ResultUtils.success(pictureVOPage);
     }
 
@@ -284,9 +284,9 @@ public class PictureController {
             return ResultUtils.success(cachedPage);
         }
         // 3. 都未命中，查数据库
-        Page<Picture> picturePage = pictureService.page(
-                new Page<>(current, size), pictureService.getQueryWrapper(pictureQueryRequest));
-        Page<PictureVO> pictureVOPage = pictureService.getPictureVOPage(picturePage);
+        Page<Picture> picturePage = pictureApplicationService.page(
+                new Page<>(current, size), pictureApplicationService.getQueryWrapper(pictureQueryRequest));
+        Page<PictureVO> pictureVOPage = pictureApplicationService.getPictureVOPage(picturePage);
         // 4. 更新缓存
         String cacheValue = JSONUtil.toJsonStr(pictureVOPage);
         // 更新本地缓存
@@ -307,7 +307,7 @@ public class PictureController {
         ThrowUtils.throwIf(pictureEditRequest == null || pictureEditRequest.getId() <= 0,
                 ErrorCode.PARAMS_ERROR);
         User loginUser = userApplicationService.getLoginUser(request);
-        pictureService.editPicture(pictureEditRequest, loginUser);
+        pictureApplicationService.editPicture(pictureEditRequest, loginUser);
         return ResultUtils.success(true);
     }
 
@@ -333,7 +333,7 @@ public class PictureController {
                                                  HttpServletRequest request) {
         ThrowUtils.throwIf(pictureReviewRequest == null, ErrorCode.PARAMS_ERROR);
         User loginUser = userApplicationService.getLoginUser(request);
-        pictureService.doPictureReview(pictureReviewRequest, loginUser);
+        pictureApplicationService.doPictureReview(pictureReviewRequest, loginUser);
         return ResultUtils.success(true);
     }
 
@@ -346,7 +346,7 @@ public class PictureController {
                                                    HttpServletRequest request) {
         ThrowUtils.throwIf(pictureUploadByBatchRequest == null, ErrorCode.PARAMS_ERROR);
         User loginUser = userApplicationService.getLoginUser(request);
-        int uploadByBatchCount = pictureService.uploadPictureByBatch(pictureUploadByBatchRequest, loginUser);
+        int uploadByBatchCount = pictureApplicationService.uploadPictureByBatch(pictureUploadByBatchRequest, loginUser);
         return ResultUtils.success(uploadByBatchCount);
     }
 
@@ -358,7 +358,7 @@ public class PictureController {
         ThrowUtils.throwIf(searchPictureByPictureRequest == null, ErrorCode.PARAMS_ERROR);
         Long pictureId = searchPictureByPictureRequest.getPictureId();
         ThrowUtils.throwIf(pictureId == null || pictureId <= 0, ErrorCode.PARAMS_ERROR);
-        Picture oldPicture = pictureService.getById(pictureId);
+        Picture oldPicture = pictureApplicationService.getById(pictureId);
         ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR);
         List<SoImageSearchResult> resultList = new ArrayList<>();
         // 这个 start 是控制查询多少页, 每页是 20 条
@@ -389,7 +389,7 @@ public class PictureController {
         String picColor = searchPictureByColorRequest.getPicColor();
         Long spaceId = searchPictureByColorRequest.getSpaceId();
         User loginUser = userApplicationService.getLoginUser(request);
-        List<PictureVO> pictureVOList = pictureService.searchPictureByColor(picColor, spaceId, loginUser);
+        List<PictureVO> pictureVOList = pictureApplicationService.searchPictureByColor(picColor, spaceId, loginUser);
         return ResultUtils.success(pictureVOList);
     }
 
@@ -402,7 +402,7 @@ public class PictureController {
                                                     HttpServletRequest request) {
         ThrowUtils.throwIf(pictureEditByBatchRequest == null, ErrorCode.PARAMS_ERROR);
         User loginUser = userApplicationService.getLoginUser(request);
-        pictureService.editPictureByBatch(pictureEditByBatchRequest, loginUser);
+        pictureApplicationService.editPictureByBatch(pictureEditByBatchRequest, loginUser);
         return ResultUtils.success(true);
     }
 
@@ -417,7 +417,7 @@ public class PictureController {
         }
         User loginUser = userApplicationService.getLoginUser(request);
         CreateOutPaintingTaskResponse response =
-                pictureService.createPictureOutPaintingTask(createPictureOutPaintingTaskRequest, loginUser);
+                pictureApplicationService.createPictureOutPaintingTask(createPictureOutPaintingTaskRequest, loginUser);
         return ResultUtils.success(response);
     }
 

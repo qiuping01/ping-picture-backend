@@ -16,13 +16,13 @@ import com.ping.pingpicture.infrastructure.exception.ErrorCode;
 import com.ping.pingpicturebackend.manager.auth.SpaceUserAuthContext;
 import com.ping.pingpicturebackend.manager.auth.SpaceUserAuthManager;
 import com.ping.pingpicturebackend.manager.auth.model.SpaceUserPermissionConstant;
-import com.ping.pingpicturebackend.model.entity.Picture;
+import com.ping.pingpicture.domain.picture.entity.Picture;
 import com.ping.pingpicturebackend.model.entity.Space;
 import com.ping.pingpicturebackend.model.entity.SpaceUser;
 import com.ping.pingpicture.domain.user.entity.User;
 import com.ping.pingpicturebackend.model.enums.SpaceRoleEnum;
 import com.ping.pingpicturebackend.model.enums.SpaceTypeEnum;
-import com.ping.pingpicturebackend.service.PictureService;
+import com.ping.pingpicture.domain.picture.service.PictureDomainService;
 import com.ping.pingpicturebackend.service.SpaceService;
 import com.ping.pingpicturebackend.service.SpaceUserService;
 import com.ping.pingpicture.application.service.UserApplicationService;
@@ -45,7 +45,7 @@ public class StpInterfaceImpl implements StpInterface {
     private SpaceUserService spaceUserService;
 
     @Resource
-    private PictureService pictureService;
+    private PictureDomainService pictureApplicationService;
 
     @Resource
     private UserApplicationService userApplicationService;
@@ -109,7 +109,7 @@ public class StpInterfaceImpl implements StpInterface {
                 return ADMIN_PERMISSIONS;
             }
             // 通过 pictureId 获取 space 对象
-            Picture picture = pictureService.lambdaQuery()
+            Picture picture = pictureApplicationService.lambdaQuery()
                     .eq(Picture::getId, pictureId)
                     .select(Picture::getSpaceId, Picture::getUserId, Picture::getId) // 减轻查库压力
                     .one();

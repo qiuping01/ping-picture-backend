@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ping.pingpicture.infrastructure.mapper.PictureMapper">
 
-    <resultMap id="BaseResultMap" type="com.ping.pingpicturebackend.model.entity.Picture">
+    <resultMap id="BaseResultMap" type="com.ping.pingpicture.domain.picture.entity.Picture">
             <id property="id" column="id" />
             <result property="url" column="url" />
             <result property="thumbnailUrl" column="thumbnailUrl" />

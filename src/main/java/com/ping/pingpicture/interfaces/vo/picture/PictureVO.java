@@ -1,8 +1,8 @@
-package com.ping.pingpicturebackend.model.vo;
+package com.ping.pingpicture.interfaces.vo.picture;
 
 import cn.hutool.json.JSONUtil;
 import com.ping.pingpicture.interfaces.vo.user.UserVO;
-import com.ping.pingpicturebackend.model.entity.Picture;
+import com.ping.pingpicture.domain.picture.entity.Picture;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
 

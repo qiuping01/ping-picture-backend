@@ -1,4 +1,4 @@
-package com.ping.pingpicturebackend.model.dto.picture;
+package com.ping.pingpicture.interfaces.dto.picture;
 
 import lombok.Data;
 
@@ -6,10 +6,10 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * 图片编辑请求体
+ * 图片更新请求体
  */
 @Data
-public class PictureEditRequest implements Serializable {
+public class PictureUpdateRequest implements Serializable {
 
     /**
      * id

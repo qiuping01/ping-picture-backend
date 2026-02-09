@@ -1,4 +1,4 @@
-package com.ping.pingpicturebackend.model.vo;
+package com.ping.pingpicture.interfaces.vo.picture;
 
 import lombok.Data;
 

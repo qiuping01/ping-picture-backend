@@ -10,11 +10,11 @@ import com.ping.pingpicture.infrastructure.exception.ErrorCode;
 import com.ping.pingpicture.infrastructure.exception.ThrowUtils;
 import com.ping.pingpicture.infrastructure.mapper.SpaceMapper;
 import com.ping.pingpicturebackend.model.dto.space.analyze.*;
-import com.ping.pingpicturebackend.model.entity.Picture;
+import com.ping.pingpicture.domain.picture.entity.Picture;
 import com.ping.pingpicturebackend.model.entity.Space;
 import com.ping.pingpicture.domain.user.entity.User;
 import com.ping.pingpicturebackend.model.vo.space.analyze.*;
-import com.ping.pingpicturebackend.service.PictureService;
+import com.ping.pingpicture.domain.picture.service.PictureDomainService;
 import com.ping.pingpicturebackend.service.SpaceAnalyzeService;
 import com.ping.pingpicturebackend.service.SpaceService;
 import com.ping.pingpicture.application.service.UserApplicationService;
@@ -40,7 +40,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
     private SpaceService spaceService;
 
     @Resource
-    private PictureService pictureService;
+    private PictureDomainService pictureApplicationService;
 
     /**
      * 获取空间使用分析数据
@@ -65,7 +65,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
             // 补充查询范围
             fillAnalyzeQueryWrapper(spaceUsageAnalyzeRequest, queryWrapper);
             // 直接返回 Object 对象提高性能
-            List<Object> pictureObjList = pictureService.getBaseMapper().selectObjs(queryWrapper);
+            List<Object> pictureObjList = pictureApplicationService.getBaseMapper().selectObjs(queryWrapper);
             long usedSize = pictureObjList.stream()
                     .mapToLong(obj -> obj instanceof Long ? (Long) obj : 0)
                     .sum();
@@ -126,7 +126,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
                         "sum(picSize) as totalSize")
                 .groupBy("category");
         // 4. 查询并转换结果
-        return pictureService.getBaseMapper().selectMaps(queryWrapper)
+        return pictureApplicationService.getBaseMapper().selectMaps(queryWrapper)
                 .stream()
                 .map(result -> {
                     String category = result.get("category") != null ? result.get("category").toString() : "未分类";
@@ -160,7 +160,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
         fillAnalyzeQueryWrapper(spaceTagAnalyzeRequest, queryWrapper);
         // 4. 查询所有符合条件的结果 - 标签
         queryWrapper.select("tags");
-        List<String> tagsJsonList = pictureService.getBaseMapper().selectObjs(queryWrapper)
+        List<String> tagsJsonList = pictureApplicationService.getBaseMapper().selectObjs(queryWrapper)
                 .stream()
                 .filter(ObjUtil::isNotNull)
                 .map(Object::toString)
@@ -198,7 +198,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
         fillAnalyzeQueryWrapper(spaceSizeAnalyzeRequest, queryWrapper);
         // 4. 查询所有符合条件的结果 - 图片大小
         queryWrapper.select("picSize");
-        List<Long> picSizeList = pictureService.getBaseMapper().selectObjs(queryWrapper)
+        List<Long> picSizeList = pictureApplicationService.getBaseMapper().selectObjs(queryWrapper)
                 .stream()
                 .filter(ObjUtil::isNotNull)
                 .map(size -> ((Number) size).longValue())
@@ -265,7 +265,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
         }
         // 6. 按时间维度分组统计上传数量
         queryWrapper.groupBy("period").orderByAsc("period");
-        List<Map<String, Object>> queryResult = pictureService.getBaseMapper().selectMaps(queryWrapper);
+        List<Map<String, Object>> queryResult = pictureApplicationService.getBaseMapper().selectMaps(queryWrapper);
         return queryResult.stream()
                 .map(result -> {
                     String period = result.get("period").toString();

@@ -4,11 +4,11 @@ import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import com.ping.pingpicturebackend.manager.auth.SpaceUserAuthManager;
 import com.ping.pingpicturebackend.manager.auth.model.SpaceUserPermissionConstant;
-import com.ping.pingpicturebackend.model.entity.Picture;
+import com.ping.pingpicture.domain.picture.entity.Picture;
 import com.ping.pingpicturebackend.model.entity.Space;
 import com.ping.pingpicture.domain.user.entity.User;
 import com.ping.pingpicturebackend.model.enums.SpaceTypeEnum;
-import com.ping.pingpicturebackend.service.PictureService;
+import com.ping.pingpicture.domain.picture.service.PictureDomainService;
 import com.ping.pingpicturebackend.service.SpaceService;
 import com.ping.pingpicture.application.service.UserApplicationService;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +36,7 @@ public class WsHandshakeInterceptor implements HandshakeInterceptor {
     private UserApplicationService userApplicationService;
 
     @Resource
-    private PictureService pictureService;
+    private PictureDomainService pictureApplicationService;
 
     @Resource
     private SpaceService spaceService;
@@ -73,7 +73,7 @@ public class WsHandshakeInterceptor implements HandshakeInterceptor {
             return false;
         }
         // 3. 校验用户是否有该图片的权限
-        Picture picture = pictureService.getById(pictureId);
+        Picture picture = pictureApplicationService.getById(pictureId);
         if (ObjUtil.isEmpty(picture)) {
             log.error("WebSocket 连接失败，图片不存在，拒绝握手");
             return false;

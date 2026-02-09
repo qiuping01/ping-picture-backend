@@ -1,6 +1,6 @@
 package com.ping.pingpicturebackend.manager.auth;
 
-import com.ping.pingpicturebackend.model.entity.Picture;
+import com.ping.pingpicture.domain.picture.entity.Picture;
 import com.ping.pingpicturebackend.model.entity.Space;
 import com.ping.pingpicturebackend.model.entity.SpaceUser;
 import lombok.Data;

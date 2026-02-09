@@ -1,4 +1,4 @@
-package com.ping.pingpicturebackend.model.dto.picture;
+package com.ping.pingpicture.interfaces.dto.picture;
 
 import lombok.Data;
 

@@ -1,4 +1,4 @@
-package com.ping.pingpicturebackend.model.entity;
+package com.ping.pingpicture.domain.picture.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
 

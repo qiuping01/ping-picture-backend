@@ -1,4 +1,4 @@
-package com.ping.pingpicturebackend.service.impl;
+package com.ping.pingpicture.domain.picture.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.net.url.UrlBuilder;
@@ -8,6 +8,7 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ping.pingpicture.domain.picture.service.PictureDomainService;
 import com.ping.pingpicture.infrastructure.api.aliyunai.AliYunAiApi;
 import com.ping.pingpicture.infrastructure.api.aliyunai.model.CreateOutPaintingTaskRequest;
 import com.ping.pingpicture.infrastructure.api.aliyunai.model.CreateOutPaintingTaskResponse;
@@ -15,19 +16,18 @@ import com.ping.pingpicture.infrastructure.exception.BusinessException;
 import com.ping.pingpicture.infrastructure.exception.ErrorCode;
 import com.ping.pingpicture.infrastructure.exception.ThrowUtils;
 import com.ping.pingpicture.infrastructure.api.CosManager;
+import com.ping.pingpicture.interfaces.dto.picture.*;
 import com.ping.pingpicturebackend.manager.upload.FilePictureUpload;
 import com.ping.pingpicturebackend.manager.upload.PictureUploadTemplate;
 import com.ping.pingpicturebackend.manager.upload.URLPictureUpload;
 import com.ping.pingpicture.infrastructure.mapper.PictureMapper;
 import com.ping.pingpicturebackend.model.dto.file.UploadPictureResult;
-import com.ping.pingpicturebackend.model.dto.picture.*;
-import com.ping.pingpicturebackend.model.entity.Picture;
+import com.ping.pingpicture.domain.picture.entity.Picture;
 import com.ping.pingpicturebackend.model.entity.Space;
 import com.ping.pingpicture.domain.user.entity.User;
-import com.ping.pingpicturebackend.model.enums.PictureReviewStatusEnum;
-import com.ping.pingpicturebackend.model.vo.PictureVO;
+import com.ping.pingpicture.domain.picture.valueobject.PictureReviewStatusEnum;
+import com.ping.pingpicture.interfaces.vo.picture.PictureVO;
 import com.ping.pingpicture.interfaces.vo.user.UserVO;
-import com.ping.pingpicturebackend.service.PictureService;
 import com.ping.pingpicturebackend.service.SpaceService;
 import com.ping.pingpicture.application.service.UserApplicationService;
 import com.ping.pingpicture.infrastructure.utils.ColorSimilarUtils;
@@ -58,8 +58,8 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
-        implements PictureService {
+public class PictureDomainServiceImpl extends ServiceImpl<PictureMapper, Picture>
+        implements PictureDomainService {
 
     @Resource
     private UserApplicationService userApplicationService;

@@ -1,13 +1,13 @@
-package com.ping.pingpicturebackend.service;
+package com.ping.pingpicture.application.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.ping.pingpicture.infrastructure.api.aliyunai.model.CreateOutPaintingTaskResponse;
-import com.ping.pingpicturebackend.model.dto.picture.*;
-import com.ping.pingpicturebackend.model.entity.Picture;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.ping.pingpicture.domain.picture.entity.Picture;
 import com.ping.pingpicture.domain.user.entity.User;
-import com.ping.pingpicturebackend.model.vo.PictureVO;
+import com.ping.pingpicture.infrastructure.api.aliyunai.model.CreateOutPaintingTaskResponse;
+import com.ping.pingpicture.interfaces.dto.picture.*;
+import com.ping.pingpicture.interfaces.vo.picture.PictureVO;
 
 import java.util.List;
 
@@ -16,7 +16,7 @@ import java.util.List;
  * @description 针对表【picture(图片)】的数据库操作Service
  * @createDate 2025-12-21 21:52:25
  */
-public interface PictureService extends IService<Picture> {
+public interface PictureApplicationService extends IService<Picture> {
 
     /**
      * 验证图片
