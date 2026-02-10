@@ -1,10 +1,14 @@
 package com.ping.pingpicture.domain.picture.entity;
 
+import cn.hutool.core.util.ObjUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.annotation.*;
 
 import java.io.Serializable;
 import java.util.Date;
 
+import com.ping.pingpicture.infrastructure.exception.ErrorCode;
+import com.ping.pingpicture.infrastructure.exception.ThrowUtils;
 import lombok.Data;
 
 /**
@@ -140,4 +144,23 @@ public class Picture implements Serializable {
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
+
+    /**
+     * 验证图片
+     */
+    public void validPicture() {
+        // 校验图片信息
+        Long id = this.getId();
+        String url = this.getUrl();
+        String introduction = this.getIntroduction();
+        // 修改数据时，id 不能为空
+        ThrowUtils.throwIf((ObjUtil.isNull(id)), ErrorCode.PARAMS_ERROR, "图片 id 不能为空");
+        // 有参数则校验
+        if (StrUtil.isNotBlank(url)) {
+            ThrowUtils.throwIf(url.length() > 1024, ErrorCode.PARAMS_ERROR, "url 过长");
+        }
+        if (StrUtil.isNotBlank(introduction)) {
+            ThrowUtils.throwIf(introduction.length() > 400, ErrorCode.PARAMS_ERROR, "简介过长");
+        }
+    }
 }

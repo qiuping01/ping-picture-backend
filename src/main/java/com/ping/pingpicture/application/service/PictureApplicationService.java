@@ -19,13 +19,6 @@ import java.util.List;
 public interface PictureApplicationService extends IService<Picture> {
 
     /**
-     * 验证图片
-     *
-     * @param picture 图片
-     */
-    void validPicture(Picture picture);
-
-    /**
      * 上传图片
      *
      * @param inputSource          输入源
