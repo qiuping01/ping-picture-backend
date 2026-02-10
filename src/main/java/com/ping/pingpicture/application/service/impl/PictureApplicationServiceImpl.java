@@ -62,6 +62,9 @@ public class PictureApplicationServiceImpl extends ServiceImpl<PictureMapper, Pi
         implements PictureDomainService {
 
     @Resource
+    private PictureDomainService pictureDomainService;
+
+    @Resource
     private UserApplicationService userApplicationService;
 
     @Resource
@@ -70,7 +73,7 @@ public class PictureApplicationServiceImpl extends ServiceImpl<PictureMapper, Pi
     @Resource
     private URLPictureUpload urlPictureUpload;
 
-    @Autowired
+    @Resource
     private CosManager cosManager;
 
     @Resource
@@ -78,7 +81,8 @@ public class PictureApplicationServiceImpl extends ServiceImpl<PictureMapper, Pi
 
     @Resource
     private TransactionTemplate transactionTemplate;
-    @Autowired
+
+    @Resource
     private AliYunAiApi aliYunAiApi;
 
     /**

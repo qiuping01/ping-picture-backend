@@ -8,6 +8,7 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ping.pingpicture.domain.picture.repository.PictureRepository;
 import com.ping.pingpicture.domain.picture.service.PictureDomainService;
 import com.ping.pingpicture.infrastructure.api.aliyunai.AliYunAiApi;
 import com.ping.pingpicture.infrastructure.api.aliyunai.model.CreateOutPaintingTaskRequest;
@@ -62,6 +63,9 @@ public class PictureDomainServiceImpl extends ServiceImpl<PictureMapper, Picture
         implements PictureDomainService {
 
     @Resource
+    private PictureRepository pictureRepository;
+
+    @Resource
     private UserApplicationService userApplicationService;
 
     @Resource
@@ -70,7 +74,7 @@ public class PictureDomainServiceImpl extends ServiceImpl<PictureMapper, Picture
     @Resource
     private URLPictureUpload urlPictureUpload;
 
-    @Autowired
+    @Resource
     private CosManager cosManager;
 
     @Resource
@@ -78,7 +82,8 @@ public class PictureDomainServiceImpl extends ServiceImpl<PictureMapper, Picture
 
     @Resource
     private TransactionTemplate transactionTemplate;
-    @Autowired
+
+    @Resource
     private AliYunAiApi aliYunAiApi;
 
     /**
