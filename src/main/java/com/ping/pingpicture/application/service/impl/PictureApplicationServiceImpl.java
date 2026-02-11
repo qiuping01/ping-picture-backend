@@ -2,9 +2,6 @@ package com.ping.pingpicture.application.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.net.url.UrlBuilder;
-import cn.hutool.core.util.ObjUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -12,43 +9,23 @@ import com.ping.pingpicture.application.service.PictureApplicationService;
 import com.ping.pingpicture.application.service.UserApplicationService;
 import com.ping.pingpicture.domain.picture.entity.Picture;
 import com.ping.pingpicture.domain.picture.service.PictureDomainService;
-import com.ping.pingpicture.domain.picture.valueobject.PictureReviewStatusEnum;
 import com.ping.pingpicture.domain.user.entity.User;
-import com.ping.pingpicture.infrastructure.api.CosManager;
-import com.ping.pingpicture.infrastructure.api.aliyunai.AliYunAiApi;
-import com.ping.pingpicture.infrastructure.api.aliyunai.model.CreateOutPaintingTaskRequest;
 import com.ping.pingpicture.infrastructure.api.aliyunai.model.CreateOutPaintingTaskResponse;
 import com.ping.pingpicture.infrastructure.exception.BusinessException;
 import com.ping.pingpicture.infrastructure.exception.ErrorCode;
-import com.ping.pingpicture.infrastructure.exception.ThrowUtils;
 import com.ping.pingpicture.infrastructure.mapper.PictureMapper;
-import com.ping.pingpicture.infrastructure.utils.ColorSimilarUtils;
-import com.ping.pingpicture.infrastructure.utils.ColorTransformUtils;
 import com.ping.pingpicture.interfaces.dto.picture.*;
 import com.ping.pingpicture.interfaces.vo.picture.PictureVO;
-import com.ping.pingpicture.interfaces.vo.user.UserVO;
-import com.ping.pingpicturebackend.manager.upload.FilePictureUpload;
-import com.ping.pingpicturebackend.manager.upload.PictureUploadTemplate;
-import com.ping.pingpicturebackend.manager.upload.URLPictureUpload;
-import com.ping.pingpicturebackend.model.dto.file.UploadPictureResult;
-import com.ping.pingpicturebackend.model.entity.Space;
-import com.ping.pingpicturebackend.service.SpaceService;
 import lombok.extern.slf4j.Slf4j;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-import org.springframework.beans.BeanUtils;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Resource;
-import java.awt.*;
-import java.io.IOException;
-import java.util.*;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -66,24 +43,6 @@ public class PictureApplicationServiceImpl extends ServiceImpl<PictureMapper, Pi
 
     @Resource
     private UserApplicationService userApplicationService;
-
-    @Resource
-    private FilePictureUpload filePictureUpload;
-
-    @Resource
-    private URLPictureUpload urlPictureUpload;
-
-    @Resource
-    private CosManager cosManager;
-
-    @Resource
-    private SpaceService spaceService;
-
-    @Resource
-    private TransactionTemplate transactionTemplate;
-
-    @Resource
-    private AliYunAiApi aliYunAiApi;
 
     /**
      * 上传图片
@@ -192,7 +151,7 @@ public class PictureApplicationServiceImpl extends ServiceImpl<PictureMapper, Pi
      */
     @Override
     public int uploadPictureByBatch(PictureUploadByBatchRequest pictureUploadByBatchRequest, User loginUser) {
-       return pictureDomainService.uploadPictureByBatch(pictureUploadByBatchRequest, loginUser);
+        return pictureDomainService.uploadPictureByBatch(pictureUploadByBatchRequest, loginUser);
     }
 
     /**
@@ -291,6 +250,14 @@ public class PictureApplicationServiceImpl extends ServiceImpl<PictureMapper, Pi
     @Override
     public CreateOutPaintingTaskResponse createPictureOutPaintingTask(CreatePictureOutPaintingTaskRequest createPictureOutPaintingTaskRequest, User loginUser) {
         return pictureDomainService.createPictureOutPaintingTask(createPictureOutPaintingTaskRequest, loginUser);
+    }
+
+    @Override
+    public void validPicture(Picture picture) {
+        if (picture == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        picture.validPicture();
     }
 }
 

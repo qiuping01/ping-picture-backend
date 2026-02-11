@@ -144,4 +144,11 @@ public interface PictureApplicationService extends IService<Picture> {
      */
     CreateOutPaintingTaskResponse createPictureOutPaintingTask(CreatePictureOutPaintingTaskRequest createPictureOutPaintingTaskRequest,
                                                                User loginUser);
+
+    /**
+     * 校验图片
+     *
+     * @param picture 图片
+     */
+    void validPicture(Picture picture);
 }
