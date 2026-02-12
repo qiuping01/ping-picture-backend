@@ -59,8 +59,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-public class PictureDomainServiceImpl extends ServiceImpl<PictureMapper, Picture>
-        implements PictureDomainService {
+public class PictureDomainServiceImpl implements PictureDomainService {
 
     @Resource
     private PictureRepository pictureRepository;
@@ -147,7 +146,7 @@ public class PictureDomainServiceImpl extends ServiceImpl<PictureMapper, Picture
         }
         // 如果是更新图片，需要校验图片是否存在
         if (pictureId != null) {
-            Picture oldPicture = this.getById(pictureId);
+            Picture oldPicture = pictureRepository.getById(pictureId);
             ThrowUtils.throwIf(oldPicture == null, ErrorCode.PARAMS_ERROR, "图片不存在");
             // 仅本人或管理员可编辑
             if (!oldPicture.getUserId().equals(loginUser.getId()) && !loginUser.isAdmin()) {
@@ -211,7 +210,7 @@ public class PictureDomainServiceImpl extends ServiceImpl<PictureMapper, Picture
         Long finalSpaceId = spaceId;
         transactionTemplate.execute(status -> {
             // 保存图片信息
-            boolean result = this.saveOrUpdate(picture);
+            boolean result = pictureRepository.saveOrUpdate(picture);
             ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "上传图片失败");
             if (finalSpaceId != null) {
                 boolean updateResult = spaceService.lambdaUpdate()
@@ -381,7 +380,7 @@ public class PictureDomainServiceImpl extends ServiceImpl<PictureMapper, Picture
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "审核失败，参数错误");
         }
         // 判断是否存在
-        Picture oldPicture = this.getById(picId);
+        Picture oldPicture = pictureRepository.getById(picId);
         ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR, "图片不存在");
         // 判断是否已是该状态
         Integer oldPictureReviewStatus = oldPicture.getReviewStatus();
@@ -395,7 +394,7 @@ public class PictureDomainServiceImpl extends ServiceImpl<PictureMapper, Picture
         BeanUtils.copyProperties(pictureReviewRequest, updatePicture);
         updatePicture.setReviewerId(loginUser.getId());
         updatePicture.setReviewTime(new Date());
-        boolean result = this.updateById(updatePicture);
+        boolean result = pictureRepository.updateById(updatePicture);
         ThrowUtils.throwIf(!result, ErrorCode.SYSTEM_ERROR, "审核失败");
     }
 
@@ -498,7 +497,7 @@ public class PictureDomainServiceImpl extends ServiceImpl<PictureMapper, Picture
     public void clearPictureFile(Picture oldPicture) {
         // 判断该图片是否被多条记录使用
         String pictureUrl = oldPicture.getUrl();
-        long count = this.lambdaQuery()
+        long count = pictureRepository.lambdaQuery()
                 .eq(Picture::getUrl, pictureUrl)
                 .count();
         // 有不止一条记录用到了该图片，不清理
@@ -564,7 +563,7 @@ public class PictureDomainServiceImpl extends ServiceImpl<PictureMapper, Picture
         ThrowUtils.throwIf(picId <= 0, ErrorCode.PARAMS_ERROR);
         ThrowUtils.throwIf(loginUser == null, ErrorCode.NO_AUTH_ERROR);
         // 判断图片是否存在
-        Picture oldPicture = getById(picId);
+        Picture oldPicture = pictureRepository.getById(picId);
         ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR, "图片不存在");
         // 校验操作权限
         // 已经改为使用注解鉴权
@@ -572,7 +571,7 @@ public class PictureDomainServiceImpl extends ServiceImpl<PictureMapper, Picture
         // 开启事务 - 更新空间额度
         transactionTemplate.executeWithoutResult(status -> {
             // 操作数据库 - 删除图片信息
-            boolean result = removeById(picId);
+            boolean result = pictureRepository.removeById(picId);
             ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "删除失败");
             // 释放额度
             Long finalSpaceId = oldPicture.getSpaceId();
@@ -602,7 +601,7 @@ public class PictureDomainServiceImpl extends ServiceImpl<PictureMapper, Picture
                 ErrorCode.PARAMS_ERROR);
         ThrowUtils.throwIf(loginUser == null, ErrorCode.NO_AUTH_ERROR);
         // 判断图片是否存在
-        Picture oldPicture = getById(pictureEditRequest.getId());
+        Picture oldPicture = pictureRepository.getById(pictureEditRequest.getId());
         ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR, "图片不存在");
         // 将实体类和 DTO 进行转换
         Picture picture = new Picture();
@@ -619,7 +618,7 @@ public class PictureDomainServiceImpl extends ServiceImpl<PictureMapper, Picture
         // 补充审核参数
         this.fillReviewParams(picture, loginUser);
         // 操作数据库
-        boolean result = updateById(picture);
+        boolean result = pictureRepository.updateById(picture);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "更新失败");
     }
 
@@ -649,7 +648,7 @@ public class PictureDomainServiceImpl extends ServiceImpl<PictureMapper, Picture
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "没有空间访问权限");
         }
         // 3. 查询指定图片，仅选择需要的字段
-        List<Picture> pictureList = this.lambdaQuery()
+        List<Picture> pictureList = pictureRepository.lambdaQuery()
                 .select(Picture::getId, Picture::getSpaceId) // 提高查询效率
                 .eq(Picture::getSpaceId, spaceId)
                 .in(Picture::getId, pictureIdList)
@@ -669,7 +668,7 @@ public class PictureDomainServiceImpl extends ServiceImpl<PictureMapper, Picture
         // 4.2. 批量重命名
         fillPictureWithNameRule(pictureList, nameRule);
         // 5. 操作数据库批量更新
-        boolean result = this.updateBatchById(pictureList);
+        boolean result = pictureRepository.updateBatchById(pictureList);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "批量更新失败");
     }
 
@@ -717,7 +716,7 @@ public class PictureDomainServiceImpl extends ServiceImpl<PictureMapper, Picture
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "没有权限");
         }
         // 3. 查询该空间下所有图片（必须有主色调）
-        List<Picture> pictureList = this.lambdaQuery()
+        List<Picture> pictureList = pictureRepository.lambdaQuery()
                 .eq(Picture::getSpaceId, spaceId)
                 .isNotNull(Picture::getPicColor)
                 .list();
@@ -759,7 +758,7 @@ public class PictureDomainServiceImpl extends ServiceImpl<PictureMapper, Picture
     public CreateOutPaintingTaskResponse createPictureOutPaintingTask(CreatePictureOutPaintingTaskRequest createPictureOutPaintingTaskRequest, User loginUser) {
         // 获取图片信息
         Long pictureId = createPictureOutPaintingTaskRequest.getPictureId();
-        Picture picture = Optional.ofNullable(this.getById(pictureId))
+        Picture picture = Optional.ofNullable(pictureRepository.getById(pictureId))
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR, "图片不存在"));
         // 权限校验
         // 已经改为使用注解鉴权

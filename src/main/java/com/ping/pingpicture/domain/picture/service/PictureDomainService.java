@@ -16,7 +16,7 @@ import java.util.List;
  * @description 针对表【picture(图片)】的数据库操作Service
  * @createDate 2025-12-21 21:52:25
  */
-public interface PictureDomainService extends IService<Picture> {
+public interface PictureDomainService {
 
     /**
      * 验证图片
