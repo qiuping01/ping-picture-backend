@@ -5,6 +5,7 @@ import cn.hutool.core.util.ObjUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ping.pingpicture.application.service.PictureApplicationService;
 import com.ping.pingpicture.infrastructure.exception.BusinessException;
 import com.ping.pingpicture.infrastructure.exception.ErrorCode;
 import com.ping.pingpicture.infrastructure.exception.ThrowUtils;
@@ -14,7 +15,6 @@ import com.ping.pingpicture.domain.picture.entity.Picture;
 import com.ping.pingpicturebackend.model.entity.Space;
 import com.ping.pingpicture.domain.user.entity.User;
 import com.ping.pingpicturebackend.model.vo.space.analyze.*;
-import com.ping.pingpicture.domain.picture.service.PictureDomainService;
 import com.ping.pingpicturebackend.service.SpaceAnalyzeService;
 import com.ping.pingpicturebackend.service.SpaceService;
 import com.ping.pingpicture.application.service.UserApplicationService;
@@ -40,7 +40,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
     private SpaceService spaceService;
 
     @Resource
-    private PictureDomainService pictureApplicationService;
+    private PictureApplicationService pictureApplicationService;
 
     /**
      * 获取空间使用分析数据

@@ -7,7 +7,6 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ping.pingpicture.domain.picture.repository.PictureRepository;
 import com.ping.pingpicture.domain.picture.service.PictureDomainService;
 import com.ping.pingpicture.infrastructure.api.aliyunai.AliYunAiApi;
@@ -21,7 +20,6 @@ import com.ping.pingpicture.interfaces.dto.picture.*;
 import com.ping.pingpicturebackend.manager.upload.FilePictureUpload;
 import com.ping.pingpicturebackend.manager.upload.PictureUploadTemplate;
 import com.ping.pingpicturebackend.manager.upload.URLPictureUpload;
-import com.ping.pingpicture.infrastructure.mapper.PictureMapper;
 import com.ping.pingpicturebackend.model.dto.file.UploadPictureResult;
 import com.ping.pingpicture.domain.picture.entity.Picture;
 import com.ping.pingpicturebackend.model.entity.Space;
@@ -39,7 +37,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -84,29 +81,6 @@ public class PictureDomainServiceImpl implements PictureDomainService {
 
     @Resource
     private AliYunAiApi aliYunAiApi;
-
-    /**
-     * 验证图片
-     *
-     * @param picture 图片
-     */
-    @Override
-    public void validPicture(Picture picture) {
-        ThrowUtils.throwIf(picture == null, ErrorCode.PARAMS_ERROR);
-        // 校验图片信息
-        Long id = picture.getId();
-        String url = picture.getUrl();
-        String introduction = picture.getIntroduction();
-        // 修改数据时，id 不能为空
-        ThrowUtils.throwIf((ObjUtil.isNull(id)), ErrorCode.PARAMS_ERROR, "图片 id 不能为空");
-        // 有参数则校验
-        if (StrUtil.isNotBlank(url)) {
-            ThrowUtils.throwIf(url.length() > 1024, ErrorCode.PARAMS_ERROR, "url 过长");
-        }
-        if (StrUtil.isNotBlank(introduction)) {
-            ThrowUtils.throwIf(introduction.length() > 400, ErrorCode.PARAMS_ERROR, "简介过长");
-        }
-    }
 
     /**
      * 上传图片
@@ -319,47 +293,6 @@ public class PictureDomainServiceImpl implements PictureDomainService {
             pictureVO.setUser(userVO);
         }
         return pictureVO;
-    }
-
-    /**
-     * 获取分页图片封装
-     *
-     * @param picturePage 图片分页
-     * @return PictureVO分页
-     */
-    @Override
-    public Page<PictureVO> getPictureVOPage(Page<Picture> picturePage) {
-        // 拿到当前页数据
-        List<Picture> pictureList = picturePage.getRecords();
-        Page<PictureVO> pictureVOPage = new Page<>
-                (picturePage.getCurrent(), picturePage.getSize(), picturePage.getTotal());
-        if (CollUtil.isEmpty(pictureList)) {
-            return pictureVOPage;
-        }
-        // 1. 转换为VO
-        List<PictureVO> pictureVOList = pictureList.stream()
-                .map(PictureVO::objToVo)
-                .collect(Collectors.toList());
-        // 2. 提取不重复的userId（Set去重）
-        Set<Long> userIdSet = pictureList.stream()
-                .map(Picture::getUserId)
-                .filter(Objects::nonNull)  // 过滤null值
-                .collect(Collectors.toSet());
-        // 3. 批量查询用户
-        Map<Long, List<User>> userIdUserListMap = userApplicationService.listByIds(userIdSet)
-                .stream()
-                .collect(Collectors.groupingBy(User::getId));
-        // 4. 填充用户信息
-        pictureVOList.forEach(pictureVO -> {
-            Long userId = pictureVO.getUserId();
-            User user = null;
-            if (userIdUserListMap.containsKey(userId)) {
-                user = userIdUserListMap.get(userId).get(0);
-            }
-            pictureVO.setUser(userApplicationService.getUserVO(user));
-        });
-        pictureVOPage.setRecords(pictureVOList);
-        return pictureVOPage;
     }
 
     /**
@@ -609,9 +542,10 @@ public class PictureDomainServiceImpl implements PictureDomainService {
         // tag 类型转换
         picture.setTags(JSONUtil.toJsonStr(pictureEditRequest.getTags()));
         // 图片校验
-        this.validPicture(picture);
+        picture.validPicture();
         // 设置编辑时间
         picture.setUpdateTime(new Date());
+
         // 校验图片空间
         // 已经改为使用注解鉴权
 //        this.checkPictureAuth(loginUser, oldPicture);

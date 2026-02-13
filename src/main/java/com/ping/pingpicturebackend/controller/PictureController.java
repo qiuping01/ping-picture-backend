@@ -9,6 +9,7 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.ping.pingpicture.application.service.PictureApplicationService;
 import com.ping.pingpicture.infrastructure.api.aliyunai.AliYunAiApi;
 import com.ping.pingpicture.infrastructure.api.aliyunai.model.CreateOutPaintingTaskResponse;
 import com.ping.pingpicture.infrastructure.api.aliyunai.model.GetOutPaintingTaskResponse;
@@ -30,7 +31,6 @@ import com.ping.pingpicture.domain.user.entity.User;
 import com.ping.pingpicture.domain.picture.valueobject.PictureReviewStatusEnum;
 import com.ping.pingpicture.interfaces.vo.picture.PictureTagCategory;
 import com.ping.pingpicture.interfaces.vo.picture.PictureVO;
-import com.ping.pingpicture.domain.picture.service.PictureDomainService;
 import com.ping.pingpicturebackend.service.SpaceService;
 import com.ping.pingpicture.application.service.UserApplicationService;
 import lombok.extern.slf4j.Slf4j;
@@ -57,7 +57,7 @@ import java.util.concurrent.TimeUnit;
 public class PictureController {
 
     @Resource
-    private PictureDomainService pictureApplicationService;
+    private PictureApplicationService pictureApplicationService;
 
     @Resource
     private UserApplicationService userApplicationService;

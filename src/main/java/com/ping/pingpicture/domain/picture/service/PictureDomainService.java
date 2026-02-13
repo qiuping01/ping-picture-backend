@@ -2,11 +2,11 @@ package com.ping.pingpicture.domain.picture.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.ping.pingpicture.domain.picture.entity.Picture;
+import com.ping.pingpicture.domain.user.entity.User;
 import com.ping.pingpicture.infrastructure.api.aliyunai.model.CreateOutPaintingTaskResponse;
 import com.ping.pingpicture.interfaces.dto.picture.*;
-import com.ping.pingpicture.domain.picture.entity.Picture;
-import com.baomidou.mybatisplus.extension.service.IService;
-import com.ping.pingpicture.domain.user.entity.User;
 import com.ping.pingpicture.interfaces.vo.picture.PictureVO;
 
 import java.util.List;
@@ -17,13 +17,6 @@ import java.util.List;
  * @createDate 2025-12-21 21:52:25
  */
 public interface PictureDomainService {
-
-    /**
-     * 验证图片
-     *
-     * @param picture 图片
-     */
-    void validPicture(Picture picture);
 
     /**
      * 上传图片
@@ -52,14 +45,6 @@ public interface PictureDomainService {
      * @return PictureVO
      */
     PictureVO getPictureVO(Picture picture);
-
-    /**
-     * 获取分页图片封装
-     *
-     * @param picturePage 图片分页
-     * @return PictureVO分页
-     */
-    Page<PictureVO> getPictureVOPage(Page<Picture> picturePage);
 
     /**
      * 图片审核
@@ -151,4 +136,6 @@ public interface PictureDomainService {
      */
     CreateOutPaintingTaskResponse createPictureOutPaintingTask(CreatePictureOutPaintingTaskRequest createPictureOutPaintingTaskRequest,
                                                                User loginUser);
+
+
 }

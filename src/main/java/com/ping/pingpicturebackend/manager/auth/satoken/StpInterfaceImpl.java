@@ -11,6 +11,7 @@ import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.http.ContentType;
 import cn.hutool.http.Header;
 import cn.hutool.json.JSONUtil;
+import com.ping.pingpicture.application.service.PictureApplicationService;
 import com.ping.pingpicture.infrastructure.exception.BusinessException;
 import com.ping.pingpicture.infrastructure.exception.ErrorCode;
 import com.ping.pingpicturebackend.manager.auth.SpaceUserAuthContext;
@@ -22,7 +23,6 @@ import com.ping.pingpicturebackend.model.entity.SpaceUser;
 import com.ping.pingpicture.domain.user.entity.User;
 import com.ping.pingpicturebackend.model.enums.SpaceRoleEnum;
 import com.ping.pingpicturebackend.model.enums.SpaceTypeEnum;
-import com.ping.pingpicture.domain.picture.service.PictureDomainService;
 import com.ping.pingpicturebackend.service.SpaceService;
 import com.ping.pingpicturebackend.service.SpaceUserService;
 import com.ping.pingpicture.application.service.UserApplicationService;
@@ -45,7 +45,7 @@ public class StpInterfaceImpl implements StpInterface {
     private SpaceUserService spaceUserService;
 
     @Resource
-    private PictureDomainService pictureApplicationService;
+    private PictureApplicationService pictureApplicationService;
 
     @Resource
     private UserApplicationService userApplicationService;

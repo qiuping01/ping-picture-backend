@@ -2,13 +2,13 @@ package com.ping.pingpicturebackend.manager.websocket;
 
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
+import com.ping.pingpicture.application.service.PictureApplicationService;
 import com.ping.pingpicturebackend.manager.auth.SpaceUserAuthManager;
 import com.ping.pingpicturebackend.manager.auth.model.SpaceUserPermissionConstant;
 import com.ping.pingpicture.domain.picture.entity.Picture;
 import com.ping.pingpicturebackend.model.entity.Space;
 import com.ping.pingpicture.domain.user.entity.User;
 import com.ping.pingpicturebackend.model.enums.SpaceTypeEnum;
-import com.ping.pingpicture.domain.picture.service.PictureDomainService;
 import com.ping.pingpicturebackend.service.SpaceService;
 import com.ping.pingpicture.application.service.UserApplicationService;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +36,7 @@ public class WsHandshakeInterceptor implements HandshakeInterceptor {
     private UserApplicationService userApplicationService;
 
     @Resource
-    private PictureDomainService pictureApplicationService;
+    private PictureApplicationService pictureApplicationService;
 
     @Resource
     private SpaceService spaceService;

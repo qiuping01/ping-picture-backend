@@ -5,7 +5,6 @@ import cn.hutool.core.net.url.UrlBuilder;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.ping.pingpicture.application.service.PictureApplicationService;
 import com.ping.pingpicture.application.service.UserApplicationService;
 import com.ping.pingpicture.domain.picture.entity.Picture;
 import com.ping.pingpicture.domain.picture.service.PictureDomainService;
@@ -36,7 +35,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class PictureApplicationServiceImpl extends ServiceImpl<PictureMapper, Picture>
-        implements PictureApplicationService {
+        implements com.ping.pingpicture.application.service.PictureApplicationService {
 
     @Resource
     private PictureDomainService pictureDomainService;
