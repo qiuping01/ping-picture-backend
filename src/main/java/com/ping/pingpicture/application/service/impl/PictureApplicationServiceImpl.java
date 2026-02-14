@@ -206,12 +206,12 @@ public class PictureApplicationServiceImpl extends ServiceImpl<PictureMapper, Pi
     /**
      * 编辑图片
      *
-     * @param pictureEditRequest 编辑请求
+     * @param picture 图片
      * @param loginUser          登录用户
      */
     @Override
-    public void editPicture(PictureEditRequest pictureEditRequest, User loginUser) {
-        pictureDomainService.editPicture(pictureEditRequest, loginUser);
+    public void editPicture(Picture picture, User loginUser) {
+        pictureDomainService.editPicture(picture, loginUser);
     }
 
     /**

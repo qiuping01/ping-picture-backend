@@ -104,10 +104,10 @@ public interface PictureDomainService {
     /**
      * 编辑图片
      *
-     * @param pictureEditRequest 编辑请求
-     * @param loginUser          登录用户
+     * @param picture   图片
+     * @param loginUser 登录用户
      */
-    void editPicture(PictureEditRequest pictureEditRequest, User loginUser);
+    void editPicture(Picture picture, User loginUser);
 
     /**
      * 批量编辑图片

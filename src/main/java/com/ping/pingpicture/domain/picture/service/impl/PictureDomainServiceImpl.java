@@ -524,28 +524,21 @@ public class PictureDomainServiceImpl implements PictureDomainService {
     /**
      * 编辑图片
      *
-     * @param pictureEditRequest 编辑请求
-     * @param loginUser          登录用户
+     * @param picture   图片
+     * @param loginUser 登录用户
      */
     @Override
-    public void editPicture(PictureEditRequest pictureEditRequest, User
-            loginUser) {
-        ThrowUtils.throwIf(pictureEditRequest == null || pictureEditRequest.getId() <= 0,
+    public void editPicture(Picture picture, User loginUser) {
+        ThrowUtils.throwIf(picture == null || picture.getId() <= 0,
                 ErrorCode.PARAMS_ERROR);
         ThrowUtils.throwIf(loginUser == null, ErrorCode.NO_AUTH_ERROR);
         // 判断图片是否存在
-        Picture oldPicture = pictureRepository.getById(pictureEditRequest.getId());
+        Picture oldPicture = pictureRepository.getById(picture.getId());
         ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR, "图片不存在");
-        // 将实体类和 DTO 进行转换
-        Picture picture = new Picture();
-        BeanUtils.copyProperties(pictureEditRequest, picture);
-        // tag 类型转换
-        picture.setTags(JSONUtil.toJsonStr(pictureEditRequest.getTags()));
         // 图片校验
         picture.validPicture();
         // 设置编辑时间
         picture.setUpdateTime(new Date());
-
         // 校验图片空间
         // 已经改为使用注解鉴权
 //        this.checkPictureAuth(loginUser, oldPicture);

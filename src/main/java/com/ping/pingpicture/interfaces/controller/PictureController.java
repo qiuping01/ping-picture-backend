@@ -1,4 +1,4 @@
-package com.ping.pingpicturebackend.controller;
+package com.ping.pingpicture.interfaces.controller;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import cn.dev33.satoken.annotation.SaCheckRole;
@@ -22,6 +22,7 @@ import com.ping.pingpicture.domain.user.constant.UserConstant;
 import com.ping.pingpicture.infrastructure.exception.BusinessException;
 import com.ping.pingpicture.infrastructure.exception.ErrorCode;
 import com.ping.pingpicture.infrastructure.exception.ThrowUtils;
+import com.ping.pingpicture.interfaces.assembler.PictureAssembler;
 import com.ping.pingpicture.interfaces.dto.picture.*;
 import com.ping.pingpicturebackend.manager.auth.SpaceUserAuthManager;
 import com.ping.pingpicturebackend.manager.auth.model.SpaceUserPermissionConstant;
@@ -143,8 +144,7 @@ public class PictureController {
         Picture oldPicture = pictureApplicationService.getById(pictureUpdateRequest.getId());
         ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR, "图片不存在");
         // 将实体类和 DTO 进行转换
-        Picture picture = new Picture();
-        BeanUtils.copyProperties(pictureUpdateRequest, picture);
+        Picture picture = PictureAssembler.toPictureEntity(pictureUpdateRequest);
         // tag 类型转换
         picture.setTags(JSONUtil.toJsonStr(pictureUpdateRequest.getTags()));
         // 图片校验
@@ -307,7 +307,9 @@ public class PictureController {
         ThrowUtils.throwIf(pictureEditRequest == null || pictureEditRequest.getId() <= 0,
                 ErrorCode.PARAMS_ERROR);
         User loginUser = userApplicationService.getLoginUser(request);
-        pictureApplicationService.editPicture(pictureEditRequest, loginUser);
+        // 在此处将实体类和 DTO 进行转换
+        Picture picture = PictureAssembler.toPictureEntity(pictureEditRequest);
+        pictureApplicationService.editPicture(picture, loginUser);
         return ResultUtils.success(true);
     }
 
