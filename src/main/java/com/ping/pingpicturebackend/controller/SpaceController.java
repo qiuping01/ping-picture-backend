@@ -9,7 +9,7 @@ import com.ping.pingpicture.domain.user.constant.UserConstant;
 import com.ping.pingpicture.infrastructure.exception.BusinessException;
 import com.ping.pingpicture.infrastructure.exception.ErrorCode;
 import com.ping.pingpicture.infrastructure.exception.ThrowUtils;
-import com.ping.pingpicturebackend.manager.auth.SpaceUserAuthManager;
+import com.ping.pingpicture.infrastructure.manager.auth.SpaceUserAuthManager;
 import com.ping.pingpicturebackend.model.dto.space.*;
 import com.ping.pingpicturebackend.model.entity.Space;
 import com.ping.pingpicture.domain.user.entity.User;

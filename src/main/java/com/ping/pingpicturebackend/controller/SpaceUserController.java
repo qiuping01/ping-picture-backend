@@ -7,7 +7,7 @@ import com.ping.pingpicture.infrastructure.common.DeleteRequest;
 import com.ping.pingpicture.infrastructure.common.ResultUtils;
 import com.ping.pingpicture.infrastructure.exception.ErrorCode;
 import com.ping.pingpicture.infrastructure.exception.ThrowUtils;
-import com.ping.pingpicturebackend.manager.auth.model.SpaceUserPermissionConstant;
+import com.ping.pingpicture.infrastructure.manager.auth.model.SpaceUserPermissionConstant;
 import com.ping.pingpicturebackend.model.dto.spaceuser.SpaceUserAddRequest;
 import com.ping.pingpicturebackend.model.dto.spaceuser.SpaceUserEditRequest;
 import com.ping.pingpicturebackend.model.dto.spaceuser.SpaceUserQueryRequest;

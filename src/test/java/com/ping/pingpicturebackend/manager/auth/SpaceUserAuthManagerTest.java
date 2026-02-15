@@ -1,5 +1,6 @@
 package com.ping.pingpicturebackend.manager.auth;
 
+import com.ping.pingpicture.infrastructure.manager.auth.SpaceUserAuthManager;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
