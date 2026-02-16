@@ -27,7 +27,7 @@ import com.ping.pingpicture.interfaces.dto.picture.*;
 import com.ping.pingpicture.infrastructure.manager.auth.SpaceUserAuthManager;
 import com.ping.pingpicture.infrastructure.manager.auth.model.SpaceUserPermissionConstant;
 import com.ping.pingpicture.domain.picture.entity.Picture;
-import com.ping.pingpicturebackend.model.entity.Space;
+import com.ping.pingpicture.domain.space.entity.Space;
 import com.ping.pingpicture.domain.user.entity.User;
 import com.ping.pingpicture.domain.picture.valueobject.PictureReviewStatusEnum;
 import com.ping.pingpicture.interfaces.vo.picture.PictureTagCategory;

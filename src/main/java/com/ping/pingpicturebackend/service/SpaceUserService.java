@@ -3,12 +3,12 @@ package com.ping.pingpicturebackend.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ping.pingpicture.infrastructure.common.DeleteRequest;
-import com.ping.pingpicturebackend.model.dto.spaceuser.SpaceUserAddRequest;
-import com.ping.pingpicturebackend.model.dto.spaceuser.SpaceUserEditRequest;
-import com.ping.pingpicturebackend.model.dto.spaceuser.SpaceUserQueryRequest;
-import com.ping.pingpicturebackend.model.entity.SpaceUser;
+import com.ping.pingpicture.interfaces.dto.spaceuser.SpaceUserAddRequest;
+import com.ping.pingpicture.interfaces.dto.spaceuser.SpaceUserEditRequest;
+import com.ping.pingpicture.interfaces.dto.spaceuser.SpaceUserQueryRequest;
+import com.ping.pingpicture.domain.space.entity.SpaceUser;
 import com.ping.pingpicture.domain.user.entity.User;
-import com.ping.pingpicturebackend.model.vo.SpaceUserVO;
+import com.ping.pingpicture.interfaces.vo.space.SpaceUserVO;
 
 import java.util.List;
 

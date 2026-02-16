@@ -4,12 +4,12 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ping.pingpicture.infrastructure.common.DeleteRequest;
-import com.ping.pingpicturebackend.model.dto.space.SpaceAddRequest;
-import com.ping.pingpicturebackend.model.dto.space.SpaceEditRequest;
-import com.ping.pingpicturebackend.model.dto.space.SpaceQueryRequest;
-import com.ping.pingpicturebackend.model.entity.Space;
+import com.ping.pingpicture.interfaces.dto.space.SpaceAddRequest;
+import com.ping.pingpicture.interfaces.dto.space.SpaceEditRequest;
+import com.ping.pingpicture.interfaces.dto.space.SpaceQueryRequest;
+import com.ping.pingpicture.domain.space.entity.Space;
 import com.ping.pingpicture.domain.user.entity.User;
-import com.ping.pingpicturebackend.model.vo.SpaceVO;
+import com.ping.pingpicture.interfaces.vo.space.SpaceVO;
 
 /**
  * @author 21877
