@@ -9,7 +9,7 @@ import com.ping.pingpicture.domain.picture.entity.Picture;
 import com.ping.pingpicture.domain.space.entity.Space;
 import com.ping.pingpicture.domain.user.entity.User;
 import com.ping.pingpicture.domain.space.valueobject.SpaceTypeEnum;
-import com.ping.pingpicturebackend.service.SpaceService;
+import com.ping.pingpicture.application.service.SpaceApplicationService;
 import com.ping.pingpicture.application.service.UserApplicationService;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -39,7 +39,7 @@ public class WsHandshakeInterceptor implements HandshakeInterceptor {
     private PictureApplicationService pictureApplicationService;
 
     @Resource
-    private SpaceService spaceService;
+    private SpaceApplicationService spaceApplicationService;
 
     @Resource
     private SpaceUserAuthManager spaceUserAuthManager;
@@ -85,7 +85,7 @@ public class WsHandshakeInterceptor implements HandshakeInterceptor {
             log.error("WebSocket 连接失败，图片关联的空间ID非法（为空或非正数），pictureId: {}, spaceId: {}", pictureId, spaceId);
             return false;
         }
-        space = spaceService.getById(spaceId);
+        space = spaceApplicationService.getById(spaceId);
         if (ObjUtil.isEmpty(space)) {
             log.error("WebSocket 连接失败，图片所属空间不存在，拒绝握手");
             return false;

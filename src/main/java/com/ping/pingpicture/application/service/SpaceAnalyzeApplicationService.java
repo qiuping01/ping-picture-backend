@@ -1,9 +1,8 @@
-package com.ping.pingpicturebackend.service;
+package com.ping.pingpicture.application.service;
 
-import com.baomidou.mybatisplus.extension.service.IService;
-import com.ping.pingpicture.interfaces.dto.space.analyze.*;
 import com.ping.pingpicture.domain.space.entity.Space;
 import com.ping.pingpicture.domain.user.entity.User;
+import com.ping.pingpicture.interfaces.dto.space.analyze.*;
 import com.ping.pingpicture.interfaces.vo.space.analyze.*;
 
 import java.util.List;
@@ -11,7 +10,7 @@ import java.util.List;
 /**
  * 空间分析服务接口
  */
-public interface SpaceAnalyzeService extends IService<Space> {
+public interface SpaceAnalyzeApplicationService {
 
     /**
      * 获取空间使用分析数据

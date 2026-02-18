@@ -8,7 +8,7 @@ import com.ping.pingpicture.interfaces.dto.space.analyze.*;
 import com.ping.pingpicture.domain.space.entity.Space;
 import com.ping.pingpicture.domain.user.entity.User;
 import com.ping.pingpicture.interfaces.vo.space.analyze.*;
-import com.ping.pingpicturebackend.service.SpaceAnalyzeService;
+import com.ping.pingpicture.application.service.SpaceAnalyzeApplicationService;
 import com.ping.pingpicture.application.service.UserApplicationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,7 +29,7 @@ import java.util.List;
 public class SpaceAnalyzeController {
 
     @Resource
-    private SpaceAnalyzeService spaceAnalyzeService;
+    private SpaceAnalyzeApplicationService spaceAnalyzeApplicationService;
 
     @Resource
     private UserApplicationService userApplicationService;
@@ -43,7 +43,7 @@ public class SpaceAnalyzeController {
             HttpServletRequest request) {
         ThrowUtils.throwIf(spaceUsageAnalyzeRequest == null, ErrorCode.PARAMS_ERROR);
         User loginUser = userApplicationService.getLoginUser(request);
-        SpaceUsageAnalyzeResponse spaceUsageAnalyze = spaceAnalyzeService.getSpaceUsageAnalyze(spaceUsageAnalyzeRequest, loginUser);
+        SpaceUsageAnalyzeResponse spaceUsageAnalyze = spaceAnalyzeApplicationService.getSpaceUsageAnalyze(spaceUsageAnalyzeRequest, loginUser);
         return ResultUtils.success(spaceUsageAnalyze);
     }
 
@@ -55,7 +55,7 @@ public class SpaceAnalyzeController {
                                                                                     HttpServletRequest request) {
         ThrowUtils.throwIf(spaceCategoryAnalyzeRequest == null, ErrorCode.PARAMS_ERROR);
         User loginUser = userApplicationService.getLoginUser(request);
-        List<SpaceCategoryAnalyzeResponse> resultList = spaceAnalyzeService.getSpaceCategoryAnalyze(spaceCategoryAnalyzeRequest, loginUser);
+        List<SpaceCategoryAnalyzeResponse> resultList = spaceAnalyzeApplicationService.getSpaceCategoryAnalyze(spaceCategoryAnalyzeRequest, loginUser);
         return ResultUtils.success(resultList);
     }
 
@@ -67,7 +67,7 @@ public class SpaceAnalyzeController {
                                                                           HttpServletRequest request) {
         ThrowUtils.throwIf(spaceTagAnalyzeRequest == null, ErrorCode.PARAMS_ERROR);
         User loginUser = userApplicationService.getLoginUser(request);
-        List<SpaceTagAnalyzeResponse> resultList = spaceAnalyzeService.getSpaceTagAnalyze(spaceTagAnalyzeRequest, loginUser);
+        List<SpaceTagAnalyzeResponse> resultList = spaceAnalyzeApplicationService.getSpaceTagAnalyze(spaceTagAnalyzeRequest, loginUser);
         return ResultUtils.success(resultList);
     }
 
@@ -79,7 +79,7 @@ public class SpaceAnalyzeController {
                                                                             HttpServletRequest request) {
         ThrowUtils.throwIf(spaceSizeAnalyzeRequest == null, ErrorCode.PARAMS_ERROR);
         User loginUser = userApplicationService.getLoginUser(request);
-        List<SpaceSizeAnalyzeResponse> resultList = spaceAnalyzeService.getSpaceSizeAnalyze(spaceSizeAnalyzeRequest, loginUser);
+        List<SpaceSizeAnalyzeResponse> resultList = spaceAnalyzeApplicationService.getSpaceSizeAnalyze(spaceSizeAnalyzeRequest, loginUser);
         return ResultUtils.success(resultList);
     }
 
@@ -91,7 +91,7 @@ public class SpaceAnalyzeController {
                                                                             HttpServletRequest request) {
         ThrowUtils.throwIf(spaceUserAnalyzeRequest == null, ErrorCode.PARAMS_ERROR);
         User loginUser = userApplicationService.getLoginUser(request);
-        List<SpaceUserAnalyzeResponse> resultList = spaceAnalyzeService.getSpaceUserAnalyze(spaceUserAnalyzeRequest, loginUser);
+        List<SpaceUserAnalyzeResponse> resultList = spaceAnalyzeApplicationService.getSpaceUserAnalyze(spaceUserAnalyzeRequest, loginUser);
         return ResultUtils.success(resultList);
     }
 
@@ -102,7 +102,7 @@ public class SpaceAnalyzeController {
     public BaseResponse<List<Space>> getSpaceRank(@RequestBody SpaceRankAnalyzeRequest spaceRankAnalyzeRequest, HttpServletRequest request) {
         ThrowUtils.throwIf(spaceRankAnalyzeRequest == null, ErrorCode.PARAMS_ERROR);
         User loginUser = userApplicationService.getLoginUser(request);
-        List<Space> resultList = spaceAnalyzeService.getSpaceRank(spaceRankAnalyzeRequest, loginUser);
+        List<Space> resultList = spaceAnalyzeApplicationService.getSpaceRank(spaceRankAnalyzeRequest, loginUser);
         return ResultUtils.success(resultList);
     }
 }

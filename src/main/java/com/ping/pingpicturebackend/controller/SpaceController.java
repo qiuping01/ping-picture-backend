@@ -15,7 +15,7 @@ import com.ping.pingpicture.domain.space.entity.Space;
 import com.ping.pingpicture.domain.user.entity.User;
 import com.ping.pingpicture.domain.space.valueobject.SpaceLevelEnum;
 import com.ping.pingpicture.interfaces.vo.space.SpaceVO;
-import com.ping.pingpicturebackend.service.SpaceService;
+import com.ping.pingpicture.application.service.SpaceApplicationService;
 import com.ping.pingpicture.application.service.UserApplicationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 public class SpaceController {
 
     @Resource
-    private SpaceService spaceService;
+    private SpaceApplicationService spaceApplicationService;
 
     @Resource
     private UserApplicationService userApplicationService;
@@ -51,7 +51,7 @@ public class SpaceController {
     public BaseResponse<Long> addSpace(@RequestBody SpaceAddRequest spaceAddRequest, HttpServletRequest request) {
         ThrowUtils.throwIf(spaceAddRequest == null, ErrorCode.PARAMS_ERROR);
         User loginUser = userApplicationService.getLoginUser(request);
-        long newSpaceId = spaceService.addSpace(spaceAddRequest, loginUser);
+        long newSpaceId = spaceApplicationService.addSpace(spaceAddRequest, loginUser);
         return ResultUtils.success(newSpaceId);
     }
 
@@ -64,7 +64,7 @@ public class SpaceController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         User loginUser = userApplicationService.getLoginUser(request);
-        spaceService.deleteSpace(deleteRequest, loginUser);
+        spaceApplicationService.deleteSpace(deleteRequest, loginUser);
         return ResultUtils.success(true);
     }
 
@@ -79,17 +79,17 @@ public class SpaceController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         // 判断空间是否存在
-        Space oldSpace = spaceService.getById(spaceUpdateRequest.getId());
+        Space oldSpace = spaceApplicationService.getById(spaceUpdateRequest.getId());
         ThrowUtils.throwIf(oldSpace == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
         // 将实体类和 DTO 进行转换
         Space space = new Space();
         BeanUtils.copyProperties(spaceUpdateRequest, space);
         // 空间校验
-        spaceService.validSpace(space, true);
+        space.validSpace(true);
         // 填充空间级别参数
-        spaceService.fillSpaceBySpaceLevel(space);
+        spaceApplicationService.fillSpaceBySpaceLevel(space);
         // 更新空间
-        boolean result = spaceService.updateById(space);
+        boolean result = spaceApplicationService.updateById(space);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "更新失败");
         return ResultUtils.success(true);
     }
@@ -101,7 +101,7 @@ public class SpaceController {
     @SaCheckRole(UserConstant.ADMIN_ROLE)
     public BaseResponse<Space> getSpaceById(@RequestParam Long id) {
         ThrowUtils.throwIf(id <= 0, ErrorCode.PARAMS_ERROR);
-        Space space = spaceService.getById(id);
+        Space space = spaceApplicationService.getById(id);
         ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
         return ResultUtils.success(space);
     }
@@ -113,9 +113,9 @@ public class SpaceController {
     public BaseResponse<SpaceVO> getSpaceVOById(@RequestParam Long id,
                                                 HttpServletRequest request) {
         ThrowUtils.throwIf(id <= 0, ErrorCode.PARAMS_ERROR);
-        Space space = spaceService.getById(id);
+        Space space = spaceApplicationService.getById(id);
         ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
-        SpaceVO spaceVO = spaceService.getSpaceVO(space);
+        SpaceVO spaceVO = spaceApplicationService.getSpaceVO(space);
         // 获取权限列表
         User loginUser = userApplicationService.getLoginUser(request);
         List<String> permissionList = spaceUserAuthManager.getPermissionList(space, loginUser);
@@ -132,8 +132,8 @@ public class SpaceController {
         ThrowUtils.throwIf(spaceQueryRequest == null, ErrorCode.PARAMS_ERROR);
         long current = spaceQueryRequest.getCurrent();
         long size = spaceQueryRequest.getPageSize();
-        Page<Space> spacePage = spaceService.page(
-                new Page<>(current, size), spaceService.getQueryWrapper(spaceQueryRequest));
+        Page<Space> spacePage = spaceApplicationService.page(
+                new Page<>(current, size), spaceApplicationService.getQueryWrapper(spaceQueryRequest));
         return ResultUtils.success(spacePage);
     }
 
@@ -148,9 +148,9 @@ public class SpaceController {
         // 限制爬虫
         ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
         // 查数据库
-        Page<Space> spacePage = spaceService.page(
-                new Page<>(current, size), spaceService.getQueryWrapper(spaceQueryRequest));
-        Page<SpaceVO> spaceVOPage = spaceService.getSpaceVOPage(spacePage);
+        Page<Space> spacePage = spaceApplicationService.page(
+                new Page<>(current, size), spaceApplicationService.getQueryWrapper(spaceQueryRequest));
+        Page<SpaceVO> spaceVOPage = spaceApplicationService.getSpaceVOPage(spacePage);
         return ResultUtils.success(spaceVOPage);
     }
 
@@ -164,7 +164,7 @@ public class SpaceController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         User loginUser = userApplicationService.getLoginUser(request);
-        spaceService.editSpace(spaceEditRequest, loginUser);
+        spaceApplicationService.editSpace(spaceEditRequest, loginUser);
         return ResultUtils.success(true);
     }
 

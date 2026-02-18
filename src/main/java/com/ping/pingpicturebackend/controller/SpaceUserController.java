@@ -14,7 +14,7 @@ import com.ping.pingpicture.interfaces.dto.spaceuser.SpaceUserQueryRequest;
 import com.ping.pingpicture.domain.space.entity.SpaceUser;
 import com.ping.pingpicture.domain.user.entity.User;
 import com.ping.pingpicture.interfaces.vo.space.SpaceUserVO;
-import com.ping.pingpicturebackend.service.SpaceUserService;
+import com.ping.pingpicture.application.service.SpaceUserApplicationService;
 import com.ping.pingpicture.application.service.UserApplicationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +32,7 @@ import java.util.List;
 public class SpaceUserController {
 
     @Resource
-    private SpaceUserService spaceUserService;
+    private SpaceUserApplicationService spaceUserApplicationService;
 
     @Resource
     private UserApplicationService userApplicationService;
@@ -44,7 +44,7 @@ public class SpaceUserController {
     @SaCheckPermission(value = SpaceUserPermissionConstant.SPACE_USER_MANAGE)
     public BaseResponse<Long> addSpaceUser(@RequestBody SpaceUserAddRequest spaceUserAddRequest) {
         ThrowUtils.throwIf(spaceUserAddRequest == null, ErrorCode.PARAMS_ERROR);
-        long id = spaceUserService.addSpaceUser(spaceUserAddRequest);
+        long id = spaceUserApplicationService.addSpaceUser(spaceUserAddRequest);
         return ResultUtils.success(id);
     }
 
@@ -55,7 +55,7 @@ public class SpaceUserController {
     @SaCheckPermission(value = SpaceUserPermissionConstant.SPACE_USER_MANAGE)
     public BaseResponse<Boolean> deleteSpaceUser(@RequestBody DeleteRequest deleteRequest) {
         ThrowUtils.throwIf(deleteRequest == null, ErrorCode.PARAMS_ERROR);
-        spaceUserService.deleteSpaceUser(deleteRequest, null);
+        spaceUserApplicationService.deleteSpaceUser(deleteRequest, null);
         return ResultUtils.success(true);
     }
 
@@ -69,7 +69,7 @@ public class SpaceUserController {
         Long spaceId = spaceUserQueryRequest.getSpaceId();
         Long userId = spaceUserQueryRequest.getUserId();
         ThrowUtils.throwIf(ObjectUtil.hasEmpty(spaceId, userId), ErrorCode.PARAMS_ERROR);
-        SpaceUser spaceUser = spaceUserService.getOne(spaceUserService.getQueryWrapper(spaceUserQueryRequest));
+        SpaceUser spaceUser = spaceUserApplicationService.getOne(spaceUserApplicationService.getQueryWrapper(spaceUserQueryRequest));
         ThrowUtils.throwIf(spaceUser == null, ErrorCode.NOT_FOUND_ERROR);
         return ResultUtils.success(spaceUser);
     }
@@ -81,8 +81,8 @@ public class SpaceUserController {
     @SaCheckPermission(value = SpaceUserPermissionConstant.SPACE_USER_MANAGE)
     public BaseResponse<List<SpaceUserVO>> listSpaceUser(@RequestBody SpaceUserQueryRequest spaceUserQueryRequest) {
         ThrowUtils.throwIf(spaceUserQueryRequest == null, ErrorCode.PARAMS_ERROR);
-        List<SpaceUser> spaceUserList = spaceUserService.list(spaceUserService.getQueryWrapper(spaceUserQueryRequest));
-        return ResultUtils.success(spaceUserService.getSpaceUserVOList(spaceUserList));
+        List<SpaceUser> spaceUserList = spaceUserApplicationService.list(spaceUserApplicationService.getQueryWrapper(spaceUserQueryRequest));
+        return ResultUtils.success(spaceUserApplicationService.getSpaceUserVOList(spaceUserList));
     }
 
     /**
@@ -92,7 +92,7 @@ public class SpaceUserController {
     @SaCheckPermission(value = SpaceUserPermissionConstant.SPACE_USER_MANAGE)
     public BaseResponse<Boolean> editSpaceUser(@RequestBody SpaceUserEditRequest spaceUserEditRequest) {
         ThrowUtils.throwIf(spaceUserEditRequest == null, ErrorCode.PARAMS_ERROR);
-        spaceUserService.editSpaceUser(spaceUserEditRequest, null);
+        spaceUserApplicationService.editSpaceUser(spaceUserEditRequest, null);
         return ResultUtils.success(true);
     }
 
@@ -104,7 +104,7 @@ public class SpaceUserController {
         User loginUser = userApplicationService.getLoginUser(request);
         SpaceUserQueryRequest spaceUserQueryRequest = new SpaceUserQueryRequest();
         spaceUserQueryRequest.setUserId(loginUser.getId());
-        List<SpaceUser> spaceUserList = spaceUserService.list(spaceUserService.getQueryWrapper(spaceUserQueryRequest));
-        return ResultUtils.success(spaceUserService.getSpaceUserVOList(spaceUserList));
+        List<SpaceUser> spaceUserList = spaceUserApplicationService.list(spaceUserApplicationService.getQueryWrapper(spaceUserQueryRequest));
+        return ResultUtils.success(spaceUserApplicationService.getSpaceUserVOList(spaceUserList));
     }
 }

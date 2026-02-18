@@ -1,4 +1,4 @@
-package com.ping.pingpicturebackend.service.impl;
+package com.ping.pingpicture.domain.space.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjUtil;
@@ -6,6 +6,15 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ping.pingpicture.application.service.UserApplicationService;
+import com.ping.pingpicture.domain.picture.entity.Picture;
+import com.ping.pingpicture.domain.space.entity.Space;
+import com.ping.pingpicture.domain.space.entity.SpaceUser;
+import com.ping.pingpicture.domain.space.service.SpaceDomainService;
+import com.ping.pingpicture.domain.space.valueobject.SpaceLevelEnum;
+import com.ping.pingpicture.domain.space.valueobject.SpaceRoleEnum;
+import com.ping.pingpicture.domain.space.valueobject.SpaceTypeEnum;
+import com.ping.pingpicture.domain.user.entity.User;
 import com.ping.pingpicture.infrastructure.common.DeleteRequest;
 import com.ping.pingpicture.infrastructure.exception.BusinessException;
 import com.ping.pingpicture.infrastructure.exception.ErrorCode;
@@ -16,17 +25,8 @@ import com.ping.pingpicture.infrastructure.mapper.SpaceUserMapper;
 import com.ping.pingpicture.interfaces.dto.space.SpaceAddRequest;
 import com.ping.pingpicture.interfaces.dto.space.SpaceEditRequest;
 import com.ping.pingpicture.interfaces.dto.space.SpaceQueryRequest;
-import com.ping.pingpicture.domain.picture.entity.Picture;
-import com.ping.pingpicture.domain.space.entity.Space;
-import com.ping.pingpicture.domain.space.entity.SpaceUser;
-import com.ping.pingpicture.domain.user.entity.User;
-import com.ping.pingpicture.domain.space.valueobject.SpaceLevelEnum;
-import com.ping.pingpicture.domain.space.valueobject.SpaceRoleEnum;
-import com.ping.pingpicture.domain.space.valueobject.SpaceTypeEnum;
 import com.ping.pingpicture.interfaces.vo.space.SpaceVO;
 import com.ping.pingpicture.interfaces.vo.user.UserVO;
-import com.ping.pingpicturebackend.service.SpaceService;
-import com.ping.pingpicture.application.service.UserApplicationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -43,8 +43,8 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space>
-        implements SpaceService {
+public class SpaceDomainServiceImpl extends ServiceImpl<SpaceMapper, Space>
+        implements SpaceDomainService {
 
     @Resource
     private UserApplicationService userApplicationService;

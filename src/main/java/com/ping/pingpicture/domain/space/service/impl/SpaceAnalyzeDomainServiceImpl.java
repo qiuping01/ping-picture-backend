@@ -1,4 +1,4 @@
-package com.ping.pingpicturebackend.service.impl;
+package com.ping.pingpicture.domain.space.service.impl;
 
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjUtil;
@@ -6,23 +6,26 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ping.pingpicture.application.service.PictureApplicationService;
+import com.ping.pingpicture.application.service.SpaceApplicationService;
+import com.ping.pingpicture.application.service.UserApplicationService;
+import com.ping.pingpicture.domain.picture.entity.Picture;
+import com.ping.pingpicture.domain.space.entity.Space;
+import com.ping.pingpicture.domain.space.service.SpaceAnalyzeDomainService;
+import com.ping.pingpicture.domain.user.entity.User;
 import com.ping.pingpicture.infrastructure.exception.BusinessException;
 import com.ping.pingpicture.infrastructure.exception.ErrorCode;
 import com.ping.pingpicture.infrastructure.exception.ThrowUtils;
 import com.ping.pingpicture.infrastructure.mapper.SpaceMapper;
 import com.ping.pingpicture.interfaces.dto.space.analyze.*;
-import com.ping.pingpicture.domain.picture.entity.Picture;
-import com.ping.pingpicture.domain.space.entity.Space;
-import com.ping.pingpicture.domain.user.entity.User;
 import com.ping.pingpicture.interfaces.vo.space.analyze.*;
-import com.ping.pingpicturebackend.service.SpaceAnalyzeService;
-import com.ping.pingpicturebackend.service.SpaceService;
-import com.ping.pingpicture.application.service.UserApplicationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -30,14 +33,14 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
-        implements SpaceAnalyzeService {
+public class SpaceAnalyzeDomainServiceImpl extends ServiceImpl<SpaceMapper, Space>
+        implements SpaceAnalyzeDomainService {
 
     @Resource
     private UserApplicationService userApplicationService;
 
     @Resource
-    private SpaceService spaceService;
+    private SpaceApplicationService spaceApplicationService;
 
     @Resource
     private PictureApplicationService pictureApplicationService;
@@ -84,7 +87,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
             // 指定空间分析权限校验：仅空间管理员可访问
             Long spaceId = spaceUsageAnalyzeRequest.getSpaceId();
             ThrowUtils.throwIf((spaceId == null || spaceId <= 0), ErrorCode.PARAMS_ERROR);
-            Space space = spaceService.getById(spaceId);
+            Space space = spaceApplicationService.getById(spaceId);
             ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
             // 仅空间管理员可访问
             checkSpaceAnalyzeAuth(spaceUsageAnalyzeRequest, loginUser);
@@ -295,7 +298,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
                 .orderByDesc("totalSize")
                 .last("LIMIT " + spaceRankAnalyzeRequest.getTopN()); // 获取前 N 个空间
         // 3. 查询结果
-        return spaceService.list(queryWrapper);
+        return spaceApplicationService.list(queryWrapper);
     }
 
     /**
@@ -342,7 +345,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
         } else {
             // 指定空间分析权限校验：仅空间管理员可访问
             ThrowUtils.throwIf((spaceId == null || spaceId <= 0), ErrorCode.PARAMS_ERROR);
-            Space space = spaceService.getById(spaceId);
+            Space space = spaceApplicationService.getById(spaceId);
             ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
         }
     }

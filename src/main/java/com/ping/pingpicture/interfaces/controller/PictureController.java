@@ -32,7 +32,7 @@ import com.ping.pingpicture.domain.user.entity.User;
 import com.ping.pingpicture.domain.picture.valueobject.PictureReviewStatusEnum;
 import com.ping.pingpicture.interfaces.vo.picture.PictureTagCategory;
 import com.ping.pingpicture.interfaces.vo.picture.PictureVO;
-import com.ping.pingpicturebackend.service.SpaceService;
+import com.ping.pingpicture.application.service.SpaceApplicationService;
 import com.ping.pingpicture.application.service.UserApplicationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -66,7 +66,7 @@ public class PictureController {
     private StringRedisTemplate stringRedisTemplate;
 
     @Resource
-    private SpaceService spaceService;
+    private SpaceApplicationService spaceApplicationService;
 
     @Resource
     private SpaceUserAuthManager spaceUserAuthManager;
@@ -185,7 +185,7 @@ public class PictureController {
 //            User loginUser = userService.getLoginUser(request);
             // 已经改为使用注解鉴权
 //            pictureService.checkPictureAuth(loginUser, picture);
-            space = spaceService.getById(picture.getSpaceId());
+            space = spaceApplicationService.getById(picture.getSpaceId());
             ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "图片所在空间不存在");
         }
         // 获取权限列表

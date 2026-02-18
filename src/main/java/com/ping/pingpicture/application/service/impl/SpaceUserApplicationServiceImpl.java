@@ -1,11 +1,18 @@
-package com.ping.pingpicturebackend.service.impl;
+package com.ping.pingpicture.application.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ping.pingpicture.application.service.SpaceApplicationService;
+import com.ping.pingpicture.application.service.SpaceUserApplicationService;
+import com.ping.pingpicture.application.service.UserApplicationService;
+import com.ping.pingpicture.domain.space.entity.Space;
+import com.ping.pingpicture.domain.space.entity.SpaceUser;
+import com.ping.pingpicture.domain.space.service.SpaceUserDomainService;
+import com.ping.pingpicture.domain.space.valueobject.SpaceRoleEnum;
+import com.ping.pingpicture.domain.user.entity.User;
 import com.ping.pingpicture.infrastructure.common.DeleteRequest;
 import com.ping.pingpicture.infrastructure.exception.BusinessException;
 import com.ping.pingpicture.infrastructure.exception.ErrorCode;
@@ -14,16 +21,9 @@ import com.ping.pingpicture.infrastructure.mapper.SpaceUserMapper;
 import com.ping.pingpicture.interfaces.dto.spaceuser.SpaceUserAddRequest;
 import com.ping.pingpicture.interfaces.dto.spaceuser.SpaceUserEditRequest;
 import com.ping.pingpicture.interfaces.dto.spaceuser.SpaceUserQueryRequest;
-import com.ping.pingpicture.domain.space.entity.Space;
-import com.ping.pingpicture.domain.space.entity.SpaceUser;
-import com.ping.pingpicture.domain.user.entity.User;
-import com.ping.pingpicture.domain.space.valueobject.SpaceRoleEnum;
 import com.ping.pingpicture.interfaces.vo.space.SpaceUserVO;
 import com.ping.pingpicture.interfaces.vo.space.SpaceVO;
 import com.ping.pingpicture.interfaces.vo.user.UserVO;
-import com.ping.pingpicturebackend.service.SpaceService;
-import com.ping.pingpicturebackend.service.SpaceUserService;
-import com.ping.pingpicture.application.service.UserApplicationService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -40,11 +40,14 @@ import java.util.stream.Collectors;
  * @createDate 2026-01-24 22:58:46
  */
 @Service
-public class SpaceUserServiceImpl extends ServiceImpl<SpaceUserMapper, SpaceUser>
-        implements SpaceUserService {
+public class SpaceUserApplicationServiceImpl extends ServiceImpl<SpaceUserMapper, SpaceUser>
+        implements SpaceUserApplicationService {
 
     @Resource
-    private SpaceService spaceService;
+    private SpaceUserDomainService spaceUserDomainService;
+
+    @Resource
+    private SpaceApplicationService spaceApplicationService;
 
     @Resource
     private UserApplicationService userApplicationService;
@@ -89,7 +92,7 @@ public class SpaceUserServiceImpl extends ServiceImpl<SpaceUserMapper, SpaceUser
             ThrowUtils.throwIf(ObjectUtil.hasEmpty(spaceId, userId), ErrorCode.PARAMS_ERROR);
             User user = userApplicationService.getUserById(userId);
             ThrowUtils.throwIf(user == null, ErrorCode.NOT_FOUND_ERROR, "用户不存在");
-            Space space = spaceService.getById(spaceId);
+            Space space = spaceApplicationService.getById(spaceId);
             ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
         } else {
             // 编辑时，校验 id 和空间角色
@@ -111,19 +114,7 @@ public class SpaceUserServiceImpl extends ServiceImpl<SpaceUserMapper, SpaceUser
      */
     @Override
     public QueryWrapper<SpaceUser> getQueryWrapper(SpaceUserQueryRequest spaceUserQueryRequest) {
-        QueryWrapper<SpaceUser> queryWrapper = new QueryWrapper<>();
-        if (spaceUserQueryRequest == null) {
-            return queryWrapper;
-        }
-        Long id = spaceUserQueryRequest.getId();
-        Long spaceId = spaceUserQueryRequest.getSpaceId();
-        Long userId = spaceUserQueryRequest.getUserId();
-        String spaceRole = spaceUserQueryRequest.getSpaceRole();
-        queryWrapper.eq(ObjUtil.isNotEmpty(id), "id", id);
-        queryWrapper.eq(ObjUtil.isNotEmpty(spaceId), "spaceId", spaceId);
-        queryWrapper.eq(ObjUtil.isNotEmpty(userId), "userId", userId);
-        queryWrapper.eq(StrUtil.isNotBlank(spaceRole), "spaceRole", spaceRole);
-        return queryWrapper;
+        return spaceUserDomainService.getQueryWrapper(spaceUserQueryRequest);
     }
 
     /**
@@ -146,8 +137,8 @@ public class SpaceUserServiceImpl extends ServiceImpl<SpaceUserMapper, SpaceUser
         // 关联查询空间信息
         Long spaceId = spaceUser.getSpaceId();
         if (spaceId != null && spaceId > 0) {
-            Space space = spaceService.getById(spaceId);
-            SpaceVO spaceVO = spaceService.getSpaceVO(space);
+            Space space = spaceApplicationService.getById(spaceId);
+            SpaceVO spaceVO = spaceApplicationService.getSpaceVO(space);
             spaceUserVO.setSpace(spaceVO);
         }
         return spaceUserVO;
@@ -182,7 +173,7 @@ public class SpaceUserServiceImpl extends ServiceImpl<SpaceUserMapper, SpaceUser
         Map<Long, List<User>> userIdUserListMap = userApplicationService.listByIds(userIdSet).stream()
                 .collect(Collectors.groupingBy(User::getId));
         // 查询空间信息
-        Map<Long, List<Space>> spaceIdSpaceListMap = spaceService.listByIds(spaceIdSet).stream()
+        Map<Long, List<Space>> spaceIdSpaceListMap = spaceApplicationService.listByIds(spaceIdSet).stream()
                 .collect(Collectors.groupingBy(Space::getId));
         // 填充用户和空间信息到列表中
         spaceUserVOList.forEach(spaceUserVO -> {
@@ -199,7 +190,7 @@ public class SpaceUserServiceImpl extends ServiceImpl<SpaceUserMapper, SpaceUser
             if (spaceIdSpaceListMap.containsKey(spaceId)) {
                 space = spaceIdSpaceListMap.get(spaceId).get(0);
             }
-            spaceUserVO.setSpace(spaceService.getSpaceVO(space));
+            spaceUserVO.setSpace(spaceApplicationService.getSpaceVO(space));
         });
         return spaceUserVOList;
     }

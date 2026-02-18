@@ -1,4 +1,4 @@
-package com.ping.pingpicturebackend.service;
+package com.ping.pingpicture.application.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -16,7 +16,7 @@ import com.ping.pingpicture.interfaces.vo.space.SpaceVO;
  * @description 针对表【space(空间)】的数据库操作Service
  * @createDate 2026-01-03 19:53:40
  */
-public interface SpaceService extends IService<Space> {
+public interface SpaceApplicationService extends IService<Space> {
 
     /**
      * 添加空间
@@ -26,13 +26,6 @@ public interface SpaceService extends IService<Space> {
      * @return 空间id
      */
     long addSpace(SpaceAddRequest spaceAddRequest, User loginUser);
-
-    /**
-     * 验证空间
-     *
-     * @param space 空间
-     */
-    void validSpace(Space space, boolean add);
 
     /**
      * 构造查询 QueryWrapper

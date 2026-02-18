@@ -23,8 +23,8 @@ import com.ping.pingpicture.domain.space.entity.SpaceUser;
 import com.ping.pingpicture.domain.user.entity.User;
 import com.ping.pingpicture.domain.space.valueobject.SpaceRoleEnum;
 import com.ping.pingpicture.domain.space.valueobject.SpaceTypeEnum;
-import com.ping.pingpicturebackend.service.SpaceService;
-import com.ping.pingpicturebackend.service.SpaceUserService;
+import com.ping.pingpicture.application.service.SpaceApplicationService;
+import com.ping.pingpicture.application.service.SpaceUserApplicationService;
 import com.ping.pingpicture.application.service.UserApplicationService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -42,7 +42,7 @@ import static com.ping.pingpicture.domain.user.constant.UserConstant.USER_LOGIN_
 public class StpInterfaceImpl implements StpInterface {
 
     @Resource
-    private SpaceUserService spaceUserService;
+    private SpaceUserApplicationService spaceUserApplicationService;
 
     @Resource
     private PictureApplicationService pictureApplicationService;
@@ -51,7 +51,7 @@ public class StpInterfaceImpl implements StpInterface {
     private UserApplicationService userApplicationService;
 
     @Resource
-    private SpaceService spaceService;
+    private SpaceApplicationService spaceApplicationService;
 
     @Resource
     private SpaceUserAuthManager spaceUserAuthManager;
@@ -84,12 +84,12 @@ public class StpInterfaceImpl implements StpInterface {
         // 6. 没有 SpaceUser 对象，如果有 spaceUserId,必然是团队空间，直接查 SpaceUser对象
         Long spaceUserId = authContext.getSpaceUserId();
         if (spaceUserId != null) {
-            spaceUser = spaceUserService.getById(spaceUserId);
+            spaceUser = spaceUserApplicationService.getById(spaceUserId);
             if (spaceUser == null) {
                 throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "空间用户不存在");
             }
             // 取出当前登录用户对应的 spaceUser
-            SpaceUser loginSpaceUser = spaceUserService.lambdaQuery()
+            SpaceUser loginSpaceUser = spaceUserApplicationService.lambdaQuery()
                     .eq(SpaceUser::getUserId, userId)
                     .eq(SpaceUser::getSpaceId, spaceUser.getSpaceId())
                     .one();
@@ -129,7 +129,7 @@ public class StpInterfaceImpl implements StpInterface {
         }
 
         // 7.2. 如果 spaceId 不为空，直接获取 Space 对象
-        Space space = spaceService.getById(spaceId);
+        Space space = spaceApplicationService.getById(spaceId);
         if (space == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "空间不存在");
         }
@@ -144,7 +144,7 @@ public class StpInterfaceImpl implements StpInterface {
             }
         } else {
             // 团队空间，通过 spaceUser 表获取权限
-            spaceUser = spaceUserService.lambdaQuery()
+            spaceUser = spaceUserApplicationService.lambdaQuery()
                     .eq(SpaceUser::getUserId, userId)
                     .eq(SpaceUser::getSpaceId, spaceId)
                     .one();

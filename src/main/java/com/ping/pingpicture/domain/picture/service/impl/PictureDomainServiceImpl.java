@@ -26,7 +26,7 @@ import com.ping.pingpicture.domain.user.entity.User;
 import com.ping.pingpicture.domain.picture.valueobject.PictureReviewStatusEnum;
 import com.ping.pingpicture.interfaces.vo.picture.PictureVO;
 import com.ping.pingpicture.interfaces.vo.user.UserVO;
-import com.ping.pingpicturebackend.service.SpaceService;
+import com.ping.pingpicture.application.service.SpaceApplicationService;
 import com.ping.pingpicture.application.service.UserApplicationService;
 import com.ping.pingpicture.infrastructure.utils.ColorSimilarUtils;
 import com.ping.pingpicture.infrastructure.utils.ColorTransformUtils;
@@ -73,7 +73,7 @@ public class PictureDomainServiceImpl implements PictureDomainService {
     private CosManager cosManager;
 
     @Resource
-    private SpaceService spaceService;
+    private SpaceApplicationService spaceApplicationService;
 
     @Resource
     private TransactionTemplate transactionTemplate;
@@ -102,7 +102,7 @@ public class PictureDomainServiceImpl implements PictureDomainService {
         }
         // 校验是否指定空间
         if (spaceId != null) {   // 指定空间id，则为非默认公共空间
-            Space space = spaceService.getById(spaceId);
+            Space space = spaceApplicationService.getById(spaceId);
             ThrowUtils.throwIf(space == null, ErrorCode.PARAMS_ERROR, "空间不存在");
             // 仅本人可编辑
             if (!loginUser.getId().equals(space.getUserId())) {
@@ -186,7 +186,7 @@ public class PictureDomainServiceImpl implements PictureDomainService {
             boolean result = pictureRepository.saveOrUpdate(picture);
             ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "上传图片失败");
             if (finalSpaceId != null) {
-                boolean updateResult = spaceService.lambdaUpdate()
+                boolean updateResult = spaceApplicationService.lambdaUpdate()
                         .eq(Space::getId, finalSpaceId)
                         .setSql("totalCount = totalCount + 1")
                         .setSql("totalSize = totalSize + " + picture.getPicSize())
@@ -508,7 +508,7 @@ public class PictureDomainServiceImpl implements PictureDomainService {
             // 释放额度
             Long finalSpaceId = oldPicture.getSpaceId();
             if (finalSpaceId != null) {
-                boolean updateResult = spaceService.lambdaUpdate()
+                boolean updateResult = spaceApplicationService.lambdaUpdate()
                         .eq(Space::getId, finalSpaceId)
                         .setSql("totalCount = totalCount - 1")
                         .setSql("totalSize = totalSize - " + oldPicture.getPicSize())
@@ -568,7 +568,7 @@ public class PictureDomainServiceImpl implements PictureDomainService {
         ThrowUtils.throwIf(spaceId == null, ErrorCode.PARAMS_ERROR);
         ThrowUtils.throwIf(loginUser == null, ErrorCode.NO_AUTH_ERROR);
         // 2. 校验空间权限
-        Space space = spaceService.getById(spaceId);
+        Space space = spaceApplicationService.getById(spaceId);
         ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
         if (!space.getUserId().equals(loginUser.getId())) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "没有空间访问权限");
@@ -636,7 +636,7 @@ public class PictureDomainServiceImpl implements PictureDomainService {
         ThrowUtils.throwIf(spaceId <= 0, ErrorCode.PARAMS_ERROR);
         ThrowUtils.throwIf(loginUser == null, ErrorCode.NO_AUTH_ERROR);
         // 2. 校验空间权限
-        Space space = spaceService.getById(spaceId);
+        Space space = spaceApplicationService.getById(spaceId);
         ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
         if (!space.getUserId().equals(loginUser.getId())) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "没有权限");
