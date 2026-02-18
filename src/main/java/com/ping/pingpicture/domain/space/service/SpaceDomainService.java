@@ -16,23 +16,7 @@ import com.ping.pingpicture.interfaces.vo.space.SpaceVO;
  * @description 针对表【space(空间)】的数据库操作Service
  * @createDate 2026-01-03 19:53:40
  */
-public interface SpaceDomainService extends IService<Space> {
-
-    /**
-     * 添加空间
-     *
-     * @param spaceAddRequest 添加请求
-     * @param loginUser       登录用户
-     * @return 空间id
-     */
-    long addSpace(SpaceAddRequest spaceAddRequest, User loginUser);
-
-    /**
-     * 验证空间
-     *
-     * @param space 空间
-     */
-    void validSpace(Space space, boolean add);
+public interface SpaceDomainService {
 
     /**
      * 构造查询 QueryWrapper
@@ -41,22 +25,6 @@ public interface SpaceDomainService extends IService<Space> {
      * @return 查询 QueryWrapper
      */
     QueryWrapper<Space> getQueryWrapper(SpaceQueryRequest spaceQueryRequest);
-
-    /**
-     * 获取单个空间封装
-     *
-     * @param space 空间
-     * @return SpaceVO
-     */
-    SpaceVO getSpaceVO(Space space);
-
-    /**
-     * 获取分页空间封装
-     *
-     * @param spacePage 空间分页
-     * @return SpaceVO分页
-     */
-    Page<SpaceVO> getSpaceVOPage(Page<Space> spacePage);
 
     /**
      * 填充审核参数
@@ -84,7 +52,7 @@ public interface SpaceDomainService extends IService<Space> {
     /**
      * 空间权限校验 - 仅本人或管理员可访问
      *
-     * @param oldSpace 空间
+     * @param oldSpace  空间
      * @param loginUser 登录用户
      */
     void checkSpaceAuth(Space oldSpace, User loginUser);
