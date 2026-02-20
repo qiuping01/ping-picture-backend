@@ -14,6 +14,7 @@ import com.ping.pingpicture.infrastructure.exception.BusinessException;
 import com.ping.pingpicture.infrastructure.exception.ErrorCode;
 import com.ping.pingpicture.infrastructure.exception.ThrowUtils;
 import com.ping.pingpicture.infrastructure.mapper.PictureMapper;
+import com.ping.pingpicture.interfaces.assembler.SpaceAssembler;
 import com.ping.pingpicture.interfaces.dto.space.SpaceEditRequest;
 import com.ping.pingpicture.interfaces.dto.space.SpaceQueryRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -110,8 +111,7 @@ public class SpaceDomainServiceImpl implements SpaceDomainService {
         // 仅本人或管理员可编辑
         checkSpaceAuth(oldSpace, loginUser);
         // 编辑空间
-        Space space = new Space();
-        BeanUtils.copyProperties(spaceEditRequest, space);
+        Space space = SpaceAssembler.toSpaceEntity(spaceEditRequest);
         // 数据校验 - 管理员操作校验
         space.validSpace(false);
         // 自动填充数据

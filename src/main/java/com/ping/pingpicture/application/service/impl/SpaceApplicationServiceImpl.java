@@ -19,6 +19,7 @@ import com.ping.pingpicture.infrastructure.exception.ErrorCode;
 import com.ping.pingpicture.infrastructure.exception.ThrowUtils;
 import com.ping.pingpicture.infrastructure.mapper.SpaceMapper;
 import com.ping.pingpicture.infrastructure.mapper.SpaceUserMapper;
+import com.ping.pingpicture.interfaces.assembler.SpaceAssembler;
 import com.ping.pingpicture.interfaces.dto.space.SpaceAddRequest;
 import com.ping.pingpicture.interfaces.dto.space.SpaceEditRequest;
 import com.ping.pingpicture.interfaces.dto.space.SpaceQueryRequest;
@@ -67,8 +68,7 @@ public class SpaceApplicationServiceImpl extends ServiceImpl<SpaceMapper, Space>
         // 1. 填充参数默认值
         ThrowUtils.throwIf(spaceAddRequest == null, ErrorCode.PARAMS_ERROR);
         // DTO 处理完后再拷贝到实体
-        Space space = new Space();
-        BeanUtils.copyProperties(spaceAddRequest, space);
+        Space space = SpaceAssembler.toSpaceEntity(spaceAddRequest);
         space.fillDefaultSpace();
         // 填充级别参数和用户 id
         this.fillSpaceBySpaceLevel(space);

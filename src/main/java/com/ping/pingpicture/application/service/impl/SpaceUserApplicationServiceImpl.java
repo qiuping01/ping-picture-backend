@@ -18,6 +18,7 @@ import com.ping.pingpicture.infrastructure.exception.BusinessException;
 import com.ping.pingpicture.infrastructure.exception.ErrorCode;
 import com.ping.pingpicture.infrastructure.exception.ThrowUtils;
 import com.ping.pingpicture.infrastructure.mapper.SpaceUserMapper;
+import com.ping.pingpicture.interfaces.assembler.SpaceUserAssembler;
 import com.ping.pingpicture.interfaces.dto.spaceuser.SpaceUserAddRequest;
 import com.ping.pingpicture.interfaces.dto.spaceuser.SpaceUserEditRequest;
 import com.ping.pingpicture.interfaces.dto.spaceuser.SpaceUserQueryRequest;
@@ -61,8 +62,7 @@ public class SpaceUserApplicationServiceImpl extends ServiceImpl<SpaceUserMapper
     @Override
     public long addSpaceUser(SpaceUserAddRequest spaceUserAddRequest) {
         ThrowUtils.throwIf(spaceUserAddRequest == null, ErrorCode.PARAMS_ERROR);
-        SpaceUser spaceUser = new SpaceUser();
-        BeanUtils.copyProperties(spaceUserAddRequest, spaceUser);
+        SpaceUser spaceUser = SpaceUserAssembler.toSpaceUserEntity(spaceUserAddRequest);
         validSpaceUser(spaceUser, true);
         // 检查是否已添加过
         boolean exists = this.lambdaQuery()
@@ -206,8 +206,7 @@ public class SpaceUserApplicationServiceImpl extends ServiceImpl<SpaceUserMapper
         if (spaceUserEditRequest == null || spaceUserEditRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        SpaceUser spaceUser = new SpaceUser();
-        BeanUtils.copyProperties(spaceUserEditRequest, spaceUser);
+        SpaceUser spaceUser = SpaceUserAssembler.toSpaceUserEntity(spaceUserEditRequest);
         // 数据校验
         validSpaceUser(spaceUser, false);
         // 判断该条关系是否存在 - 查库操作往后放

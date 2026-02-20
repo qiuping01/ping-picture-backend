@@ -1,4 +1,4 @@
-package com.ping.pingpicturebackend.controller;
+package com.ping.pingpicture.interfaces.controller;
 
 import cn.dev33.satoken.annotation.SaCheckRole;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -10,6 +10,7 @@ import com.ping.pingpicture.infrastructure.exception.BusinessException;
 import com.ping.pingpicture.infrastructure.exception.ErrorCode;
 import com.ping.pingpicture.infrastructure.exception.ThrowUtils;
 import com.ping.pingpicture.infrastructure.manager.auth.SpaceUserAuthManager;
+import com.ping.pingpicture.interfaces.assembler.SpaceAssembler;
 import com.ping.pingpicture.interfaces.dto.space.*;
 import com.ping.pingpicture.domain.space.entity.Space;
 import com.ping.pingpicture.domain.user.entity.User;
@@ -82,8 +83,7 @@ public class SpaceController {
         Space oldSpace = spaceApplicationService.getById(spaceUpdateRequest.getId());
         ThrowUtils.throwIf(oldSpace == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
         // 将实体类和 DTO 进行转换
-        Space space = new Space();
-        BeanUtils.copyProperties(spaceUpdateRequest, space);
+        Space space = SpaceAssembler.toSpaceEntity(spaceUpdateRequest);
         // 空间校验
         space.validSpace(true);
         // 填充空间级别参数

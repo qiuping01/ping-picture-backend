@@ -1,4 +1,4 @@
-package com.ping.pingpicturebackend.controller;
+package com.ping.pingpicture.interfaces.controller;
 
 import com.ping.pingpicture.infrastructure.common.BaseResponse;
 import com.ping.pingpicture.infrastructure.common.ResultUtils;

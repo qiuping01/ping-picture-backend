@@ -1,4 +1,4 @@
-package com.ping.pingpicturebackend.controller;
+package com.ping.pingpicture.interfaces.controller;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import cn.hutool.core.util.ObjectUtil;
