@@ -17,7 +17,7 @@ import com.ping.pingpicture.infrastructure.exception.ThrowUtils;
 import com.ping.pingpicture.interfaces.dto.user.UserQueryRequest;
 import com.ping.pingpicture.interfaces.vo.user.LoginUserVO;
 import com.ping.pingpicture.interfaces.vo.user.UserVO;
-import com.ping.pingpicture.infrastructure.manager.auth.satoken.DeviceUtils;
+import com.ping.pingpicture.shared.auth.satoken.DeviceUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;

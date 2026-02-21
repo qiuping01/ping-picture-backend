@@ -9,7 +9,7 @@ import com.ping.pingpicture.infrastructure.config.CosClientConfig;
 import com.ping.pingpicture.infrastructure.exception.BusinessException;
 import com.ping.pingpicture.infrastructure.exception.ErrorCode;
 import com.ping.pingpicture.infrastructure.api.CosManager;
-import com.ping.pingpicturebackend.model.dto.file.UploadPictureResult;
+import com.ping.pingpicture.infrastructure.manager.upload.file.UploadPictureResult;
 import com.qcloud.cos.model.PutObjectResult;
 import com.qcloud.cos.model.ciModel.persistence.CIObject;
 import com.qcloud.cos.model.ciModel.persistence.ImageInfo;

@@ -7,7 +7,6 @@ import com.ping.pingpicture.infrastructure.common.DeleteRequest;
 import com.ping.pingpicture.infrastructure.common.ResultUtils;
 import com.ping.pingpicture.infrastructure.exception.ErrorCode;
 import com.ping.pingpicture.infrastructure.exception.ThrowUtils;
-import com.ping.pingpicture.infrastructure.manager.auth.model.SpaceUserPermissionConstant;
 import com.ping.pingpicture.interfaces.dto.spaceuser.SpaceUserAddRequest;
 import com.ping.pingpicture.interfaces.dto.spaceuser.SpaceUserEditRequest;
 import com.ping.pingpicture.interfaces.dto.spaceuser.SpaceUserQueryRequest;
@@ -16,6 +15,7 @@ import com.ping.pingpicture.domain.user.entity.User;
 import com.ping.pingpicture.interfaces.vo.space.SpaceUserVO;
 import com.ping.pingpicture.application.service.SpaceUserApplicationService;
 import com.ping.pingpicture.application.service.UserApplicationService;
+import com.ping.pingpicture.shared.auth.model.SpaceUserPermissionConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 

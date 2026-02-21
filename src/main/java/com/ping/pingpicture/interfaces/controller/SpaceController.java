@@ -9,7 +9,6 @@ import com.ping.pingpicture.domain.user.constant.UserConstant;
 import com.ping.pingpicture.infrastructure.exception.BusinessException;
 import com.ping.pingpicture.infrastructure.exception.ErrorCode;
 import com.ping.pingpicture.infrastructure.exception.ThrowUtils;
-import com.ping.pingpicture.infrastructure.manager.auth.SpaceUserAuthManager;
 import com.ping.pingpicture.interfaces.assembler.SpaceAssembler;
 import com.ping.pingpicture.interfaces.dto.space.*;
 import com.ping.pingpicture.domain.space.entity.Space;
@@ -18,8 +17,8 @@ import com.ping.pingpicture.domain.space.valueobject.SpaceLevelEnum;
 import com.ping.pingpicture.interfaces.vo.space.SpaceVO;
 import com.ping.pingpicture.application.service.SpaceApplicationService;
 import com.ping.pingpicture.application.service.UserApplicationService;
+import com.ping.pingpicture.shared.auth.SpaceUserAuthManager;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;

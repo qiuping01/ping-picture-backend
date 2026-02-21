@@ -65,7 +65,7 @@ knife4j:
         group-name: 默认分组
         api-rule: package
         api-rule-resources:
-          - com.ping.pingpicturebackend.controller
+          - com.ping.pingpicture.interfaces.controller
 
 ############## Sa-Token 配置 (文档: https://sa-token.cc) ##############
 sa-token:
