@@ -118,3 +118,50 @@ create table if not exists space_user
     INDEX idx_spaceId (spaceId),                    -- 提升按空间查询的性能
     INDEX idx_userId (userId)                       -- 提升按用户查询的性能
 ) comment '空间用户关联' collate = utf8mb4_unicode_ci;
+
+
+-- 为 user 表添加会员相关字段
+ALTER TABLE user
+    ADD COLUMN vipExpireTime datetime     NULL COMMENT '会员过期时间',
+    ADD COLUMN vipCode       varchar(128) NULL COMMENT '会员兑换码',
+    ADD COLUMN vipNumber     bigint       NULL COMMENT '会员编号';
+
+-- 会员兑换码表
+create table if not exists vip_exchange_code
+(
+    id           bigint auto_increment comment 'id' primary key,
+    exchangeCode varchar(128)                          not null comment '兑换码',
+    hasUsed      tinyint     default 0                 not null comment '是否已兑换',
+    source       VARCHAR(50) DEFAULT NULL COMMENT '来源活动/渠道',
+    creator      VARCHAR(64) DEFAULT NULL COMMENT '创建人',
+    createTime   datetime    default CURRENT_TIMESTAMP not null comment '创建时间',
+    updateTime   datetime    default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    -- 索引设计
+    UNIQUE KEY uk_exchangeCode (exchangeCode) -- 唯一索引，兑换码全局唯一
+    ) comment '会员兑换码' collate = utf8mb4_unicode_ci;
+-- 插入20条随机格式的会员兑换码
+INSERT INTO vip_exchange_code (exchangeCode, hasUsed, source, creator)
+VALUES
+-- 未使用的兑换码
+('F4gH5jK8', 0, '春节活动', 'admin'),
+('R2tY7uI9', 0, '春节活动', 'admin'),
+('W3qE6rT4', 0, '新用户注册', 'system'),
+('B5nM8lP2', 0, '新用户注册', 'system'),
+('X1zC4vB7', 0, '新用户注册', 'system'),
+('J9kL0oP3', 0, '618大促', '运营小张'),
+('Q2wS5xE6', 0, '618大促', '运营小张'),
+('A7sD8fG1', 0, '618大促', '运营小张'),
+('Z4xR6tY9', 0, '邀请有礼', 'system'),
+('C3vB5nM2', 0, '邀请有礼', 'system'),
+('E7rT8zU1', 0, '邀请有礼', 'system'),
+('L0oP9iK4', 0, '老用户回馈', '运营小李'),
+('U2yH5jN7', 0, '老用户回馈', '运营小李'),
+('I8kM3lO6', 0, '新用户注册', 'system'),
+('P5aS9dF2', 0, '618大促', '运营小张'),
+
+-- 已使用的兑换码
+('G1hJ4kL7', 1, '春节活动', 'admin'),
+('V6bN8mQ3', 1, '春节活动', 'admin'),
+('T9rE2wR5', 1, '新用户注册', 'system'),
+('Y4uI7oP1', 1, '邀请有礼', 'system'),
+('N3mM6lL8', 1, '老用户回馈', '运营小李');
