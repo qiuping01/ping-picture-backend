@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ping.pingpicture.application.service.UserApplicationService;
 import com.ping.pingpicture.domain.user.entity.User;
 import com.ping.pingpicture.domain.user.service.UserDomainService;
+import com.ping.pingpicture.domain.user.service.VipExchangeCodeDomainService;
 import com.ping.pingpicture.infrastructure.common.DeleteRequest;
 import com.ping.pingpicture.infrastructure.common.UserNameGenerator;
 import com.ping.pingpicture.infrastructure.exception.BusinessException;
@@ -37,6 +38,9 @@ public class UserApplicationServiceImpl implements UserApplicationService {
 
     @Resource
     private UserDomainService userDomainService;
+
+    @Resource
+    private VipExchangeCodeDomainService vipExchangeCodeDomainService;
 
     /**
      * 用户注册
@@ -142,6 +146,11 @@ public class UserApplicationServiceImpl implements UserApplicationService {
     @Override
     public QueryWrapper<User> getQueryWrapper(UserQueryRequest userQueryRequest) {
         return userDomainService.getQueryWrapper(userQueryRequest);
+    }
+
+    @Override
+    public void userExchangeVip(String code, User loginUser) {
+        vipExchangeCodeDomainService.userExchangeVip(code, loginUser);
     }
 
     @Override

@@ -46,5 +46,20 @@ public class UserVO implements Serializable {
      */
     private Date createTime;
 
+    /**
+     * 会员过期时间
+     */
+    private Date vipExpireTime;
+
+    /**
+     * 会员兑换码
+     */
+    private String vipCode;
+
+    /**
+     * 会员编号
+     */
+    private Long vipNumber;
+
     private static final long serialVersionUID = -1224457055138499430L;
 }

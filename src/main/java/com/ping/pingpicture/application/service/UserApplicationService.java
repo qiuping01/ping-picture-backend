@@ -108,5 +108,13 @@ public interface UserApplicationService {
      * @return MyBatis Plus查询条件包装器，用于数据库查询
      */
     QueryWrapper<User> getQueryWrapper(UserQueryRequest userQueryRequest);
+
+    /**
+     * 兑换会员码
+     *
+     * @param code      兑换码
+     * @param loginUser 当前登录用户
+     */
+    void userExchangeVip(String code, User loginUser);
 }
 

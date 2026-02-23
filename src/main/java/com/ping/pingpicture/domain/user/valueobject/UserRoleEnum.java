@@ -2,6 +2,7 @@ package com.ping.pingpicture.domain.user.valueobject;
 
 import cn.hutool.core.util.ObjUtil;
 import lombok.Getter;
+import org.apache.ibatis.mapping.VendorDatabaseIdProvider;
 
 /**
  * 用户角色枚举
@@ -10,7 +11,9 @@ import lombok.Getter;
 public enum UserRoleEnum {
 
     USER("用户","user"),
+    VIP("会员","vip"),
     ADMIN("管理员","admin");
+
 
     private final String text;
 

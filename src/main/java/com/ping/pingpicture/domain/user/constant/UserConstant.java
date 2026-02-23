@@ -19,5 +19,10 @@ public interface UserConstant {
      */
     String ADMIN_ROLE = "admin";
 
+    /**
+     * 会员角色
+     */
+    String VIP_ROLE = "vip";
+
     // endregion
 }
