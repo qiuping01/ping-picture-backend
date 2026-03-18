@@ -6,6 +6,8 @@ server:
 spring:
   application:
     name: ping-picture-backend-ddd
+  profiles:
+    active: local
   # 数据库配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -34,6 +36,11 @@ spring:
         max-idle: 10
         # 连接池中的最小空闲连接
         min-idle: 0
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
 
 mybatis-plus:
   configuration:
