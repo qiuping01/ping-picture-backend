@@ -18,10 +18,10 @@ public class MqInitMain {
             Connection connection = factory.newConnection();
             // channel 操作消息队列的客户端
             Channel channel = connection.createChannel();
-            String EXCHANGE_NAME = "code_exchange";
+            String EXCHANGE_NAME = "pic_exchange";
             channel.exchangeDeclare(EXCHANGE_NAME, "direct");
             // 创建队列，随机分配一个队列名称
-            String queueName = "code_queue";
+            String queueName = "pic_review_queue";
             channel.queueDeclare(queueName, true, false, false, null);
             channel.queueBind(queueName, EXCHANGE_NAME, "my_routingKey");
             log.info("消息队列启动成功");

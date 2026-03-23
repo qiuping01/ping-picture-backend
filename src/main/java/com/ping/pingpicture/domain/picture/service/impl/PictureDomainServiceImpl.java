@@ -89,6 +89,7 @@ public class PictureDomainServiceImpl implements PictureDomainService {
      * @param loginUser            登录用户
      * @return PictureVO
      */
+    // todo 使用消息队列提交审核消息
     @Override
     public PictureVO uploadPicture(Object inputSource, PictureUploadRequest pictureUploadRequest, User loginUser) {
         ThrowUtils.throwIf(loginUser == null, ErrorCode.NO_AUTH_ERROR);

@@ -14,7 +14,7 @@ public class MyMessageConsumer {
 
     // 指定程序监听的消息队列和确认机制
     @SneakyThrows
-    @RabbitListener(queues = {"code_queue"}, ackMode = "MANUAL")
+    @RabbitListener(queues = {"pic_review_queue"}, ackMode = "MANUAL")
     public void receiveMessage(String message, Channel channel, @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag) {
         log.info("接收到消息: {}", message);
         // 手动确认消息
