@@ -301,6 +301,7 @@ public class PictureDomainServiceImpl implements PictureDomainService {
      * @param pictureReviewRequest 审核请求
      * @param loginUser            登录用户
      */
+    // todo 改造为消息队列消费者
     @Override
     public void doPictureReview(PictureReviewRequest
                                         pictureReviewRequest, User loginUser) {
@@ -337,6 +338,7 @@ public class PictureDomainServiceImpl implements PictureDomainService {
      * @param picture   图片
      * @param loginUser 登录用户
      */
+    // todo 1.可优化为先过审再复审  2.管理员无需复审
     @Override
     public void fillReviewParams(Picture picture, User loginUser) {
         // 管理员自动过审
@@ -349,6 +351,7 @@ public class PictureDomainServiceImpl implements PictureDomainService {
         // 普通用户自动待审（创建 / 编辑）
         else {
             picture.setReviewStatus(PictureReviewStatusEnum.REVIEWING.getValue());
+            // todo 此处可补充复审逻辑，并向消息队列发送审核消息
         }
     }
 
