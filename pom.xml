@@ -117,6 +117,14 @@
             <artifactId>spring-boot-starter-amqp</artifactId>
             <version>2.7.6</version>
         </dependency>
+        <!--  阿里云灵积  -->
+        <!-- Source: https://mvnrepository.com/artifact/com.alibaba/dashscope-sdk-java -->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>dashscope-sdk-java</artifactId>
+            <version>2.22.10</version>
+            <scope>compile</scope>
+        </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
