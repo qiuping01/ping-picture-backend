@@ -9,11 +9,15 @@ import com.alibaba.dashscope.common.ResponseFormat;
 import com.alibaba.dashscope.common.Role;
 import com.alibaba.dashscope.utils.Constants;
 import com.ping.pingpicture.infrastructure.api.qwen.model.AuditImageResponse;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Arrays;
 import java.util.Collections;
 
 public class ImageAuditWithStructuredOutput {
+
+    @Value("${spring.ai.dashscope.api-key}")
+    private static String apiKey;
 
     static {
         // 根据实际地域设置，默认北京地域无需修改，新加坡地域需改为 https://dashscope-intl.aliyuncs.com/api/v1
@@ -22,9 +26,9 @@ public class ImageAuditWithStructuredOutput {
 
     /**
      * 审核图片并返回结构化对象（含标签和分类）
-     * @param imageUrl 图片公网URL
+     * @param imageUrl 图片公网 URL
      * @return 审核结果对象
-     * @throws Exception 调用失败或JSON解析失败时抛出
+     * @throws Exception 调用失败或 JSON 解析失败时抛出
      */
     public static AuditImageResponse auditImage(String imageUrl) throws Exception {
         // 1. 构建系统消息（包含标签分类要求）
@@ -73,7 +77,7 @@ public class ImageAuditWithStructuredOutput {
         // 4. 构建请求参数（使用多模态模型，如 qwen-vl-plus）
         MultiModalConversationParam param = MultiModalConversationParam.builder()
                 // 建议从环境变量读取 API Key，避免硬编码
-                .apiKey("sk-2fd3ded9a85840ba885ac248911c255a")
+                .apiKey(apiKey)
                 .model("qwen-vl-plus")
                 .messages(Arrays.asList(systemMessage, userMessage))
                 .responseFormat(jsonFormat)
