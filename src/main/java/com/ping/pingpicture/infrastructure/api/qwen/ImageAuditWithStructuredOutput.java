@@ -10,14 +10,16 @@ import com.alibaba.dashscope.common.Role;
 import com.alibaba.dashscope.utils.Constants;
 import com.ping.pingpicture.infrastructure.api.qwen.model.AuditImageResponse;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.Collections;
 
+@Component
 public class ImageAuditWithStructuredOutput {
 
     @Value("${spring.ai.dashscope.api-key}")
-    private static String apiKey;
+    private String apiKey;
 
     static {
         // 根据实际地域设置，默认北京地域无需修改，新加坡地域需改为 https://dashscope-intl.aliyuncs.com/api/v1
@@ -26,11 +28,12 @@ public class ImageAuditWithStructuredOutput {
 
     /**
      * 审核图片并返回结构化对象（含标签和分类）
+     *
      * @param imageUrl 图片公网 URL
      * @return 审核结果对象
      * @throws Exception 调用失败或 JSON 解析失败时抛出
      */
-    public static AuditImageResponse auditImage(String imageUrl) throws Exception {
+    public AuditImageResponse auditImage(String imageUrl) throws Exception {
         // 1. 构建系统消息（包含标签分类要求）
         String systemPrompt = "你是一个图片内容审核与标签分类助手。请根据图片内容完成以下任务：\n"
                 + "1. 审核图片是否正常、是否危险、是否通过，并给出不通过原因和简短描述。\n"
@@ -99,22 +102,6 @@ public class ImageAuditWithStructuredOutput {
             return JSONUtil.toBean(jsonOutput, AuditImageResponse.class);
         } catch (Exception e) {
             throw new RuntimeException("解析AI返回的JSON失败: " + jsonOutput, e);
-        }
-    }
-
-    public static void main(String[] args) {
-        // 替换为真实的图片 URL
-        String imageUrl = "https://b0.bdstatic.com/4d0701f256a552f57f5527cf5f779350.jpg";
-        try {
-            AuditImageResponse response = auditImage(imageUrl);
-            System.out.println("审核结果对象: " + response);
-            System.out.println("是否通过: " + response.getIsPass());
-            System.out.println("描述: " + response.getDescription());
-            System.out.println("标签: " + response.getTags());
-            System.out.println("分类: " + response.getCategory());
-        } catch (Exception e) {
-            System.err.println("审核失败: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 }

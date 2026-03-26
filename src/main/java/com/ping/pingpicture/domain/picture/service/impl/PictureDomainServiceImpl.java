@@ -11,6 +11,9 @@ import com.ping.pingpicture.domain.picture.service.PictureDomainService;
 import com.ping.pingpicture.infrastructure.api.aliyunai.AliYunAiApi;
 import com.ping.pingpicture.infrastructure.api.aliyunai.model.CreateOutPaintingTaskRequest;
 import com.ping.pingpicture.infrastructure.api.aliyunai.model.CreateOutPaintingTaskResponse;
+import com.ping.pingpicture.infrastructure.api.qwen.ImageAuditWithStructuredOutput;
+import com.ping.pingpicture.infrastructure.api.qwen.model.AuditImageResponse;
+import com.ping.pingpicture.infrastructure.api.qwen.model.AuditImageStatusEnum;
 import com.ping.pingpicture.infrastructure.exception.BusinessException;
 import com.ping.pingpicture.infrastructure.exception.ErrorCode;
 import com.ping.pingpicture.infrastructure.exception.ThrowUtils;
@@ -36,6 +39,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +51,8 @@ import java.awt.*;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -80,6 +87,12 @@ public class PictureDomainServiceImpl implements PictureDomainService {
 
     @Resource
     private AliYunAiApi aliYunAiApi;
+
+    @Resource
+    private ImageAuditWithStructuredOutput imageAuditWithStructuredOutput;
+
+    @Resource
+    private TaskScheduler taskScheduler;
 
     /**
      * 上传图片
@@ -331,6 +344,92 @@ public class PictureDomainServiceImpl implements PictureDomainService {
         boolean result = pictureRepository.updateById(updatePicture);
         ThrowUtils.throwIf(!result, ErrorCode.SYSTEM_ERROR, "审核失败");
     }
+
+    /**
+     * AI 自动审图
+     *
+     * @param imageUrl  图片 url
+     * @param picId     图片 id
+     * @param loginUser 登录用户
+     */
+    @Override
+    public void aiPictureReview(String imageUrl, Long picId, User loginUser) {
+        if (loginUser.isAdmin()) {
+            return;
+        }
+        // 异步执行审核，不阻塞主线程
+        CompletableFuture.runAsync(() -> {
+            try {
+                // 1. 调用 AI 审核接口
+                AuditImageResponse auditImageResponse = imageAuditWithStructuredOutput.auditImage(imageUrl);
+                String isPass = auditImageResponse.getIsPass();
+                String noPassReason = auditImageResponse.getNoPassReason();
+                String description = auditImageResponse.getDescription();
+                List<String> tags = auditImageResponse.getTags();
+                String category = auditImageResponse.getCategory();
+
+                // 2. 更新图片状态
+                // 执行审核
+                Picture updatePicture = new Picture();
+                updatePicture.setId(picId);
+                updatePicture.setReviewStatus(PictureReviewStatusEnum.PASS.getValue());
+                updatePicture.setReviewMessage("AI 自动过审");
+                final long aiReviewerId = 943615287620148396L;
+                updatePicture.setReviewerId(aiReviewerId);
+                updatePicture.setReviewTime(new Date());
+                // 附带 AI 信息
+                updatePicture.setIntroduction(description);
+                updatePicture.setTags(JSONUtil.toJsonStr(tags));
+                updatePicture.setCategory(category);
+                if (StrUtil.isNotBlank(noPassReason)) {
+                    log.info("图片内容不安全，原因：{}", noPassReason);
+                    updatePicture.setReviewMessage(noPassReason);
+                    updatePicture.setReviewStatus(PictureReviewStatusEnum.REJECT.getValue());
+                }
+
+                // 3. 如果图片不安全，延迟删除
+                boolean result = pictureRepository.updateById(updatePicture);
+                ThrowUtils.throwIf(!result, ErrorCode.SYSTEM_ERROR, "审核失败");
+                if (AuditImageStatusEnum.NO.getValue().equals(isPass)) {
+                    log.warn("图片内容不安全，将在1分钟后自动删除，图片ID：{}", picId);
+                    // 延迟 1分钟执行删除
+                    scheduleDelayedDelete(picId, loginUser, 1, TimeUnit.MINUTES);
+//                    throw new BusinessException(ErrorCode.PICTURE_CONTENT_UNSAFE);
+                }
+            } catch (Exception e) {
+                // 记录异常，避免丢失，可根据业务决定是否需要重试或通知
+                log.error("AI 自动审图失败，图片ID：{}", picId, e);
+            }
+        });
+    }
+
+    /**
+     * 延迟删除图片
+     *
+     * @param picId     图片ID
+     * @param loginUser 登录用户
+     * @param delay     延迟时间
+     * @param unit      时间单位
+     */
+    private void scheduleDelayedDelete(Long picId, User loginUser, long delay, TimeUnit unit) {
+        taskScheduler.schedule(() -> {
+            try {
+                log.info("开始执行延迟删除，图片ID：{}，延迟时间：{} {}", picId, delay, unit);
+                // 删除前再次确认图片状态，避免误删
+                Picture picture = pictureRepository.getById(picId);
+                PictureReviewStatusEnum pictureReviewStatusEnum = PictureReviewStatusEnum.getEnumByValue(picture.getReviewStatus());
+                if (picture != null && PictureReviewStatusEnum.REJECT.equals(pictureReviewStatusEnum)) {
+                    this.deletePicture(picId, loginUser);
+                    log.info("延迟删除成功，图片ID：{}", picId);
+                } else {
+                    log.info("图片状态已变更，跳过删除，图片ID：{}", picId);
+                }
+            } catch (Exception e) {
+                log.error("延迟删除失败，图片ID：{}", picId, e);
+            }
+        }, new Date(System.currentTimeMillis() + unit.toMillis(delay)));
+    }
+
 
     /**
      * 填充审核参数

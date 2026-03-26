@@ -5,6 +5,7 @@ import lombok.Getter;
 @Getter
 public enum ErrorCode {
 
+    PICTURE_CONTENT_UNSAFE(40500, "图片内容不安全"),
     SUCCESS(200, "ok"),
     PARAMS_ERROR(40000, "请求参数错误"),
     NOT_LOGIN_ERROR(40100, "未登录"),

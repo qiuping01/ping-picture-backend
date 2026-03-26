@@ -119,6 +119,11 @@ public class PictureApplicationServiceImpl extends ServiceImpl<PictureMapper, Pi
         return pictureVOPage;
     }
 
+    @Override
+    public void aiPictureReview(String imageUrl, Long picId, User loginUser) {
+        pictureDomainService.aiPictureReview(imageUrl, picId, loginUser);
+    }
+
     /**
      * 图片审核
      *
@@ -206,8 +211,8 @@ public class PictureApplicationServiceImpl extends ServiceImpl<PictureMapper, Pi
     /**
      * 编辑图片
      *
-     * @param picture 图片
-     * @param loginUser          登录用户
+     * @param picture   图片
+     * @param loginUser 登录用户
      */
     @Override
     public void editPicture(Picture picture, User loginUser) {

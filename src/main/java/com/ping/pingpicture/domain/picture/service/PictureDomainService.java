@@ -55,6 +55,15 @@ public interface PictureDomainService {
     void doPictureReview(PictureReviewRequest pictureReviewRequest, User loginUser);
 
     /**
+     * AI 自动审图
+     *
+     * @param imageUrl  图片 url
+     * @param picId     图片 id
+     * @param loginUser 登录用户
+     */
+    void aiPictureReview(String imageUrl, Long picId, User loginUser);
+
+    /**
      * 填充审核参数
      *
      * @param picture   图片

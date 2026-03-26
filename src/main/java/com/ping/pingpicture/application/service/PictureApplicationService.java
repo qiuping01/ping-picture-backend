@@ -55,6 +55,15 @@ public interface PictureApplicationService extends IService<Picture> {
     Page<PictureVO> getPictureVOPage(Page<Picture> picturePage);
 
     /**
+     * AI 自动审图
+     *
+     * @param imageUrl  图片 url
+     * @param picId     图片 id
+     * @param loginUser 登录用户
+     */
+    void aiPictureReview(String imageUrl, Long picId, User loginUser);
+
+    /**
      * 图片审核
      *
      * @param pictureReviewRequest 审核请求
@@ -112,8 +121,8 @@ public interface PictureApplicationService extends IService<Picture> {
     /**
      * 编辑图片
      *
-     * @param picture 图片
-     * @param loginUser          登录用户
+     * @param picture   图片
+     * @param loginUser 登录用户
      */
     void editPicture(Picture picture, User loginUser);
 

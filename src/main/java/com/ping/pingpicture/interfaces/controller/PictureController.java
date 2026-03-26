@@ -97,6 +97,8 @@ public class PictureController {
         ThrowUtils.throwIf(request == null, ErrorCode.PARAMS_ERROR);
         User loginUser = userApplicationService.getLoginUser(request);
         PictureVO pictureVO = pictureApplicationService.uploadPicture(multipartFile, pictureUploadRequest, loginUser);
+        String imageUrl = pictureVO.getUrl();
+        pictureApplicationService.aiPictureReview(imageUrl, pictureVO.getId(), loginUser);
         return ResultUtils.success(pictureVO);
     }
 
@@ -111,6 +113,7 @@ public class PictureController {
         User loginUser = userApplicationService.getLoginUser(request);
         String fileUrl = pictureUploadRequest.getFileUrl();
         PictureVO pictureVO = pictureApplicationService.uploadPicture(fileUrl, pictureUploadRequest, loginUser);
+        pictureApplicationService.aiPictureReview(fileUrl, pictureVO.getId(), loginUser);
         return ResultUtils.success(pictureVO);
     }
 
