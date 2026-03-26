@@ -33,7 +33,7 @@ public class UserUpdateRequest implements Serializable {
     /**
      * 用户角色：user/admin
      */
-    private String userRole;
+//    private String userRole;
 
     private static final long serialVersionUID = 6415958572301945156L;
 }

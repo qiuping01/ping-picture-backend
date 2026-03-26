@@ -135,7 +135,7 @@ public class UserController {
      * 更新用户
      */
     @PostMapping("/update")
-    @SaCheckRole(UserConstant.ADMIN_ROLE)
+//    @SaCheckRole(UserConstant.ADMIN_ROLE)
     public BaseResponse<Boolean> userUpdate(@RequestBody UserUpdateRequest userUpdateRequest) {
         ThrowUtils.throwIf(userUpdateRequest == null || userUpdateRequest.getId() == null
                 , ErrorCode.PARAMS_ERROR);
