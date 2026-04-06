@@ -15,7 +15,7 @@ public class PingPictureBackendApplication {
 
     public static void main(String[] args) {
         // 初始化消息队列
-        MqInitMain.doInit();
+//        MqInitMain.doInit();
         SpringApplication.run(PingPictureBackendApplication.class, args);
     }
 }

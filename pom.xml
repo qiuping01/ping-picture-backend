@@ -186,7 +186,7 @@
                     <mainClass>
                         com.ping.pingpicture.PingPictureBackendApplication
                     </mainClass>
-                    <skip>true</skip>
+                    <skip>false</skip>
                 </configuration>
                 <executions>
                     <execution>

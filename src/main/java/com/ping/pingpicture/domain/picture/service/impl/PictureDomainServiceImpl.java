@@ -209,6 +209,11 @@ public class PictureDomainServiceImpl implements PictureDomainService {
             }
             return picture; // 此处返回图片信息，saveOrUpdate 会更新 picture 对象（比如设置 ID）
         });
+        // 直接同步调用
+        final Long finalPictureId = picture.getId();
+        final String finalPictureUrl = picture.getUrl();
+        // 使用 ai 异步审核图片
+        aiPictureReview(finalPictureUrl, finalPictureId, loginUser);
         return PictureVO.objToVo(picture);
     }
 
@@ -644,8 +649,8 @@ public class PictureDomainServiceImpl implements PictureDomainService {
         // 校验图片空间
         // 已经改为使用注解鉴权
 //        this.checkPictureAuth(loginUser, oldPicture);
-        // 补充审核参数
-        this.fillReviewParams(picture, loginUser);
+        // 补充审核参数 - 已使用 AI 审图，无需再次填充审核参数
+//        this.fillReviewParams(picture, loginUser);
         // 操作数据库
         boolean result = pictureRepository.updateById(picture);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "更新失败");
