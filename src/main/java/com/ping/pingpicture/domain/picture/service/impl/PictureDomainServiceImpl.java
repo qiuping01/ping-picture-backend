@@ -52,6 +52,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -93,6 +94,9 @@ public class PictureDomainServiceImpl implements PictureDomainService {
 
     @Resource
     private TaskScheduler taskScheduler;
+
+    @Resource
+    private ThreadPoolExecutor threadPoolExecutor;
 
     /**
      * 上传图片
@@ -212,8 +216,11 @@ public class PictureDomainServiceImpl implements PictureDomainService {
         // 直接同步调用
         final Long finalPictureId = picture.getId();
         final String finalPictureUrl = picture.getUrl();
-        // 使用 ai 异步审核图片
-        aiPictureReview(finalPictureUrl, finalPictureId, loginUser);
+        // 更新图片不需要调用 ai 审核
+        if (pictureId == null) {
+            // 使用 ai 异步审核图片
+            aiPictureReview(finalPictureUrl, finalPictureId, loginUser);
+        }
         return PictureVO.objToVo(picture);
     }
 
@@ -404,8 +411,14 @@ public class PictureDomainServiceImpl implements PictureDomainService {
             } catch (Exception e) {
                 // 记录异常，避免丢失，可根据业务决定是否需要重试或通知
                 log.error("AI 自动审图失败，图片ID：{}", picId, e);
+                // 记录异常到审核信息中
+                Picture updatePicture = new Picture();
+                updatePicture.setId(picId);
+                updatePicture.setReviewStatus(PictureReviewStatusEnum.REVIEWING.getValue());
+                updatePicture.setReviewMessage("AI 自动审图失败，等待人工重审");
+                pictureRepository.updateById(updatePicture);
             }
-        });
+        },threadPoolExecutor);
     }
 
     /**
