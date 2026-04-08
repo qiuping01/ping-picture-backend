@@ -6,6 +6,7 @@ import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.github.rholder.retry.Retryer;
 import com.ping.pingpicture.domain.picture.repository.PictureRepository;
 import com.ping.pingpicture.domain.picture.service.PictureDomainService;
 import com.ping.pingpicture.infrastructure.api.aliyunai.AliYunAiApi;
@@ -97,6 +98,9 @@ public class PictureDomainServiceImpl implements PictureDomainService {
 
     @Resource
     private ThreadPoolExecutor threadPoolExecutor;
+
+    @Resource
+    private Retryer<Object> auditRetryer;
 
     /**
      * 上传图片
@@ -373,7 +377,11 @@ public class PictureDomainServiceImpl implements PictureDomainService {
         CompletableFuture.runAsync(() -> {
             try {
                 // 1. 调用 AI 审核接口
-                AuditImageResponse auditImageResponse = imageAuditWithStructuredOutput.auditImage(imageUrl);
+                // 使用 Retryer 包装需要重试的逻辑
+                AuditImageResponse auditImageResponse = (AuditImageResponse) auditRetryer.call(() -> {
+                    log.info("开始 AI 审核，图片ID: {}", picId);
+                    return imageAuditWithStructuredOutput.auditImage(imageUrl);
+                });
                 String isPass = auditImageResponse.getIsPass();
                 String noPassReason = auditImageResponse.getNoPassReason();
                 String description = auditImageResponse.getDescription();
@@ -389,36 +397,53 @@ public class PictureDomainServiceImpl implements PictureDomainService {
                 final long aiReviewerId = 943615287620148396L;
                 updatePicture.setReviewerId(aiReviewerId);
                 updatePicture.setReviewTime(new Date());
-                // 附带 AI 信息
-                updatePicture.setIntroduction(description);
-                updatePicture.setTags(JSONUtil.toJsonStr(tags));
-                updatePicture.setCategory(category);
+                // 附带 AI 信息 - 先查询是否已经存在用户编辑痕迹
+                Picture oldPicture = pictureRepository.getById(picId);
+                if (oldPicture == null) {
+                    log.error("图片不存在，无法回填 AI 信息，图片ID: {}", picId);
+                    return;
+                }
+                String oldIntroduction = oldPicture.getIntroduction();
+                String oldTags = oldPicture.getTags();
+                String oldCategory = oldPicture.getCategory();
+                // 只更新用户未填写的字段
+                if (StrUtil.isBlank(oldIntroduction)) {
+                    updatePicture.setIntroduction(description);
+                }
+                if (StrUtil.isBlank(oldTags)) {
+                    updatePicture.setTags(JSONUtil.toJsonStr(tags));
+                }
+                if (StrUtil.isBlank(oldCategory)) {
+                    updatePicture.setCategory(category);
+                }
+
+                // 图片内容不安全则不通过审核
                 if (StrUtil.isNotBlank(noPassReason)) {
                     log.info("图片内容不安全，原因：{}", noPassReason);
                     updatePicture.setReviewMessage(noPassReason);
                     updatePicture.setReviewStatus(PictureReviewStatusEnum.REJECT.getValue());
                 }
-
-                // 3. 如果图片不安全，延迟删除
                 boolean result = pictureRepository.updateById(updatePicture);
                 ThrowUtils.throwIf(!result, ErrorCode.SYSTEM_ERROR, "审核失败");
+
+                // 3. 如果图片不安全，延迟删除
                 if (AuditImageStatusEnum.NO.getValue().equals(isPass)) {
                     log.warn("图片内容不安全，将在1分钟后自动删除，图片ID：{}", picId);
                     // 延迟 1分钟执行删除
                     scheduleDelayedDelete(picId, loginUser, 1, TimeUnit.MINUTES);
 //                    throw new BusinessException(ErrorCode.PICTURE_CONTENT_UNSAFE);
                 }
+
             } catch (Exception e) {
-                // 记录异常，避免丢失，可根据业务决定是否需要重试或通知
-                log.error("AI 自动审图失败，图片ID：{}", picId, e);
-                // 记录异常到审核信息中
-                Picture updatePicture = new Picture();
-                updatePicture.setId(picId);
-                updatePicture.setReviewStatus(PictureReviewStatusEnum.REVIEWING.getValue());
-                updatePicture.setReviewMessage("AI 自动审图失败，等待人工重审");
-                pictureRepository.updateById(updatePicture);
+                // 4. 处理所有重试都失败的最终场景
+                log.error("AI 自动审图最终失败，图片ID: {}", picId, e);
+                Picture fallbackPicture = new Picture();
+                fallbackPicture.setId(picId);
+                fallbackPicture.setReviewStatus(PictureReviewStatusEnum.REVIEWING.getValue());
+                fallbackPicture.setReviewMessage("AI审核服务异常，转人工处理");
+                pictureRepository.updateById(fallbackPicture);
             }
-        },threadPoolExecutor);
+        }, threadPoolExecutor);
     }
 
     /**
