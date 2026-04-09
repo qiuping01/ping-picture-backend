@@ -266,7 +266,20 @@ public class UserDomainServiceImpl implements UserDomainService {
 
     @Override
     public boolean updateById(User user) {
-        return userRepository.updateById(user);
+        // 1. 先更新数据库
+        boolean result = userRepository.updateById(user);
+        // 2. 再更新 redis
+        // 关键：更新当前登录用户的 Session 信息
+        if (StpUtil.isLogin() && result) {
+            User currentUser = (User) StpUtil.getSession().get(USER_LOGIN_STATE);
+            if (currentUser != null && currentUser.getId().equals(user.getId())) {
+                // 重新查询最新用户信息
+                User updatedUser = userRepository.getById(user.getId());
+                // 更新 Session
+                StpUtil.getSession().set(USER_LOGIN_STATE, updatedUser);
+            }
+        }
+        return result;
     }
 
     @Override

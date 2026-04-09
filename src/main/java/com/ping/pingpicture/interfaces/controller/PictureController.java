@@ -49,7 +49,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 用户接口
+ * 图片接口
  */
 @Slf4j
 @RestController
