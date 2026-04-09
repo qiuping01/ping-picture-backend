@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ping.pingpicture.infrastructure.token.mapper.PictureAuditTokenStatsMapper">
+
+    <resultMap id="BaseResultMap" type="com.ping.pingpicture.infrastructure.token.entity.PictureAuditTokenStats">
+            <id property="id" column="id" />
+            <result property="pictureId" column="pictureId" />
+            <result property="userId" column="userId" />
+            <result property="spaceId" column="spaceId" />
+            <result property="taskType" column="taskType" />
+            <result property="modelName" column="modelName" />
+            <result property="inputTokens" column="inputTokens" />
+            <result property="outputTokens" column="outputTokens" />
+            <result property="totalTokens" column="totalTokens" />
+            <result property="cost" column="cost" />
+            <result property="reviewStatus" column="reviewStatus" />
+            <result property="reviewMessage" column="reviewMessage" />
+            <result property="costTime" column="costTime" />
+            <result property="errorMsg" column="errorMsg" />
+            <result property="createTime" column="createTime" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,pictureId,userId,spaceId,taskType,modelName,
+        inputTokens,outputTokens,totalTokens,cost,reviewStatus,
+        reviewMessage,costTime,errorMsg,createTime
+    </sql>
+</mapper>
