@@ -4,6 +4,33 @@ create database if not exists ping_picture;
 -- 切换库
 use ping_picture;
 
+-- 图片 AI 调用 token 统计表
+create table if not exists picture_audit_token_stats
+(
+    id            bigint auto_increment comment '主键id' primary key,
+    pictureId     bigint         not null comment '图片id',
+    userId        bigint         not null comment '用户id',
+    spaceId       bigint         null comment '空间id（公共图库为null）',
+    taskType      varchar(32)    not null default 'review' comment '任务类型：review/outpainting',
+    modelName     varchar(64)    not null comment '模型名称',
+    inputTokens   bigint         null comment '输入token数',
+    outputTokens  bigint         null comment '输出token数',
+    totalTokens   bigint         null comment '总token数',
+    cost          decimal(10, 6) null comment '调用成本（元），精确到微元',
+    reviewStatus  int            not null default 0 comment '审核状态：0-待审核; 1-通过; 2-拒绝',
+    reviewMessage varchar(512)   null comment '审核信息',
+    costTime      bigint         null comment '调用耗时（毫秒）',
+    errorMsg      varchar(512)   null comment '失败时的错误信息',
+    createTime    datetime       not null default current_timestamp comment '创建时间',
+    -- 索引设计
+    index idx_picture_id (pictureId),       -- 提升按图片查询的性能
+    index idx_user_id (userId),             -- 提升按用户查询的性能
+    index idx_space_id (spaceId),           -- 提升按空间查询的性能
+    index idx_create_time (createTime),     -- 提升按时间范围查询的性能
+    index idx_review_status (reviewStatus), -- 提升按审核结果查询的性能
+    index idx_cost (cost)                   -- 提升按成本排序查询的性能
+) comment '图片 AI 调用 token 统计表' collate = utf8mb4_unicode_ci;
+
 -- 用户表
 create table if not exists user
 (
