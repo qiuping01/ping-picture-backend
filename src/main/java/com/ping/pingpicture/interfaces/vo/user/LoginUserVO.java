@@ -56,5 +56,15 @@ public class LoginUserVO implements Serializable {
      */
     private Date updateTime;
 
+    /**
+     * 会员过期时间
+     */
+    private Date vipExpireTime;
+
+    /**
+     * 会员编号
+     */
+    private Long vipNumber;
+
     private static final long serialVersionUID = 1L;
 }

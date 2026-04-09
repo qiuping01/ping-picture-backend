@@ -1,7 +1,11 @@
 package com.ping.pingpicture.domain.user.service.impl;
 
 import cn.hutool.core.date.DateUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ping.pingpicture.domain.space.entity.Space;
+import com.ping.pingpicture.domain.space.repository.SpaceRepository;
+import com.ping.pingpicture.domain.space.valueobject.SpaceLevelEnum;
 import com.ping.pingpicture.domain.user.constant.UserConstant;
 import com.ping.pingpicture.domain.user.entity.User;
 import com.ping.pingpicture.domain.user.entity.VipExchangeCode;
@@ -12,6 +16,8 @@ import com.ping.pingpicture.domain.user.valueobject.UserVipHasUsedEnum;
 import com.ping.pingpicture.infrastructure.exception.BusinessException;
 import com.ping.pingpicture.infrastructure.exception.ErrorCode;
 import com.ping.pingpicture.infrastructure.mapper.VipExchangeCodeMapper;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,13 +28,20 @@ import java.util.List;
 
 @Service
 public class VipExchangeCodeDomainServiceImpl extends ServiceImpl<VipExchangeCodeMapper, VipExchangeCode>
-    implements VipExchangeCodeDomainService {
+        implements VipExchangeCodeDomainService {
 
     @Resource
     private VipExchangeCodeRepository vipExchangeCodeRepository;
 
     @Resource
     private UserRepository userRepository;
+
+    @Resource
+    private SpaceRepository spaceRepository;
+
+    @Resource
+    private StringRedisTemplate stringRedisTemplate; // 用于生成VIP编号
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -59,7 +72,7 @@ public class VipExchangeCodeDomainServiceImpl extends ServiceImpl<VipExchangeCod
     }
 
     // 在类里面加一个静态变量
-    private static long vipNumber = 0;
+//    private static long vipNumber = 0; 已改用 Redis 原子递增
 
     private void executeExchange(VipExchangeCode code, User user) {
         // 更新兑换码状态
@@ -76,20 +89,118 @@ public class VipExchangeCodeDomainServiceImpl extends ServiceImpl<VipExchangeCod
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "用户不存在");
         }
 
-        // 更新用户
-        // 计算过期时间（当前时间 + 1 年）
-        Date expireTime = DateUtil.offsetMonth(new Date(), 12); // 计算当前时间加 1 年后的时间
-        freshUser.setUserRole(UserConstant.VIP_ROLE);
-        freshUser.setVipCode(code.getExchangeCode());
-        freshUser.setVipExpireTime(expireTime);
-        // 最简单的加一
-        vipNumber++;
-        freshUser.setVipNumber(vipNumber);
+        // 检查是否已经是VIP
+        if (UserConstant.VIP_ROLE.equals(freshUser.getUserRole())) {
+            // 如果已经是VIP，可以续期
+            Date currentExpireTime = freshUser.getVipExpireTime();
+            Date newExpireTime;
+            if (currentExpireTime != null && currentExpireTime.after(new Date())) {
+                // 在原有过期时间上加1年
+                newExpireTime = DateUtil.offsetMonth(currentExpireTime, 12);
+            } else {
+                // 已过期，从当前时间加1年
+                newExpireTime = DateUtil.offsetMonth(new Date(), 12);
+            }
+            freshUser.setVipExpireTime(newExpireTime);
+        } else {
+            // 新升级VIP
+            Date expireTime = DateUtil.offsetMonth(new Date(), 12);
+            freshUser.setUserRole(UserConstant.VIP_ROLE);
+            freshUser.setVipCode(code.getExchangeCode());
+            freshUser.setVipExpireTime(expireTime);
 
+            // 生成VIP编号（使用Redis原子递增）
+            long vipNumber = generateVipNumber();
+            freshUser.setVipNumber(vipNumber);
+        }
+
+        // 更新用户
         boolean userUpdated = userRepository.updateById(freshUser);
         if (!userUpdated) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "用户会员状态更新失败");
         }
+
+        // 执行空间扩容
+        upgradeUserSpaces(freshUser);
+    }
+
+    /**
+     * 升级用户的所有空间
+     */
+    private void upgradeUserSpaces(User user) {
+        // 1. 查询用户的所有空间
+        List<Space> spaces = spaceRepository.lambdaQuery()
+                .eq(Space::getUserId, user.getId())
+                .list();
+
+        if (spaces.isEmpty()) {
+            // 2. 如果用户没有空间，创建默认空间
+            createDefaultSpaceForVip(user);
+        } else {
+            // 3. 升级现有空间
+            for (Space space : spaces) {
+                upgradeSpace(space);
+            }
+        }
+    }
+
+    /**
+     * 升级单个空间
+     */
+    private void upgradeSpace(Space space) {
+        // 只升级普通空间（专业版以上不再升级）
+        if (space.getSpaceLevel() == SpaceLevelEnum.COMMON.getValue()) {
+            space.setSpaceLevel(SpaceLevelEnum.PROFESSIONAL.getValue());
+            space.setMaxSize(SpaceLevelEnum.PROFESSIONAL.getMaxSize());
+            space.setMaxCount(SpaceLevelEnum.PROFESSIONAL.getMaxCount());
+
+            boolean updated = spaceRepository.updateById(space);
+            if (!updated) {
+                throw new BusinessException(ErrorCode.OPERATION_ERROR,
+                        String.format("空间扩容失败，空间ID: %d", space.getId()));
+            }
+        }
+    }
+
+    /**
+     * 为VIP用户创建默认空间
+     */
+    private void createDefaultSpaceForVip(User user) {
+        Space defaultSpace = new Space();
+        defaultSpace.setUserId(user.getId());
+        defaultSpace.setSpaceName("默认空间");
+        defaultSpace.setSpaceLevel(SpaceLevelEnum.PROFESSIONAL.getValue());
+        defaultSpace.setMaxSize(SpaceLevelEnum.PROFESSIONAL.getMaxSize());
+        defaultSpace.setMaxCount(SpaceLevelEnum.PROFESSIONAL.getMaxCount());
+        defaultSpace.setSpaceType(0);  // 0-私有空间
+        defaultSpace.setCreateTime(new Date());
+
+        boolean saved = spaceRepository.save(defaultSpace);
+        if (!saved) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "创建默认空间失败");
+        }
+    }
+
+    /**
+     * 生成VIP编号（5位数，范围 10001-99999）
+     */
+    private long generateVipNumber() {
+        String key = "vip:number";
+
+        Long sequence = stringRedisTemplate.opsForValue().increment(key);
+
+        if (sequence == null) {
+            long fallback = System.currentTimeMillis() % 100000;
+            return Math.max(fallback, 10001);
+        }
+
+        long vipNumber = sequence + 10000;  // 1→10001, 2→10002
+
+        if (vipNumber > 99999) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "VIP编号已达上限，无法继续发放");
+        }
+
+        return vipNumber;
     }
 }
 
