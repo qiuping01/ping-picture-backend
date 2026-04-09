@@ -226,9 +226,9 @@ public class PictureController {
         ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
         // 空间权限校验
         Long spaceId = pictureQueryRequest.getSpaceId();
+        // 默认只能查看已过审的图片
+        pictureQueryRequest.setReviewStatus(PictureReviewStatusEnum.PASS.getValue());
         if (spaceId == null) {
-            // 默认只能查看已过审的图片
-            pictureQueryRequest.setReviewStatus(PictureReviewStatusEnum.PASS.getValue());
             // 只查询 spaceId 为 null 的数据
             pictureQueryRequest.setNullSpaceId(true);
         } else {

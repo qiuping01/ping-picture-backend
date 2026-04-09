@@ -217,14 +217,13 @@ public class PictureDomainServiceImpl implements PictureDomainService {
             }
             return picture; // 此处返回图片信息，saveOrUpdate 会更新 picture 对象（比如设置 ID）
         });
+
         // 直接同步调用
         final Long finalPictureId = picture.getId();
         final String finalPictureUrl = picture.getUrl();
-        // 更新图片不需要调用 ai 审核
-        if (pictureId == null) {
-            // 使用 ai 异步审核图片
-            aiPictureReview(finalPictureUrl, finalPictureId, loginUser);
-        }
+        // 使用 ai 异步审核图片
+        aiPictureReview(finalPictureUrl, finalPictureId, loginUser);
+
         return PictureVO.objToVo(picture);
     }
 
