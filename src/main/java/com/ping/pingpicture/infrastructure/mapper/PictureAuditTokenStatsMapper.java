@@ -23,17 +23,17 @@ public interface PictureAuditTokenStatsMapper extends BaseMapper<PictureAuditTok
     /**
      * 统计指定时间范围内的总成本
      */
-    @Select("SELECT SUM(cost) FROM picture_audit_token_stats WHERE create_time BETWEEN #{startTime} AND #{endTime}")
+    @Select("SELECT SUM(cost) FROM picture_audit_token_stats WHERE createTime BETWEEN #{startTime} AND #{endTime}")
     BigDecimal sumCostByTimeRange(@Param("startTime") Date startTime, @Param("endTime") Date endTime);
 
     /**
      * 按用户统计成本
      */
-    @Select("SELECT user_id, SUM(cost) as total_cost, COUNT(*) as call_count " +
+    @Select("SELECT userId, SUM(cost) as totalCost, COUNT(*) as callCount " +
             "FROM picture_audit_token_stats " +
-            "WHERE create_time BETWEEN #{startTime} AND #{endTime} " +
-            "GROUP BY user_id " +
-            "ORDER BY total_cost DESC " +
+            "WHERE createTime BETWEEN #{startTime} AND #{endTime} " +
+            "GROUP BY userId " +
+            "ORDER BY totalCost DESC " +
             "LIMIT #{limit}")
     List<Map<String, Object>> getUserCostStats(@Param("startTime") Date startTime,
                                                @Param("endTime") Date endTime,
@@ -42,13 +42,23 @@ public interface PictureAuditTokenStatsMapper extends BaseMapper<PictureAuditTok
     /**
      * 按空间统计成本
      */
-    @Select("SELECT space_id, SUM(cost) as total_cost, COUNT(*) as call_count " +
+    @Select("SELECT spaceId, SUM(cost) as totalCost, COUNT(*) as callCount " +
             "FROM picture_audit_token_stats " +
-            "WHERE create_time BETWEEN #{startTime} AND #{endTime} AND space_id IS NOT NULL " +
-            "GROUP BY space_id " +
-            "ORDER BY total_cost DESC")
+            "WHERE createTime BETWEEN #{startTime} AND #{endTime} AND spaceId IS NOT NULL " +
+            "GROUP BY spaceId " +
+            "ORDER BY totalCost DESC")
     List<Map<String, Object>> getSpaceCostStats(@Param("startTime") Date startTime,
                                                 @Param("endTime") Date endTime);
+
+    @Select("SELECT DATE(createTime) as date, SUM(cost) as dailyCost, COUNT(*) as callCount " +
+            "FROM picture_audit_token_stats " +
+            "WHERE createTime BETWEEN #{startTime} AND #{endTime} " +
+            "GROUP BY DATE(createTime) " +
+            "ORDER BY date DESC " +
+            "LIMIT #{limit}")
+    List<Map<String, Object>> getDailyTrend(@Param("startTime") Date startTime,
+                                            @Param("endTime") Date endTime,
+                                            @Param("limit") int limit);
 
 }
 
