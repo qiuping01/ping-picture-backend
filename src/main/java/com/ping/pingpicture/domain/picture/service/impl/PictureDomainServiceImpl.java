@@ -22,6 +22,8 @@ import com.ping.pingpicture.infrastructure.api.CosManager;
 import com.ping.pingpicture.infrastructure.manager.upload.FilePictureUpload;
 import com.ping.pingpicture.infrastructure.manager.upload.PictureUploadTemplate;
 import com.ping.pingpicture.infrastructure.manager.upload.URLPictureUpload;
+import com.ping.pingpicture.infrastructure.token.entity.PictureAuditTokenStats;
+import com.ping.pingpicture.infrastructure.mapper.PictureAuditTokenStatsMapper;
 import com.ping.pingpicture.interfaces.dto.picture.*;
 import com.ping.pingpicture.infrastructure.manager.upload.file.UploadPictureResult;
 import com.ping.pingpicture.domain.picture.entity.Picture;
@@ -40,7 +42,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -50,12 +51,15 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.annotation.Resource;
 import java.awt.*;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import static com.ping.pingpicture.infrastructure.utils.AiCostCalculator.calculateCost;
 
 /**
  * @author 21877
@@ -101,6 +105,9 @@ public class PictureDomainServiceImpl implements PictureDomainService {
 
     @Resource
     private Retryer<Object> auditRetryer;
+
+    @Resource
+    private PictureAuditTokenStatsMapper tokenStatsMapper;
 
     /**
      * 上传图片
@@ -374,6 +381,9 @@ public class PictureDomainServiceImpl implements PictureDomainService {
         }
         // 异步执行审核，不阻塞主线程
         CompletableFuture.runAsync(() -> {
+            long startTime = System.currentTimeMillis();  // 记录开始时间
+            PictureAuditTokenStats stats = new PictureAuditTokenStats();  // 统计对象
+
             try {
                 // 1. 调用 AI 审核接口
                 // 使用 Retryer 包装需要重试的逻辑
@@ -381,11 +391,24 @@ public class PictureDomainServiceImpl implements PictureDomainService {
                     log.info("开始 AI 审核，图片ID: {}", picId);
                     return imageAuditWithStructuredOutput.auditImage(imageUrl);
                 });
+
+                // 计算耗时
+                long costTime = System.currentTimeMillis() - startTime;
+
+                //获取审核结果
                 String isPass = auditImageResponse.getIsPass();
                 String noPassReason = auditImageResponse.getNoPassReason();
                 String description = auditImageResponse.getDescription();
                 List<String> tags = auditImageResponse.getTags();
                 String category = auditImageResponse.getCategory();
+
+                // 获取 Token 信息
+                Long inputTokens = auditImageResponse.getInputTokens();
+                Long outputTokens = auditImageResponse.getOutputTokens();
+                Long totalTokens = auditImageResponse.getTotalTokens();
+
+                // 计算成本
+                BigDecimal cost = calculateCost(inputTokens, outputTokens);
 
                 // 2. 更新图片状态
                 // 执行审核
@@ -433,9 +456,46 @@ public class PictureDomainServiceImpl implements PictureDomainService {
 //                    throw new BusinessException(ErrorCode.PICTURE_CONTENT_UNSAFE);
                 }
 
+                // 4. 记录 Token 统计信息
+                stats.setPictureId(picId);
+                stats.setUserId(loginUser.getId());
+                stats.setSpaceId(oldPicture.getSpaceId());  // 获取图片所属空间ID
+                stats.setTaskType("REVIEW");
+                stats.setModelName("qwen-vl-plus");
+                stats.setInputTokens(inputTokens);
+                stats.setOutputTokens(outputTokens);
+                stats.setTotalTokens(totalTokens);
+                stats.setCost(cost);
+                stats.setReviewStatus(updatePicture.getReviewStatus());
+                stats.setReviewMessage(updatePicture.getReviewMessage());
+                stats.setCostTime(costTime);
+                tokenStatsMapper.insert(stats);
+
+                log.info("AI审核成功 | 图片ID: {} | 耗时: {}ms | Token: 输入={}, 输出={}, 总计={} | 成本: {}元",
+                        picId, costTime, inputTokens, outputTokens, totalTokens, cost);
+
+
             } catch (Exception e) {
-                // 4. 处理所有重试都失败的最终场景
+                // 5. 处理所有重试都失败的最终场景
+                long costTime = System.currentTimeMillis() - startTime;
                 log.error("AI 自动审图最终失败，图片ID: {}", picId, e);
+
+                // 记录失败统计
+                // 再查一次 picture，获取 spaceId 以及审核状态，保证数据一致性
+                Picture tokenPicture = pictureRepository.getById(picId);
+                stats.setPictureId(picId);
+                stats.setUserId(loginUser.getId());
+                stats.setSpaceId(tokenPicture != null ? tokenPicture.getSpaceId() : null);  // 防空指针
+                stats.setTaskType("REVIEW");
+                stats.setModelName("qwen-vl-plus");
+                stats.setReviewStatus(tokenPicture != null ? tokenPicture.getReviewStatus() : null);
+                stats.setReviewMessage(tokenPicture != null ? tokenPicture.getReviewMessage() : null);
+                stats.setCostTime(costTime);
+                stats.setErrorMsg(e.getMessage());
+                stats.setCreateTime(new Date());  // 失败时手动设置时间（因为数据库可能没有这条记录）
+                tokenStatsMapper.insert(stats);
+
+                // 降级处理
                 Picture fallbackPicture = new Picture();
                 fallbackPicture.setId(picId);
                 fallbackPicture.setReviewStatus(PictureReviewStatusEnum.REVIEWING.getValue());
