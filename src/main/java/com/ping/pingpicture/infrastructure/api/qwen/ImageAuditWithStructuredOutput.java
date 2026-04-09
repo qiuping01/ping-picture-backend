@@ -9,6 +9,7 @@ import com.alibaba.dashscope.common.ResponseFormat;
 import com.alibaba.dashscope.common.Role;
 import com.alibaba.dashscope.utils.Constants;
 import com.ping.pingpicture.infrastructure.api.qwen.model.AuditImageResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +17,7 @@ import java.util.Arrays;
 import java.util.Collections;
 
 @Component
+@Slf4j
 public class ImageAuditWithStructuredOutput {
 
     @Value("${spring.ai.dashscope.api-key}")
@@ -88,6 +90,7 @@ public class ImageAuditWithStructuredOutput {
 
         // 5. 调用模型
         MultiModalConversation conv = new MultiModalConversation();
+        long startTime = System.currentTimeMillis();
         MultiModalConversationResult result = conv.call(param);
 
         // 6. 提取 JSON 字符串
@@ -98,10 +101,31 @@ public class ImageAuditWithStructuredOutput {
         System.out.println("原始JSON: " + jsonOutput);
 
         // 7. 使用 Hutool 解析为 AuditImageResponse 对象
+        AuditImageResponse response;
         try {
-            return JSONUtil.toBean(jsonOutput, AuditImageResponse.class);
+            response = JSONUtil.toBean(jsonOutput, AuditImageResponse.class);
         } catch (Exception e) {
             throw new RuntimeException("解析AI返回的JSON失败: " + jsonOutput, e);
         }
+
+        long costTime = System.currentTimeMillis() - startTime;
+
+        // 8. 填充 Token 统计信息
+        if (result.getUsage() != null) {
+            long inputTokens = result.getUsage().getInputTokens();
+            long outputTokens = result.getUsage().getOutputTokens();
+            long totalTokens = result.getUsage().getTotalTokens();
+
+            response.setInputTokens(inputTokens);
+            response.setOutputTokens(outputTokens);
+            response.setTotalTokens(totalTokens);
+
+            log.info("AI 审核完成 | 图片: {} | 耗时: {}ms | Token: 输入={}, 输出={}, 总计={}",
+                    imageUrl, costTime, inputTokens, outputTokens, totalTokens);
+        } else {
+            log.warn("AI 审核未返回 usage 信息，图片: {}", imageUrl);
+        }
+
+        return response;
     }
 }

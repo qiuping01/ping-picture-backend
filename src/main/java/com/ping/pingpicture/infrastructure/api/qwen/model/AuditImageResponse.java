@@ -44,4 +44,21 @@ public class AuditImageResponse {
      * 分类
      */
     private String category;
+
+    // ========== Token 统计字段 ==========
+
+    /**
+     * 输入 token 数
+     */
+    private Long inputTokens;
+
+    /**
+     * 输出 token 数
+     */
+    private Long outputTokens;
+
+    /**
+     * 总 token 数
+     */
+    private Long totalTokens;
 }
